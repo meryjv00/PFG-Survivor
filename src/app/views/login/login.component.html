@@ -1,0 +1,45 @@
+<div class="container">
+    <!--Login-->
+    <div class="row">
+        <div class="col-md-5 mx-auto bg-light border mt-5 px-4 py-4">
+            <h1 class="text-center display-4">Login</h1>
+            <!--Formulario login-->
+            <form id="login" [formGroup]="login" (ngSubmit)="onSubmit()">
+                <!--Email-->
+                <div class="form-group">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Email: </mat-label>
+                        <input matInput placeholder="example@example.com" formControlName="email" [(ngModel)]="auth.email">
+                        <mat-icon matSuffix>mail</mat-icon>
+                        <!--Validación email-->
+                        <mat-error *ngIf="formLogin.email.errors && formLogin.email.errors.required">
+                            Este campo es <strong>obligatorio.</strong>
+                        </mat-error>
+                        <mat-error *ngIf="formLogin.email.errors && formLogin.email.errors.email">
+                            Introduce un email válido.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <!--Password-->
+                <div class="form-group">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Contraseña: </mat-label>
+                        <input matInput [type]="hide ? 'password' : 'text'" formControlName="password" [(ngModel)]="auth.pass">
+                        <button type="button" mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'"
+                            [attr.aria-pressed]="hide">
+                            <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+                        </button>
+                        <!--Validación contraseña-->
+                        <mat-error *ngIf="formLogin.password.errors && formLogin.password.errors.required">
+                            Este campo es <strong>obligatorio.</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <!--Botón login-->
+                <button type="submit" mat-raised-button color="accent">Login</button>
+                <button type="button" mat-raised-button color="warn" class="ml-2" (click)="auth.loginGoogle()">Login Google</button>
+                <button type="button" mat-raised-button color="primary" class="ml-2" (click)="auth.loginFacebook()">Login Facebook</button>
+            </form>
+        </div>
+    </div>
+</div>

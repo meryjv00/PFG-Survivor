@@ -1,17 +1,35 @@
-<h1>Perfil</h1>
-<p *ngIf="auth.userLog">
-    <img [src]="auth.userLog.foto" width="150px">
-    {{auth.userLog.email}}
+<h1 class="ml-3">Perfil</h1>
+
+<div class="ml-3" *ngIf="auth.authUser">
+    <p>UID: {{auth.authUser.uid}}</p>
+    <p>Name: {{auth.authUser.displayName}}</p>
+    <p>Mail: {{auth.authUser.email}}</p>
+    <img [src]="auth.authUser.photoURL" width="150px">
+
+    <div class="mt-4">
+        <button class="btn btn-dark mr-2" (click)="perfilService.updatePerfil()">Actualizar perfil</button>
+        <button class="btn btn-dark" (click)="perfilService.updatePass()">Actualizar contraseña</button>
+    </div>
+
+</div>
+
+<!-- <p class="ml-3" *ngIf="auth.user">
+    {{auth.user.nombre}}
+    {{auth.user.email}}
+    <img [src]="auth.user.foto" width="150px">
 </p>
 
-<!--Imágen subida-->
-<div class="result" *ngIf="perfilService.downloadURL | async; else let url">
-    <img [src]="url" width="200">
+ -->
+
+<!--Cambiar foto de perfil-->
+<!--
+<div class="ml-3" *ngIf="perfilService.downloadURL | async; else let url">
+    <img [src]="url" width="150px">
     <br /><br />
-    <button class="btn btn-dark" (click)="uploadImgBD(url)">Guardar foto</button>
+    <button class="btn btn-dark" (click)="saveImg(url)">Guardar foto</button>
 </div>
 <br /><br />
 
-<!--Subida imágen-->
 <label for="file">Imágen de usuario: </label>
 <input type="file" (change)="perfilService.upload($event)" accept=".png,.jpg" />
+-->

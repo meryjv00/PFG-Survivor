@@ -8,7 +8,7 @@
   <button mat-button routerLink="rankings">Rankings</button>
 
   <!--Cuenta logeada-->
-  <button *ngIf="auth.user | async as user; else login" mat-button [matMenuTriggerFor]="beforeMenu">Cuenta</button>
+  <button *ngIf="auth.userState | async as user; else login" mat-button [matMenuTriggerFor]="beforeMenu">Cuenta</button>
   <mat-menu #beforeMenu="matMenu" xPosition="before">
     <!--Perfil-->
     <button mat-menu-item routerLink="perfil">
@@ -27,6 +27,7 @@
   
   <!--Cuenta sin logear-->
   <ng-template #login>
-    <button mat-button routerLink="login">Login</button>
+    <button mat-raised-button (click)="openLogin()" color="accent" class="mr-1">Login</button>
+    <button mat-raised-button (click)="openRegistro()" color="accent">Registrate</button>
   </ng-template>
 </nav>

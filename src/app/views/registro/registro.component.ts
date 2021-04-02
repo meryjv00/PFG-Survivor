@@ -3,54 +3,53 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'src/app/services/auth.service';
-import { RegistroComponent } from '../registro/registro.component';
+import { LoginComponent } from '../login/login.component';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  selector: 'app-registro',
+  templateUrl: './registro.component.html',
+  styleUrls: ['./registro.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class RegistroComponent implements OnInit {
   // Variables
-  login: FormGroup;
+  registro: FormGroup;
   submitted = false;
   hide = true;
-
   constructor(private formBuilder: FormBuilder,
-    public auth: AuthService,
     public toastr: ToastrService,
+    public auth: AuthService,
     public ngmodal: NgbModal,
     public activeModal: NgbActiveModal) {
 
-    this.login = this.formBuilder.group({
+    this.registro = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]]
+      password: ['', [Validators.required, Validators.minLength]]
     });
   }
 
   ngOnInit(): void {
   }
 
-  get formLogin() { return this.login.controls; }
+  get formRegistro() { return this.registro.controls; }
 
   /**
-   * Login con email y contraseña
+   * Registro con email y contraseña
    * @returns 
    */
   onSubmit() {
     this.submitted = true;
-    if (this.login.invalid) {
+    if (this.registro.invalid) {
       return;
     }
 
-    this.auth.login()
+    this.auth.registro()
       .then(user => {
         this.activeModal.close();
       })
       .catch(error => {
-        console.log("Error al logear con email: ", error.code);
-        if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-          this.toastr.error('Email o contraseña incorrectos', 'Error login')
+        console.log("Error al registrar con email y pass: ", error.code);
+        if (error.code === 'auth/email-already-in-use') {
+          this.toastr.error('El correo introducido ya está registrado', 'Error registro')
         }
       });
   }
@@ -82,11 +81,11 @@ export class LoginComponent implements OnInit {
   }
 
   /**
-   * Cierra modal login y abre modal registro
+   * Cierra modal registro y abre modal login
    */
-  openRegistro() {
+  openLogin() {
     this.activeModal.close();
-    this.ngmodal.open(RegistroComponent, { size: 'lg', backdrop: 'static' });
+    this.ngmodal.open(LoginComponent, { size: 'lg', backdrop: 'static' });
   }
 
 }

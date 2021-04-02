@@ -9,6 +9,7 @@ import { MenuComponent } from './menu/menu.component';
 import { HomeComponent } from './views/home/home.component';
 import { PerfilComponent } from './views/perfil/perfil.component';
 import { LoginComponent } from './views/login/login.component';
+import { RegistroComponent } from './views/registro/registro.component';
 
 // Environment
 import { environment } from 'src/environments/environment';
@@ -28,7 +29,7 @@ import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { ToastrModule} from 'ngx-toastr';
 
 // Material 
-import {DemoMaterialModule} from './material.module';
+import {DemoMaterialModule} from './material-module';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import {DemoMaterialModule} from './material.module';
     MenuComponent,
     HomeComponent,
     PerfilComponent,
-    LoginComponent
+    LoginComponent,
+    RegistroComponent
   ],
   imports: [
     BrowserModule,

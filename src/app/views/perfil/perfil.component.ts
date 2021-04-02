@@ -9,17 +9,17 @@ import { PerfilService } from 'src/app/services/perfil.service';
   styleUrls: ['./perfil.component.scss']
 })
 export class PerfilComponent implements OnInit {
-  user: any;
+
   constructor(public auth: AuthService,
     public perfilService: PerfilService,
     public toastr: ToastrService) {
   }
 
   ngOnInit(): void {    
-    this.auth.getU();
+    this.auth.getUser();
   }
 
-  uploadImgBD(url: any) {
+  saveImg(url: any) {
     this.perfilService.uploadImgBD(url)
       .then(success => {
         this.toastr.success('Foto actualizada con éxito', 'Foto')

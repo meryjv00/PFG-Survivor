@@ -4,6 +4,8 @@ import { AngularFireStorage, AngularFireUploadTask } from '@angular/fire/storage
 import { Observable, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from './auth.service';
+import firebase from 'firebase/app';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -16,15 +18,45 @@ export class PerfilService {
 
   constructor(public firestorage: AngularFireStorage,
     public auth: AuthService,
-    public db: AngularFireDatabase) { }
-    
+    public db: AngularFireDatabase,
+    public router: Router) {
+  }
+
+  updatePerfil() {
+    var user = firebase.auth().currentUser;
+    user.updateProfile({
+      displayName: "SG Mery",
+      photoURL: "https://blog.hotmart.com/blog/2017/01/post_url_940x606-670x432.png"
+    }).then(function () {
+      // Update successful.
+    }).catch(function (error) {
+      // An error happened.
+    });
+  }
+
+  updatePass() {
+    // Cambiar contraseña por email
+    var auth = firebase.auth();
+    auth.sendPasswordResetEmail(this.auth.authUser.email).then(function () {
+      // Email sent.
+    }).catch(function (error) {
+      // An error happened.
+    });
+
+    // Cambiar contraseña por input
+    /* var user = firebase.auth().currentUser;
+    user.updatePassword('Chubaca2021').then(function () {
+    }).catch(function (error) {
+    }); */
+  }
+
   upload(event) {
     console.log('event: ', event);
 
     // Pulsamos cancelar al subir foto
-    if (event.target.files.length == 0){
+    if (event.target.files.length == 0) {
       return
-    } 
+    }
     // Extensión imagen
     let ext = '.jpg';
     if (event.target.files[0].type === 'image/png') {
@@ -48,6 +80,7 @@ export class PerfilService {
     const u = {
       foto: url_img
     }
+
     this.downloadURL = of('');
 
     return this.db.object(path2).update(u)

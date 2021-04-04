@@ -10,10 +10,16 @@ import { AngularFireDatabase } from '@angular/fire/database';
 })
 export class AuthService {
   // Variables
+  // Login
   emailLogin = '';
   passLogin = '';
+  // Registro
   emailRegistro = '';
+  nombreRegistro = '';
   passRegistro = '';
+  // Pass olvidada
+  emailPass = '';
+  // User
   authUser = null;
   user = null;
 
@@ -23,6 +29,7 @@ export class AuthService {
 
   limpiarFormularios() {
     this.emailLogin = '';
+    this.nombreRegistro = '';
     this.passLogin = '';
     this.emailRegistro = '';
     this.passRegistro = '';
@@ -61,12 +68,23 @@ export class AuthService {
     return this.auth.createUserWithEmailAndPassword(this.emailRegistro, this.passRegistro)
       .then(user => {
         console.log('Usuario registrado con email: ', user);
-
-        //this.limpiarFormularios();
-        this.updateUserData(user.user);
-        this.router.navigate(['perfil']);
-
+        this.authUser = user.user;
       })
+  }
+
+  updateProfile(){
+    return this.authUser.updateProfile({
+      displayName: this.nombreRegistro,
+      photoURL: 'https://lh3.googleusercontent.com/-tdnx0Z4EcXM/AAAAAAAAAAI/AAAAAAAAAAA/AMZuucmcGcx5VDesBeNHugzMXhuQF7LZPQ/s96-c/photo.jpg'
+    }).then(ok => {
+      //this.limpiarFormularios();
+
+      this.updateUserData(this.authUser);
+      this.router.navigate(['perfil']);
+      
+    }).catch(function (error) {
+      console.log(error);
+    });
   }
 
   /**
@@ -77,6 +95,7 @@ export class AuthService {
     return this.auth.signInWithEmailAndPassword(this.emailLogin, this.passLogin)
       .then(user => {
         console.log("Usuario logeado con email: ", user);
+        this.authUser = user.user;
 
         //this.limpiarFormularios();
         this.router.navigate(['perfil']);
@@ -90,11 +109,12 @@ export class AuthService {
     return this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
       .then(user => {
         console.log("Usuario logeado con Google: ", user);
+        this.authUser = user.user;
 
         //this.limpiarFormularios();
         this.updateUserData(user.user);
         this.router.navigate(['perfil']);
-      })   
+      })
   }
 
   /**
@@ -104,6 +124,7 @@ export class AuthService {
     return this.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider())
       .then(user => {
         console.log("Usuario logeado con Facebook: ", user);
+        this.authUser = user.user;
 
         //this.limpiarFormularios();
         // En el caso de tener la foto de facebook por defecto se le establece la que tenga el usuario en fb
@@ -146,6 +167,18 @@ export class AuthService {
     }
     this.db.object(path).update(u)
       .catch(error => console.log(error));
+  }
+
+  /**
+   * Envía correo al email introducido donde se le permite cambiar la contraseña de la cuenta.
+   */
+  sendPasswordResetEmail() {
+    return this.auth.sendPasswordResetEmail(this.emailPass)
+    .then(ok =>{
+      console.log('Correo enviado');
+      this.emailPass = '';
+    });
+
   }
 
 }

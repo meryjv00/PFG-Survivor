@@ -6,71 +6,104 @@
             <div class="col-lg-5 col-0 p-0 bg-secondary">
             </div>
             <!--2º Parte Login-->
-            <div class="col-lg-7 col-12 px-4">
+            <div class="col-lg-7 col-12 px-3">
                 <button type="button" class="close" aria-label="Close" (click)="activeModal.close('Cross click')">
                     <i class="fas fa-times fa-sm"></i>
                 </button>
-                <h1 class="text-center mt-3">Registrarse</h1>
+                <h1 class="text-center text-primary mt-3">Registrarse</h1>
+                <!--Mensaje registro-->
+                <div *ngIf="msg" class="alert alert-danger" role="alert">
+                    {{ msg }}
+                </div>
                 <!--Formulario Registro-->
                 <form id="registro" [formGroup]="registro" (ngSubmit)="onSubmit()" class="mt-3">
                     <!--Email-->
-                    <div class="form-group">
-                        <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Introduce tu correo electrónico</mat-label>
-                            <input matInput formControlName="email" [(ngModel)]="auth.emailRegistro">
-                            <mat-icon matSuffix>mail</mat-icon>
-                            <!--Validación email-->
-                            <mat-error *ngIf="formRegistro.email.errors && formRegistro.email.errors.required">
-                                Este campo es <strong>obligatorio.</strong>
-                            </mat-error>
-                            <mat-error *ngIf="formRegistro.email.errors && formRegistro.email.errors.email">
-                                Introduce un correo electrónico válido.
-                            </mat-error>
-                        </mat-form-field>
-                    </div>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Introduce tu correo electrónico</mat-label>
+                        <input matInput formControlName="email" [(ngModel)]="auth.emailRegistro">
+                        <mat-icon matSuffix>mail</mat-icon>
+                        <!--Validación email-->
+                        <mat-error *ngIf="formRegistro.email.errors && formRegistro.email.errors.required">
+                            Este campo es <strong>obligatorio.</strong>
+                        </mat-error>
+                        <mat-error *ngIf="formRegistro.email.errors && formRegistro.email.errors.email">
+                            Introduce un correo electrónico válido.
+                        </mat-error>
+                    </mat-form-field>
+                    <!--Nombre-->
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Introduce tu nombre</mat-label>
+                        <input matInput formControlName="nombre" [(ngModel)]="auth.nombreRegistro">
+                        <mat-icon matSuffix>person</mat-icon>
+                        <!--Validación email-->
+                        <mat-error *ngIf="formRegistro.nombre.errors && formRegistro.nombre.errors.required">
+                            Este campo es <strong>obligatorio.</strong>
+                        </mat-error>
+                        <mat-error *ngIf="formRegistro.nombre.errors && formRegistro.nombre.errors.minlength">
+                            El nombre debe tener como mínimo
+                            <strong>{{formRegistro.nombre.errors.minlength.requiredLength}} carácteres.</strong>
+                        </mat-error>
+                    </mat-form-field>
                     <!--Password-->
-                    <div class="form-group">
-                        <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Crea una contraseña</mat-label>
-                            <input matInput [type]="hide ? 'password' : 'text'" formControlName="password"
-                                [(ngModel)]="auth.passRegistro" minlength="6">
-                            <button type="button" mat-icon-button matSuffix (click)="hide = !hide"
-                                [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
-                                <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-                            </button>
-                            <!--Validación contraseña-->
-                            <mat-error *ngIf="formRegistro.password.errors && formRegistro.password.errors.required">
-                                Este campo es <strong>obligatorio.</strong>
-                            </mat-error>
-                            <mat-error *ngIf="formRegistro.password.errors && formRegistro.password.errors.minlength">
-                                La contraseña debe tener como mínimo <strong>6 carácteres.</strong>
-                            </mat-error>
-                        </mat-form-field>
-                    </div>
-                    <!--Botón registro email y pass-->
-                    <button type="submit" mat-raised-button color="accent" class="w-100 py-1">Registro</button>
+                    <mat-form-field appearance="outline" class="w-50 pr-1">
+                        <mat-label>Crea una contraseña</mat-label>
+                        <input matInput [type]="hide1 ? 'password' : 'text'" formControlName="password"
+                            [(ngModel)]="auth.passRegistro">
+                        <button type="button" mat-icon-button matSuffix (click)="hide1 = !hide1"
+                            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide1">
+                            <mat-icon>{{hide1 ? 'visibility_off' : 'visibility'}}</mat-icon>
+                        </button>
+                        <!--Validación contraseña-->
+                        <mat-error *ngIf="formRegistro.password.errors && formRegistro.password.errors.required">
+                            Este campo es <strong>obligatorio.</strong>
+                        </mat-error>
+                        <mat-error *ngIf="formRegistro.password.errors && formRegistro.password.errors.minlength">
+                            La contraseña debe tener como mínimo
+                            <strong>{{formRegistro.password.errors.minlength.requiredLength}} carácteres.</strong>
+                        </mat-error>
+                    </mat-form-field>
+                    <!--Confirmación Password-->
+                    <mat-form-field appearance="outline" class="w-50 pl-1">
+                        <mat-label>Repite la contraseña</mat-label>
+                        <input matInput [type]="hide2 ? 'password' : 'text'" formControlName="confirmPassword" pattern="{{auth.passRegistro}}">
+                        <button type="button" mat-icon-button matSuffix (click)="hide2 = !hide2"
+                            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide2">
+                            <mat-icon>{{hide2 ? 'visibility_off' : 'visibility'}}</mat-icon>
+                        </button>
+                        <!--Validación confirmación contraseña-->
+                        <mat-error *ngIf="formRegistro.confirmPassword.errors && formRegistro.confirmPassword.errors.required">
+                            Este campo es <strong>obligatorio.</strong>
+                        </mat-error>
+                        <mat-error *ngIf="formRegistro.confirmPassword.errors && formRegistro.confirmPassword.errors.pattern">
+                            La contraseñas <strong>no coinciden</strong>
+                        </mat-error>
+                    </mat-form-field>
+                    <!--Submit registro email y pass-->
+                    <button type="submit" mat-raised-button class="btn btn-primary w-100 py-1 mt-3">Regístrate</button>
                 </form>
                 <!--Botones login redes sociales-->
-                <div class="row mt-4 py-4">
+                <div class="row mt-4 py-4 px-3">
                     <div class="col-12">
                         <p class="text-center">Accede a través de</p>
                     </div>
-                    <div class="col-6">
-                        <button type="button" mat-raised-button color="warn" class="w-100 py-1" (click)="loginGoogle()">
+                    <div class="w-50 pr-1">
+                        <button id="bt-google" type="button" mat-raised-button color="warn" class="w-100 py-1" (click)="loginGoogle()">
                             <i class="fab fa-google fa-lg"></i>
                         </button>
                     </div>
-                    <div class="col-6">
-                        <button type="button" mat-raised-button color="primary" class="w-100 py-1"
+                    <div class="w-50 pl-1">
+                        <button id="bt-fb" type="button" mat-raised-button color="primary" class="w-100 py-1"
                             (click)="loginFacebook()">
                             <i class="fab fa-facebook-f fa-lg"></i>
                         </button>
                     </div>
                 </div>
                 <!--Ir a login-->
-                <div class="row mt-3 py-2 text-center">
-                    <a class="w-100" (click)="openLogin()" href="#">Inicia sesión aquí</a>
-                    <span class="mx-auto">Si ya tienes una cuenta</span>
+                <div class="mt-3 py-2 text-center mx-auto">
+                    <div class="w-100">
+                        <a id="enlaceRegistro" class="cursor-pointer" (click)="openLogin()">Inicia sesión aquí</a>
+                    </div>
+                    <span>si ya tienes una cuenta</span>
                 </div>
             </div>
         </div>

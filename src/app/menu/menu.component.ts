@@ -18,10 +18,10 @@ export class MenuComponent implements OnInit {
   }
 
   openLogin() {
-    this.ngmodal.open(LoginComponent, { size: 'lg', backdrop: 'static' });
+    this.ngmodal.open(LoginComponent, { size: 'lg' });
   }
 
   openRegistro() {
-    this.ngmodal.open(RegistroComponent, { size: 'lg', backdrop: 'static' });
+    this.ngmodal.open(RegistroComponent, { size: 'lg' });
   }
 }

@@ -25,7 +25,7 @@ export class PerfilService {
   updatePerfil() {
     var user = firebase.auth().currentUser;
     user.updateProfile({
-      displayName: "SG Mery",
+      displayName: "Nombre actualizado",
       photoURL: "https://blog.hotmart.com/blog/2017/01/post_url_940x606-670x432.png"
     }).then(function () {
       // Update successful.
@@ -35,19 +35,11 @@ export class PerfilService {
   }
 
   updatePass() {
-    // Cambiar contraseña por email
-    var auth = firebase.auth();
-    auth.sendPasswordResetEmail(this.auth.authUser.email).then(function () {
-      // Email sent.
-    }).catch(function (error) {
-      // An error happened.
-    });
-
     // Cambiar contraseña por input
-    /* var user = firebase.auth().currentUser;
-    user.updatePassword('Chubaca2021').then(function () {
+    var user = firebase.auth().currentUser;
+    user.updatePassword('Chubaca2020').then(function () {
     }).catch(function (error) {
-    }); */
+    });
   }
 
   upload(event) {

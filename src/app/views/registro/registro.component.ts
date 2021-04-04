@@ -10,20 +10,25 @@ import { LoginComponent } from '../login/login.component';
   templateUrl: './registro.component.html',
   styleUrls: ['./registro.component.scss']
 })
+
 export class RegistroComponent implements OnInit {
   // Variables
   registro: FormGroup;
-  submitted = false;
-  hide = true;
+  hide1 = true;
+  hide2 = true;
+  msg: string = null;
+
   constructor(private formBuilder: FormBuilder,
-    public toastr: ToastrService,
     public auth: AuthService,
     public ngmodal: NgbModal,
-    public activeModal: NgbActiveModal) {
+    public activeModal: NgbActiveModal,
+    public toastr: ToastrService) {
 
     this.registro = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength]]
+      nombre: ['', [Validators.required, Validators.minLength(3)]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required, Validators.pattern]]
     });
   }
 
@@ -37,19 +42,22 @@ export class RegistroComponent implements OnInit {
    * @returns 
    */
   onSubmit() {
-    this.submitted = true;
     if (this.registro.invalid) {
       return;
     }
 
     this.auth.registro()
       .then(user => {
-        this.activeModal.close();
+        this.auth.updateProfile()
+          .then(ok => {
+            this.toastr.success(this.auth.authUser.displayName, 'Bienvenido/a!');
+            this.activeModal.close();
+          })
       })
       .catch(error => {
         console.log("Error al registrar con email y pass: ", error.code);
         if (error.code === 'auth/email-already-in-use') {
-          this.toastr.error('El correo introducido ya está registrado', 'Error registro')
+          this.msg = 'El correo electrónico introducido ya está registrado.'
         }
       });
   }
@@ -60,6 +68,7 @@ export class RegistroComponent implements OnInit {
   loginGoogle() {
     this.auth.loginGoogle()
       .then(user => {
+        this.toastr.success(this.auth.authUser.displayName, 'Bienvenido/a!');
         this.activeModal.close();
       })
       .catch(error => {
@@ -73,10 +82,16 @@ export class RegistroComponent implements OnInit {
   loginFacebook() {
     this.auth.loginFacebook()
       .then(user => {
+        this.toastr.success(this.auth.authUser.displayName, 'Bienvenido/a!');
         this.activeModal.close();
       })
       .catch(error => {
         console.log("Error al logear con Facebook: ", error.code);
+
+        if (error.code === 'auth/account-exists-with-different-credential') {
+          this.msg = 'Ya existe una cuenta con esta dirección de correo electrónico pero con diferentes credenciales de inicio de sesión. \
+          Intenta iniciar sesión mediante correo electrónico o Google.';
+        }
       })
   }
 
@@ -85,7 +100,9 @@ export class RegistroComponent implements OnInit {
    */
   openLogin() {
     this.activeModal.close();
-    this.ngmodal.open(LoginComponent, { size: 'lg', backdrop: 'static' });
+    this.ngmodal.open(LoginComponent, { size: 'lg' });
   }
 
+
 }
+

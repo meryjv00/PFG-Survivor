@@ -10,6 +10,7 @@ import { HomeComponent } from './views/home/home.component';
 import { PerfilComponent } from './views/perfil/perfil.component';
 import { LoginComponent } from './views/login/login.component';
 import { RegistroComponent } from './views/registro/registro.component';
+import { PassComponent } from './views/pass/pass.component';
 
 // Environment
 import { environment } from 'src/environments/environment';
@@ -38,7 +39,8 @@ import {DemoMaterialModule} from './material-module';
     HomeComponent,
     PerfilComponent,
     LoginComponent,
-    RegistroComponent
+    RegistroComponent,
+    PassComponent
   ],
   imports: [
     BrowserModule,
@@ -55,8 +57,7 @@ import {DemoMaterialModule} from './material-module';
     CommonModule,
     BrowserAnimationsModule,
     ToastrModule.forRoot({
-      timeOut: 2000,
-      positionClass: 'toast-top-center'
+      timeOut: 3000,
     }),
     // Material 
     DemoMaterialModule

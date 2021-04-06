@@ -6,11 +6,14 @@ import { AppComponent } from './app.component';
 
 // Componentes
 import { MenuComponent } from './menu/menu.component';
+import { AmigosComponent } from './views/amigos/amigos.component';
 import { HomeComponent } from './views/home/home.component';
-import { PerfilComponent } from './views/perfil/perfil.component';
 import { LoginComponent } from './views/login/login.component';
-import { RegistroComponent } from './views/registro/registro.component';
 import { PassComponent } from './views/pass/pass.component';
+import { PerfilComponent } from './views/perfil/perfil.component';
+import { RankingsComponent } from './views/rankings/rankings.component';
+import { RegistroComponent } from './views/registro/registro.component';
+import { TiendaComponent } from './views/tienda/tienda.component';
 
 // Environment
 import { environment } from 'src/environments/environment';
@@ -40,7 +43,10 @@ import {DemoMaterialModule} from './material-module';
     PerfilComponent,
     LoginComponent,
     RegistroComponent,
-    PassComponent
+    PassComponent,
+    AmigosComponent,
+    RankingsComponent,
+    TiendaComponent
   ],
   imports: [
     BrowserModule,

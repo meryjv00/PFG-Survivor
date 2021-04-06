@@ -72,6 +72,11 @@ export class AuthService {
       })
   }
 
+  /**
+   * Establece el nombre que ha introducido y una foto por defecto a 
+   * un usuario que acaba de realizar el registro
+   * @returns 
+   */
   updateProfile(){
     return this.authUser.updateProfile({
       displayName: this.nombreRegistro,
@@ -178,7 +183,6 @@ export class AuthService {
       console.log('Correo enviado');
       this.emailPass = '';
     });
-
   }
 
 }

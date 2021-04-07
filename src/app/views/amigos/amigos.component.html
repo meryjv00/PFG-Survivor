@@ -1,5 +1,37 @@
-<h1>Amigos</h1>
-<div class="ml-3">
+<h1>Lista de amigos</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-3 bg-secondary">
+            <button type="submit" class="btn btn-primary" *ngFor="let friend of chat.friends"
+                (click)="chat.chatWith(friend.uid)">
+                <img src="{{friend.photoURL}}" alt="" width="100px">
+                {{friend.displayName}}
+            </button>
+        </div>
+        <div class="col-lg-9 bg-light" *ngIf="chat.chatEnabled == true">
+            <div class="row" *ngFor="let message of chat.messagesWithFriend">
+                <div *ngIf="message.displayName == auth.authUser.displayName; else msgAjeno"
+                    class="bg-success w-50 ml-auto">
+                    {{ message.text }}
+                    {{ message.timestamp }}
+                </div>
+                <ng-template #msgAjeno>
+                    <div class="bg-danger w-50">
+                        {{ message.text }}
+                        {{ message.timestamp }}
+                    </div>
+                </ng-template>
+            </div>
+            <!--Enviar mensaje-->
+            <form id="chatFriends" [formGroup]="chatFriends" (ngSubmit)="onSubmit()">
+                <input type="text" [(ngModel)]="chat.msgEnviar" formControlName="text">
+                <button type="submit" mat-raised-button class="btn btn-primary py-1 ml-2 mt-2">Enviar</button>
+            </form>
+        </div>
+    </div>
+</div>
+<!--CHAT GLOBAL-->
+<!-- <div class="ml-3">
     <form id="chatFriends" [formGroup]="chatFriends" (ngSubmit)="onSubmit()">
         <input type="text" [(ngModel)]="chat.msgEnviar" formControlName="text">
         <button type="submit" mat-raised-button class="btn btn-primary py-1 ml-2">Enviar</button>
@@ -8,13 +40,11 @@
     <div class="container-fluid">
         <div class="row" *ngFor="let message of chat.messages">
             <div class="col-6 mx-auto bg-light py-2 px-2">
-                <!--Mis mensajes-->
                 <div *ngIf="message.name == auth.authUser.displayName; else msgAjeno" class="bg-success w-50 ml-auto">
                     <img src="{{ message.photoURL }}" alt="" width="40px">
                     {{ message.text }}
                     {{ message.timestamp }}
                 </div>
-                <!--Mensajes del otro usuario-->
                 <ng-template #msgAjeno>
                     <div class="bg-danger w-50">
                         <img src="{{ message.photoURL }}" alt="" width="40px">
@@ -25,4 +55,4 @@
             </div>  
         </div>
     </div>
-</div>
+</div> -->

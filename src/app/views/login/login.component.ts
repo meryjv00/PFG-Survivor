@@ -5,6 +5,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { RegistroComponent } from '../registro/registro.component';
 import { ToastrService } from 'ngx-toastr';
 import { PassComponent } from '../pass/pass.component';
+import { ChatService } from 'src/app/services/chat.service';
 
 @Component({
   selector: 'app-login',
@@ -22,7 +23,8 @@ export class LoginComponent implements OnInit {
     public auth: AuthService,
     public ngmodal: NgbModal,
     public activeModal: NgbActiveModal,
-    public toastr: ToastrService) {
+    public toastr: ToastrService,
+    public chat: ChatService) {
 
     this.login = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
@@ -46,8 +48,10 @@ export class LoginComponent implements OnInit {
 
     this.auth.login()
       .then(user => {        
+        console.log('Entro componente login');
         this.toastr.success(this.auth.authUser.displayName, 'Bienvenido/a!');
         this.activeModal.close();
+        // this.chat.listenFriendMessages();
       })
       .catch(error => {
         console.log("Error al logear con email: ", error.code);

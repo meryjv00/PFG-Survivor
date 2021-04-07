@@ -4,6 +4,8 @@ import { map } from 'rxjs/operators';
 import firebase from 'firebase/app';
 import { Router } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
+import { environment } from 'src/environments/environment';
+import { ChatService } from './chat.service';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +27,8 @@ export class AuthService {
 
   constructor(public auth: AngularFireAuth,
     private router: Router,
-    private db: AngularFireDatabase) { }
+    private db: AngularFireDatabase,
+    private chat: ChatService) { }
 
   limpiarFormularios() {
     this.emailLogin = '';
@@ -77,16 +80,16 @@ export class AuthService {
    * un usuario que acaba de realizar el registro
    * @returns 
    */
-  updateProfile(){
+  updateProfile() {
     return this.authUser.updateProfile({
       displayName: this.nombreRegistro,
-      photoURL: 'https://lh3.googleusercontent.com/-tdnx0Z4EcXM/AAAAAAAAAAI/AAAAAAAAAAA/AMZuucmcGcx5VDesBeNHugzMXhuQF7LZPQ/s96-c/photo.jpg'
+      photoURL: 'https://image.freepik.com/vector-gratis/vector-alfabeto-mayuscula-floral-l_53876-87377.jpg'
     }).then(ok => {
       //this.limpiarFormularios();
 
       this.updateUserData(this.authUser);
       this.router.navigate(['perfil']);
-      
+
     }).catch(function (error) {
       console.log(error);
     });
@@ -101,9 +104,14 @@ export class AuthService {
       .then(user => {
         console.log("Usuario logeado con email: ", user);
         this.authUser = user.user;
-
-        //this.limpiarFormularios();
-        this.router.navigate(['perfil']);
+        
+        // this.limpiarFormularios();
+        this.updateUserData(user.user);
+        sessionStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+        this.chat.getFriends();
+        //user.user.uid
+        // this.chat.listenFriendMessages();
+        // this.router.navigate(['perfil']);
       })
   }
 
@@ -156,6 +164,7 @@ export class AuthService {
   logout() {
     this.auth.signOut();
     this.limpiarFormularios();
+    sessionStorage.removeItem(environment.SESSION_KEY_USER_AUTH);
     this.router.navigate(['home']);
   }
 
@@ -164,14 +173,28 @@ export class AuthService {
    * @param user 
    */
   updateUserData(user: any) {
-    const path = 'users/' + user.uid;
-    const u = {
+    var db = firebase.firestore();
+
+    db.collection("users").doc(user.uid).set({
       email: user.email,
       displayName: user.displayName,
       photoURL: user.photoURL
-    }
-    this.db.object(path).update(u)
-      .catch(error => console.log(error));
+    })
+      .then(() => {
+        console.log("Document successfully written!");
+      })
+      .catch((error) => {
+        console.error("Error writing document: ", error);
+      });
+
+    /*  const path = 'users/' + user.uid;
+     const u = {
+       email: user.email,
+       displayName: user.displayName,
+       photoURL: user.photoURL
+     }
+     this.db.object(path).update(u)
+       .catch(error => console.log(error)); */
   }
 
   /**
@@ -179,10 +202,10 @@ export class AuthService {
    */
   sendPasswordResetEmail() {
     return this.auth.sendPasswordResetEmail(this.emailPass)
-    .then(ok =>{
-      console.log('Correo enviado');
-      this.emailPass = '';
-    });
+      .then(ok => {
+        console.log('Correo enviado');
+        this.emailPass = '';
+      });
   }
 
 }

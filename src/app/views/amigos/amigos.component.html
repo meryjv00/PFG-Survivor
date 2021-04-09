@@ -1,24 +1,40 @@
 <h1>Lista de amigos</h1>
 <div class="container-fluid">
     <div class="row">
-        <div class="col-lg-3 bg-secondary">
-            <button type="submit" class="btn btn-primary" *ngFor="let friend of chat.friends"
-                (click)="chat.chatWith(friend.uid)">
-                <img src="{{friend.photoURL}}" alt="" width="100px">
-                {{friend.displayName}}
-            </button>
+        <div class="col-lg-2 col-sm-3 bg-secondary py-3">
+            <div type="submit" class="bg-primary w-100 mt-2" *ngFor="let friend of chat.friends">
+                <div (click)="chat.chatWith(friend.uid)">
+                    <img src="{{friend.photoURL}}" alt="" width="100px">
+                    {{friend.displayName}}
+                </div>
+            </div>
         </div>
-        <div class="col-lg-9 bg-light" *ngIf="chat.chatEnabled == true">
-            <div class="row" *ngFor="let message of chat.messagesWithFriend">
+        <div class="col-lg-10 col-sm-9" *ngIf="chat.chatEnabled == true">
+            <div *ngFor="let message of chat.messagesWithFriend">
+                <!--Mis mensajes-->
                 <div *ngIf="message.displayName == auth.authUser.displayName; else msgAjeno"
-                    class="bg-success w-50 ml-auto">
+                    class="bg-info w-50 ml-auto mb-3">
                     {{ message.text }}
                     {{ message.timestamp }}
+
+                    <span *ngIf="!message.isRead; else elseBlock">
+                        <i class="fas fa-check"></i>
+                    </span>
+                    <ng-template #elseBlock>
+                        <i class="fas fa-check-double"></i>
+                    </ng-template>
+
+                    <button (click)="chat.deleteMsgs(message,1)">E</button>
+                    <button (click)="chat.deleteMsgs(message,2)">E</button>
+
                 </div>
+                <!--Otros mensajes-->
                 <ng-template #msgAjeno>
-                    <div class="bg-danger w-50">
-                        {{ message.text }}
-                        {{ message.timestamp }}
+                    <div class="bg-secondary w-50 mb-3">
+                        <p>
+                            {{ message.text }}
+                            {{ message.timestamp }}
+                        </p>
                     </div>
                 </ng-template>
             </div>

@@ -15,19 +15,21 @@ export class AmigosComponent implements OnInit {
     private formBuilder: FormBuilder,
     public auth: AuthService) {
 
-    // this.chat.getFriends();
-    // this.chat.loadMessages();
-    this.chat.listenFriendMessages();
-
     this.chatFriends = this.formBuilder.group({
       text: ['', [Validators.required]],
     });
+
+    // Has recargado... cargar de nuevo amigos y mensajes asociados
+    if (this.chat.friends.length == 0) {
+      this.chat.getFriends(false);
+    }
+
   }
 
   get formChat() { return this.chatFriends.controls; }
 
   ngOnInit(): void {
-    
+
   }
 
   onSubmit() {
@@ -38,5 +40,6 @@ export class AmigosComponent implements OnInit {
     // this.chat.sendMessage();
     this.chat.sendMessageFriend();
   }
+
 
 }

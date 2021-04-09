@@ -108,10 +108,7 @@ export class AuthService {
         // this.limpiarFormularios();
         this.updateUserData(user.user);
         sessionStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
-        this.chat.getFriends();
-        //user.user.uid
-        // this.chat.listenFriendMessages();
-        // this.router.navigate(['perfil']);
+        this.chat.getFriends(true);
       })
   }
 
@@ -126,7 +123,8 @@ export class AuthService {
 
         //this.limpiarFormularios();
         this.updateUserData(user.user);
-        this.router.navigate(['perfil']);
+        sessionStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+        this.chat.getFriends(true);
       })
   }
 
@@ -146,14 +144,16 @@ export class AuthService {
             photoURL: user.additionalUserInfo.profile['picture']['data']['url']
           }).then(ok => {
             this.updateUserData(user.user);
-            this.router.navigate(['perfil']);
+            sessionStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+            this.chat.getFriends(true);
 
           }).catch(function (error) {
             console.log(error);
           });
         } else {
           this.updateUserData(user.user);
-          this.router.navigate(['perfil']);
+          sessionStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+          this.chat.getFriends(true);
         }
       })
   }
@@ -164,6 +164,8 @@ export class AuthService {
   logout() {
     this.auth.signOut();
     this.limpiarFormularios();
+    this.chat.stopListenFriendMessages();
+    this.chat.chatEnabled = false;
     sessionStorage.removeItem(environment.SESSION_KEY_USER_AUTH);
     this.router.navigate(['home']);
   }

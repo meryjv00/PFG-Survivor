@@ -8,22 +8,23 @@
   <button mat-button routerLink="rankings">Rankings</button>
 
   <!--Cuenta logeada-->
-  <button *ngIf="auth.userState | async as user; else login" mat-button [matMenuTriggerFor]="beforeMenu">Cuenta</button>
-  <mat-menu #beforeMenu="matMenu" xPosition="before">
-    <!--Perfil-->
-    <button mat-menu-item routerLink="perfil">
-      <span class="ml-3">Perfil</span>
+  <span  *ngIf="auth.userState | async as user; else login">
+    <button class="btn btn-sm btn-primary mr-2" routerLink="amigos">
+      <mat-icon class="pt-1">chat</mat-icon>
     </button>
-    <!--Amigos-->
-    <button mat-menu-item routerLink="amigos">
-      <span class="ml-3">Amigos</span>
-    </button>
-    <!--Salir-->
-    <button mat-menu-item (click)="auth.logout()">
-      <span class="ml-3">Salir</span>
-      <mat-icon class="m-1">logout</mat-icon>
-    </button>
-  </mat-menu>
+    <img [matMenuTriggerFor]="beforeMenu" src="{{auth.authUser.photoURL}}" alt="" width="50px">
+    <mat-menu #beforeMenu="matMenu" xPosition="before">
+      <!--Perfil-->
+      <button mat-menu-item routerLink="perfil">
+        <span class="ml-3">Perfil</span>
+      </button>
+      <!--Salir-->
+      <button mat-menu-item (click)="auth.logout()">
+        <span class="ml-3">Salir</span>
+        <mat-icon class="m-1">logout</mat-icon>
+      </button>
+    </mat-menu>
+  </span>
   
   <!--Cuenta sin logear-->
   <ng-template #login>

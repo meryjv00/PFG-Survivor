@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
@@ -10,6 +10,9 @@ import { ChatService } from 'src/app/services/chat.service';
 })
 export class AmigosComponent implements OnInit {
   chatFriends: FormGroup;
+  @ViewChild('scrollMe') private myScrollContainer: ElementRef;
+  disableScrollDown = false
+  urlImg = '';
 
   constructor(public chat: ChatService,
     private formBuilder: FormBuilder,
@@ -23,13 +26,35 @@ export class AmigosComponent implements OnInit {
     if (this.chat.friends.length == 0) {
       this.chat.getFriends(false);
     }
-
   }
 
   get formChat() { return this.chatFriends.controls; }
 
   ngOnInit(): void {
+  }
 
+  ngAfterViewChecked() {
+    this.scrollToBottom();
+  }
+
+  onScroll() {
+    let element = this.myScrollContainer.nativeElement
+    let atBottom = element.scrollHeight - element.scrollTop === element.clientHeight
+    if (this.disableScrollDown && atBottom) {
+      this.disableScrollDown = false
+    } else {
+      this.disableScrollDown = true
+    }
+
+  }
+
+  scrollToBottom(): void {
+    if (this.disableScrollDown) {
+      return
+    }
+    try {
+      this.myScrollContainer.nativeElement.scrollTop = this.myScrollContainer.nativeElement.scrollHeight;
+    } catch (err) { }
   }
 
   onSubmit() {
@@ -37,9 +62,23 @@ export class AmigosComponent implements OnInit {
       return;
     }
 
-    // this.chat.sendMessage();
     this.chat.sendMessageFriend();
   }
 
+  openFileSelection() {
+    document.getElementById('file').click();
+  }
 
+  chatWith(friend) {
+    this.disableScrollDown = false;
+    this.chat.chatWith(friend);
+  }
+
+  enableScollDown() {
+    this.disableScrollDown = false;
+  }
+
+  saveImgModal (urlImg: string){
+    this.urlImg = urlImg;
+  }
 }

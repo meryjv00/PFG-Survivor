@@ -44,7 +44,6 @@ export class AuthService {
   userState = this.auth.authState.pipe(map(authState => {
     if (authState) {
       this.authUser = authState;
-      console.log('authUser: ', this.authUser);
       return authState;
     } else {
       return null;
@@ -70,7 +69,7 @@ export class AuthService {
   registro() {
     return this.auth.createUserWithEmailAndPassword(this.emailRegistro, this.passRegistro)
       .then(user => {
-        console.log('Usuario registrado con email: ', user);
+        // console.log('Usuario registrado con email: ', user);
         this.authUser = user.user;
       })
   }
@@ -102,12 +101,12 @@ export class AuthService {
   login() {
     return this.auth.signInWithEmailAndPassword(this.emailLogin, this.passLogin)
       .then(user => {
-        console.log("Usuario logeado con email: ", user);
+        // console.log("Usuario logeado con email: ", user);
         this.authUser = user.user;
         
         // this.limpiarFormularios();
         this.updateUserData(user.user);
-        sessionStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+        localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
         this.chat.getFriends(true);
       })
   }
@@ -118,12 +117,12 @@ export class AuthService {
   loginGoogle() {
     return this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
       .then(user => {
-        console.log("Usuario logeado con Google: ", user);
+        // console.log("Usuario logeado con Google: ", user);
         this.authUser = user.user;
 
         //this.limpiarFormularios();
         this.updateUserData(user.user);
-        sessionStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+        localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
         this.chat.getFriends(true);
       })
   }
@@ -134,7 +133,7 @@ export class AuthService {
   loginFacebook() {
     return this.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider())
       .then(user => {
-        console.log("Usuario logeado con Facebook: ", user);
+        //console.log("Usuario logeado con Facebook: ", user);
         this.authUser = user.user;
 
         //this.limpiarFormularios();
@@ -144,7 +143,7 @@ export class AuthService {
             photoURL: user.additionalUserInfo.profile['picture']['data']['url']
           }).then(ok => {
             this.updateUserData(user.user);
-            sessionStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+            localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
             this.chat.getFriends(true);
 
           }).catch(function (error) {
@@ -152,7 +151,7 @@ export class AuthService {
           });
         } else {
           this.updateUserData(user.user);
-          sessionStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+          localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
           this.chat.getFriends(true);
         }
       })
@@ -165,8 +164,8 @@ export class AuthService {
     this.auth.signOut();
     this.limpiarFormularios();
     this.chat.stopListenFriendMessages();
-    this.chat.chatEnabled = false;
-    sessionStorage.removeItem(environment.SESSION_KEY_USER_AUTH);
+    this.chat.closeChat();
+    localStorage.removeItem(environment.SESSION_KEY_USER_AUTH);
     this.router.navigate(['home']);
   }
 
@@ -183,7 +182,7 @@ export class AuthService {
       photoURL: user.photoURL
     })
       .then(() => {
-        console.log("Document successfully written!");
+        // console.log("Document successfully written!");
       })
       .catch((error) => {
         console.error("Error writing document: ", error);

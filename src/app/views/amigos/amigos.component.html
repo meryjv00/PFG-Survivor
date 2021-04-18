@@ -7,15 +7,15 @@
         <div class="container-fluid">
             <div class="row">
                 <!--Lista amigos-->
-                <div class="col-md-3 col-2 p-0">
+                <div class="col-md-3 col-2 p-0 column-friends">
                     <div class="search-box display-none mt-2 mb-4">
                         <div class="input-wrapper">
                             <i class="material-icons">search</i>
-                            <input type="text" placeholder="Buscar aquí">
+                            <input type="text" placeholder="Buscar aquí" [(ngModel)]="filtroAmigo" name="filtroAmigo">
                         </div>
                     </div>
 
-                    <div *ngFor="let friend of chat.friends; index as i" class="friend-description"
+                    <div *ngFor="let friend of chat.friends | filtroAmigos:filtroAmigo; index as i" class="friend-description"
                         (click)="chatWith(friend)">
                         <img src="{{friend.photoURL}}" alt="Foto {{friend.displayName}}" width="100px" class="centrado">
                         <div class="text display-none">

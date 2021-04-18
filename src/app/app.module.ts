@@ -34,6 +34,7 @@ import { ToastrModule} from 'ngx-toastr';
 
 // Material 
 import {DemoMaterialModule} from './material-module';
+import { FiltroAmigosPipe } from './pipes/filtro-amigos.pipe';
 
 @NgModule({
   declarations: [
@@ -46,7 +47,8 @@ import {DemoMaterialModule} from './material-module';
     PassComponent,
     AmigosComponent,
     RankingsComponent,
-    TiendaComponent
+    TiendaComponent,
+    FiltroAmigosPipe
   ],
   imports: [
     BrowserModule,

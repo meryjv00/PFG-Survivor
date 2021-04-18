@@ -1,5 +1,6 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 
@@ -13,6 +14,10 @@ export class AmigosComponent implements OnInit {
   @ViewChild('scrollMe') private myScrollContainer: ElementRef;
   disableScrollDown = false
   urlImg = '';
+  filtroAmigo = '';
+
+  @Output() onComplete = new EventEmitter();
+  countdownEndRef: Subscription = null;
 
   constructor(public chat: ChatService,
     private formBuilder: FormBuilder,
@@ -31,6 +36,10 @@ export class AmigosComponent implements OnInit {
   get formChat() { return this.chatFriends.controls; }
 
   ngOnInit(): void {
+    this.countdownEndRef = this.chat.countdownEnd$.subscribe(()=>{
+      this.onComplete.emit();
+      this.disableScrollDown = false;
+    })
   }
 
   ngAfterViewChecked() {
@@ -45,7 +54,6 @@ export class AmigosComponent implements OnInit {
     } else {
       this.disableScrollDown = true
     }
-
   }
 
   scrollToBottom(): void {
@@ -61,8 +69,7 @@ export class AmigosComponent implements OnInit {
     if (this.chatFriends.invalid) {
       return;
     }
-
-    this.chat.sendMessageFriend();
+    this.chat.sendMessageFriend();    
   }
 
   openFileSelection() {

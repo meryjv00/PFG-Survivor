@@ -5,10 +5,6 @@ $scroll: #50667e;
 $mymsg:  #F5F5F5;
 $othermsg: #82ccdd;
 
-/* .contenedor-principal {
-    background-color: #212f3d;
-} */
-
 .search-box {
     padding: 10px 13px;
     .input-wrapper {
@@ -39,179 +35,181 @@ $othermsg: #82ccdd;
     }
 }
 
-
-.friend-description {
-    color: white;
-    padding: 10px 15px;
-    display: flex;
-    vertical-align: baseline;
-    justify-content: center;
-    transition: .3s ease;
-    border-bottom: 1.5px solid $fondo-chat;
-    img {
-        width: 60px;
-        height: 60px;
-        border-radius: 40px;
+.column-friends {
+    background-color: #212f3d;
+    .friend-description {
+        color: white;
+        padding: 10px 15px;
+        display: flex;
+        vertical-align: baseline;
+        justify-content: center;
+        transition: .3s ease;
+        border-bottom: 1.5px solid $fondo-chat;
+        img {
+            width: 60px;
+            height: 60px;
+            border-radius: 40px;
+        }
+        .text {
+            width: 80%;
+            span {
+                font-size: 20px;
+                margin-left: 20px;
+            }
+        }
+    
+        &:hover {
+            background: $fondo-chat;
+            cursor: pointer;
+        }
+        
     }
-    .text {
-        width: 80%;
-        span {
-            font-size: 20px;
-            margin-left: 20px;
+}
+
+.card { 
+    background-color: $fondo-chat;
+    max-height: 850px;
+    border: none;
+    border-radius: 0px;
+
+    .card-header {
+        background-color: $header-input;
+        position: relative;
+        border-bottom: 0;
+    
+        .user_img {
+            height: 70px;
+            width: 70px;
+        }
+        
+        .user_info {
+            margin-top: auto;
+            margin-bottom: auto;
+            margin-left: 15px;
+            & span {
+                font-size: 20px;
+                color: white;
+            }
+            & p {
+                font-size: 12px;
+                color: rgba(255,255,255,0.6);
+            }
+        }
+    }
+    
+    .card-body {
+        overflow-y: auto;
+        
+        .chat-bubble {
+            padding: 10px 14px;
+            margin: 10px 30px;
+            border-radius: 13px;
+            position: relative;
+            animation: fadeIn 1s ease-in;
+            word-break: break-all;
+            
+            &:after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                width: 0;
+                height: 0;
+                border: 20px solid transparent;
+                border-bottom: 0;
+                margin-top: -10px;
+            }
+        
+            &--left {
+                background-color: $othermsg;
+                .msg_time {
+                    min-width: 100px;
+                    position: absolute;
+                    left: 0;
+                    bottom: -19px;
+                    color: rgba(255,255,255,0.5);
+                    font-size: 12px;
+                }
+                &:after {
+                    left: 0;
+                    border-right-color: $othermsg;
+                    border-left: 0;
+                    margin-left: -20px;
+                }
+            }
+        
+            &--right {
+                background-color: $mymsg;
+                .msg_time_send { 
+                    min-width: 100px;
+                    position: absolute;
+                    right:0;
+                    padding-left: 5px;
+                    bottom: -19px;
+                    color: rgba(255,255,255,0.5);
+                    font-size: 12px;
+                }
+
+                &:after {
+                    right: 0;
+                    border-left-color: $mymsg;
+                    border-right: 0;
+                    margin-right: -20px; 
+                }
+            } 
+        }
+    
+        &::-webkit-scrollbar {
+            width: 11px;
+        }
+        &::-webkit-scrollbar-track {
+            background: $fondo-chat;
+            border-radius: 20px;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: $scroll;
+            border-radius: 20px;
+        }
+        &::-webkit-scrollbar-thumb:hover {
+            box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.2);
         }
     }
 
-    &:hover {
-        background: $fondo-chat;
-        cursor: pointer;
-    }
+    .card-footer {
+        border-radius: 0 0 15px 15px;
+        border-top: 0;
+        .attach_btn {
+            border-radius: 15px 0 0 15px;
+            background-color: $header-input;
+            border:0;
+            color: white;
+            cursor: pointer;
+        }
+        .type_msg {
+            background-color: $header-input;
+            border:0 ;
+            color:white;
+            height: 60px;
+            overflow-y: auto;
+            &:focus{
+                box-shadow:none;
+                outline:0px;
+            }
+        }
+        .send_btn {
+            border-radius: 0 15px 15px 0;
+            background-color: $header-input;
+            border:0 ;
+            color: white;
+            cursor: pointer;
+        }
     
+    }
 }
 
 img {
     align-self: center;
-}
-
-//--------------------------
-.card { 
-    background-color: $fondo-chat;
-    height: 870px;
-    border: none;
-}
-.card-header {
-    background-color: $header-input;
-    position: relative;
-    border-bottom: 0;
-
-
-    .user_img {
-        height: 70px;
-        width: 70px;
-    }
-    
-    .user_info {
-        margin-top: auto;
-        margin-bottom: auto;
-        margin-left: 15px;
-        & span {
-            font-size: 20px;
-            color: white;
-        }
-        & p {
-            font-size: 12px;
-            color: rgba(255,255,255,0.6);
-        }
-    }
-}
-
-.card-body::-webkit-scrollbar {
-    width: 11px;
-}
-.card-body::-webkit-scrollbar-track {
-    background: $fondo-chat;
-    border-radius: 20px;
-}
-.card-body::-webkit-scrollbar-thumb {
-    background-color: $scroll;
-    border-radius: 20px;
-}
-.card-body::-webkit-scrollbar-thumb:hover {
-    box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.2);
-}
-
-.card-body {
-    overflow-y: auto;
-    
-    .chat-bubble {
-        padding: 10px 14px;
-        margin: 10px 30px;
-        border-radius: 13px;
-        position: relative;
-        animation: fadeIn 1s ease-in;
-        word-break: break-all;
-        
-        &:after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 0;
-            height: 0;
-            border: 20px solid transparent;
-            border-bottom: 0;
-            margin-top: -10px;
-        }
-    
-        &--left {
-            background-color: $othermsg;
-            .msg_time {
-                min-width: 100px;
-                position: absolute;
-                left: 0;
-                bottom: -19px;
-                color: rgba(255,255,255,0.5);
-                font-size: 12px;
-            }
-            &:after {
-                left: 0;
-                border-right-color: $othermsg;
-                border-left: 0;
-                margin-left: -20px;
-            }
-        }
-    
-        &--right {
-            background-color: $mymsg;
-            .msg_time_send { 
-                min-width: 100px;
-                position: absolute;
-                right:0;
-                padding-left: 5px;
-                bottom: -19px;
-                color: rgba(255,255,255,0.5);
-                font-size: 12px;
-            }
-
-            &:after {
-                right: 0;
-                border-left-color: $mymsg;
-                border-right: 0;
-                margin-right: -20px; 
-            }
-        } 
-    }
-}
-
-.card-footer {
-    border-radius: 0 0 15px 15px;
-    border-top: 0;
-    .attach_btn {
-        border-radius: 15px 0 0 15px;
-        background-color: $header-input;
-        border:0;
-        color: white;
-        cursor: pointer;
-    }
-    .type_msg {
-        background-color: $header-input;
-        border:0 ;
-        color:white;
-        height: 60px;
-        overflow-y: auto;
-        &:focus{
-            box-shadow:none;
-            outline:0px;
-        }
-    }
-    .send_btn {
-        border-radius: 0 15px 15px 0;
-        background-color: $header-input;
-        border:0 ;
-        color: white;
-        cursor: pointer;
-    }
 
 }
-
 .img-chat {
     width: 400px;
     height: 300px;

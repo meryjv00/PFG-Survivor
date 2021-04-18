@@ -5,6 +5,7 @@ import 'firebase/firestore';
 import { environment } from 'src/environments/environment';
 import * as _ from "lodash";
 import { AngularFireStorage } from '@angular/fire/storage';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +25,9 @@ export class ChatService {
   friendSelected: any;
   urlImg: any;
 
+  private countdownEndSource = new Subject<void>();
+  public countdownEnd$ = this.countdownEndSource.asObservable();
+
   constructor(
     private router: Router,
     public firestorage: AngularFireStorage) {
@@ -39,7 +43,7 @@ export class ChatService {
 
   /**
    * Suena mensaje dependiendo del tipo
-   * @param type 1: mensaje sin leer / 2: borrar mensaje
+   * @param type 1: mensaje sin leer / 2: borrar mensaje / 3: borrar chat
    * 
    */
   sonidito(type: number) {
@@ -190,6 +194,9 @@ export class ChatService {
                   encontrado = true;
                   // console.log(user.messages);
                   user.messages[user.messages.length] = msg;
+                  // Recibes nuevo mensaje: evento para bajar scroll
+                  this.countdownEndSource.next();
+                  
                   // Comprobar el chat que tengo abierto
                   db.collection("users").doc(this.userAuth.uid).get()
                     .then((doc) => {

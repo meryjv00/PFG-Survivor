@@ -1,17 +1,73 @@
-<h1 class="ml-3">Perfil</h1>
+<div class="container-fluid text-white">
+    <h1 class="ml-3">Perfil</h1>
 
-<div class="ml-3" *ngIf="auth.authUser">
-    <p>UID: {{auth.authUser.uid}}</p>
-    <p>Name: {{auth.authUser.displayName}}</p>
-    <p>Mail: {{auth.authUser.email}}</p>
-    <img [src]="auth.authUser.photoURL" width="150px">
+    <div class="ml-3" *ngIf="auth.authUser">
+        <p>UID: {{auth.authUser.uid}}</p>
+        <p>Name: {{auth.authUser.displayName}}</p>
+        <p>Mail: {{auth.authUser.email}}</p>
+        <img [src]="auth.authUser.photoURL" width="150px">
 
-    <div class="mt-4">
-        <button class="btn btn-dark mr-2" (click)="perfilService.updatePerfil()">Actualizar perfil</button>
-        <button class="btn btn-dark" (click)="perfilService.updatePass()">Actualizar contraseña</button>
+        <div class="mt-4">
+            <button class="btn btn-dark mr-2" (click)="perfilService.updatePerfil()">Actualizar perfil</button>
+            <button class="btn btn-dark" (click)="perfilService.updatePass()">Actualizar contraseña</button>
+        </div>
     </div>
 
+    <div class="row mt-5">
+        <div class="col-12">
+            <h1>Peticiones de amistad enviadas</h1>
+            <ul>
+                <li *ngFor="let userRequested of friendService.sentFriendsRequests" class="mt-2">
+                    {{userRequested.displayName}} {{userRequested.uid}}
+                    <button class="btn btn-dark ml-2"
+                        (click)="friendService.cancelFriendRequest(userRequested.uid)">Cancelar envio</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <h1>Peticiones de amistad recibidas</h1>
+            <ul>
+                <li *ngFor="let userFriend of friendService.friendsRequests" class="mt-2">
+                    {{userFriend.displayName}}
+                    <button class="btn btn-dark"
+                        (click)="friendService.acceptFriendRequest(userFriend.uid)">Aceptar</button>
+                    <button class="btn btn-dark ml-2"
+                        (click)="friendService.deleteFriendRequest(userFriend.uid)">Rechazar</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-6">
+            <h1>Búsqueda amigo</h1>
+            <input id="buscarAmigoAgregar" name="name" />
+        </div>
+        <div class="col-6">
+            <ul>
+                <ng-container *ngFor="let user of friendService.users">
+                    <li *ngIf="user.uid != chat.userAuth.uid" class="mt-2">
+                        {{user.displayName}}
+                        <button *ngIf="user.status == 'friends'" class="btn btn-primary">
+                            Ya somos amigos
+                        </button>
+                        <button *ngIf="user.status == 'unknown'" class="btn btn-primary" (click)="friendService.sendFriendRequest(user.uid)">
+                            Enviar solicitud de amistad
+                        </button>
+                        <button *ngIf="user.status == 'sentRequest'" class="btn btn-primary" (click)="friendService.cancelFriendRequest(user.uid)">
+                            Cancelar solicitud de amistad
+                        </button>
+                    </li>
+                </ng-container>
+
+            </ul>
+        </div>
+    </div>
 </div>
+
 
 <!-- <p class="ml-3" *ngIf="auth.user">
     {{auth.user.nombre}}

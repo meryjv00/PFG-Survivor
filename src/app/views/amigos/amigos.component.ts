@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
+import { FriendsService } from 'src/app/services/friends.service';
 
 @Component({
   selector: 'app-amigos',
@@ -15,20 +16,23 @@ export class AmigosComponent implements OnInit {
   disableScrollDown = false
   urlImg = '';
   filtroAmigo = '';
-
+  // En esucha si se envian nuevos mensajes para que el scroll baje automáticamente
   @Output() onComplete = new EventEmitter();
   countdownEndRef: Subscription = null;
 
   constructor(public chat: ChatService,
     private formBuilder: FormBuilder,
-    public auth: AuthService) {
+    public auth: AuthService,
+    public friends: FriendsService) {
 
     this.chatFriends = this.formBuilder.group({
       text: ['', [Validators.required]],
     });
 
-    // Has recargado... cargar de nuevo amigos y mensajes asociados
+    // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
     if (this.chat.friends.length == 0) {
+      this.friends.listenFriendsRequests();
+      this.friends.listenSentFriendsRequests();
       this.chat.getFriends(false);
     }
   }
@@ -36,10 +40,10 @@ export class AmigosComponent implements OnInit {
   get formChat() { return this.chatFriends.controls; }
 
   ngOnInit(): void {
-    this.countdownEndRef = this.chat.countdownEnd$.subscribe(()=>{
+    this.countdownEndRef = this.chat.countdownEnd$.subscribe(() => {
       this.onComplete.emit();
       this.disableScrollDown = false;
-    })
+    });
   }
 
   ngAfterViewChecked() {
@@ -69,7 +73,7 @@ export class AmigosComponent implements OnInit {
     if (this.chatFriends.invalid) {
       return;
     }
-    this.chat.sendMessageFriend();    
+    this.chat.sendMessageFriend();
   }
 
   openFileSelection() {
@@ -85,7 +89,7 @@ export class AmigosComponent implements OnInit {
     this.disableScrollDown = false;
   }
 
-  saveImgModal (urlImg: string){
+  saveImgModal(urlImg: string) {
     this.urlImg = urlImg;
   }
 }

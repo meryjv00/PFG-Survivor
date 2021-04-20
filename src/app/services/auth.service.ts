@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { environment } from 'src/environments/environment';
 import { ChatService } from './chat.service';
+import { FriendsService } from './friends.service';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +29,8 @@ export class AuthService {
   constructor(public auth: AngularFireAuth,
     private router: Router,
     private db: AngularFireDatabase,
-    private chat: ChatService) { }
+    private chat: ChatService,
+    private friends: FriendsService) { }
 
   limpiarFormularios() {
     this.emailLogin = '';
@@ -49,18 +51,6 @@ export class AuthService {
       return null;
     }
   }))
-
-  getUser() {
-    setTimeout(() => {
-      if (this.authUser.uid) {
-        var userbd = firebase.database().ref('users/' + this.authUser.uid);
-        userbd.on('value', (snapshot) => {
-          this.user = snapshot.val();
-          // console.log('Usuario logeado: ', this.user);
-        });
-      }
-    }, 1000);
-  }
 
   /**
   * Registro con email y contraseña
@@ -103,10 +93,11 @@ export class AuthService {
       .then(user => {
         // console.log("Usuario logeado con email: ", user);
         this.authUser = user.user;
-        
+
         // this.limpiarFormularios();
         this.updateUserData(user.user);
         localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+        this.friends.listenFriendsRequests();
         this.chat.getFriends(true);
       })
   }
@@ -123,6 +114,7 @@ export class AuthService {
         //this.limpiarFormularios();
         this.updateUserData(user.user);
         localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+        this.friends.listenFriendsRequests();
         this.chat.getFriends(true);
       })
   }
@@ -144,6 +136,7 @@ export class AuthService {
           }).then(ok => {
             this.updateUserData(user.user);
             localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+            this.friends.listenFriendsRequests();
             this.chat.getFriends(true);
 
           }).catch(function (error) {
@@ -152,6 +145,7 @@ export class AuthService {
         } else {
           this.updateUserData(user.user);
           localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
+          this.friends.listenFriendsRequests();
           this.chat.getFriends(true);
         }
       })

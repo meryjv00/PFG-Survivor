@@ -15,15 +15,15 @@
                         </div>
                     </div>
 
-                    <div *ngFor="let friend of chat.friends | filtroAmigos:filtroAmigo; index as i" class="friend-description"
-                        (click)="chatWith(friend)">
+                    <div *ngFor="let friend of chat.friends | filtroAmigos:filtroAmigo; index as i"
+                        class="friend-description" (click)="chatWith(friend)">
                         <img src="{{friend.photoURL}}" alt="Foto {{friend.displayName}}" width="100px" class="centrado">
                         <div class="text display-none">
                             <span>{{friend.displayName}}</span>
                         </div>
-                        <span *ngIf="chat.messagesWithoutRead[i].messages > 0">
+                        <!-- <span *ngIf="chat.messagesWithoutRead[i].messages > 0">
                             {{chat.messagesWithoutRead[i].messages}}
-                        </span>
+                        </span> -->
                     </div>
                 </div>
                 <!--Chat-->
@@ -39,7 +39,10 @@
                                 </div>
                             </div>
                             <div class="align-self-center">
-                                <button (click)="chat.deleteChat()" class="btn btn-light">
+                                <button (click)="friends.deleteFriend(chat.uidFriendSelected)" class="btn btn-light">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                                <button (click)="chat.deleteChat()" class="btn btn-light ml-2">
                                     <mat-icon>delete_forever</mat-icon>
                                 </button>
                                 <button (click)="chat.closeChat()" class="btn btn-light ml-2">
@@ -72,7 +75,8 @@
                                                 </span>
                                             </div>
                                             <mat-menu #menu="matMenu">
-                                                <button *ngIf="message.imageURL" mat-menu-item data-toggle="modal" data-target="#exampleModal"
+                                                <button *ngIf="message.imageURL" mat-menu-item data-toggle="modal"
+                                                    data-target="#exampleModal"
                                                     (click)="saveImgModal(message.imageURL)">
                                                     <mat-icon>visibility</mat-icon>
                                                     <span>Ver ampliada</span>

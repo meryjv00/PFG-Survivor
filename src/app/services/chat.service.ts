@@ -5,7 +5,7 @@ import 'firebase/firestore';
 import { environment } from 'src/environments/environment';
 import * as _ from "lodash";
 import { AngularFireStorage } from '@angular/fire/storage';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +24,7 @@ export class ChatService {
   gotAllMessages: boolean = false; // Comprueba si ya se han obtenido todos los mensajes (sin leer) al recargar la página 
   friendSelected: any;
   urlImg: any;
-
+  // Avisa al componente de que se ha recibido/enviado un nuevo mensaje
   private countdownEndSource = new Subject<void>();
   public countdownEnd$ = this.countdownEndSource.asObservable();
 
@@ -64,33 +64,65 @@ export class ChatService {
    * @param login True: viene de login // False: recargar página
    */
   getFriends(login: boolean) {
+    var db = firebase.firestore();
     console.log('Obteniendo amigos...');
 
     this.friends = [];
     this.getUser();
 
-    var query = firebase.firestore()
-      .collection('users').doc(this.userAuth.uid).collection('friends')
+    var query = db.collection('users').doc(this.userAuth.uid).collection('friends')
 
     query.onSnapshot(snapshot => {
-      snapshot.docChanges().forEach(change => {
-        if (change.type === 'removed') {
-        } else {
-          const friend = {
-            'uid': change.doc.id,
-            'displayName': change.doc.data().displayName,
-            'photoURL': change.doc.data().photoURL,
-            'email': change.doc.data().email,
+      snapshot.docChanges().forEach((change, index) => {
+        var cont = 0;
+
+        // Obtener nº de amigos
+        query.get().then((doc) => {
+          doc.forEach(function () {
+            cont++;
+          });
+
+          if (change.type === 'removed') {
+            this.friends.forEach((user, i) => {
+              if (user.uid == change.doc.id) {
+                this.friends.splice(i, 1);
+              }
+            });
+            this.chatEnabled = false;
+          } else {
+             
+            db.collection("users").doc(change.doc.id).get()
+              .then((doc) => {
+                console.log('Lenth amigos', this.friends.length);
+                console.log('Nº amigos', cont);
+                console.log('Cargando amigo', change.doc.id);
+
+                const friend = {
+                  'uid': change.doc.id,
+                  'displayName': doc.data().displayName,
+                  'photoURL': doc.data().photoURL,
+                  'email': doc.data().email,
+                }
+                this.friends.push(friend);
+                console.log(friend);
+
+                if (cont == index + 1) {
+                  // Ir a poner en escucha los mensajes de sus amigos
+                  console.log('Entro aqui');
+                  this.listenFriendMessages(login);
+
+                }
+
+
+              });
           }
-          this.friends.push(friend);
-        }
+
+
+        });
+
+
       });
-
-      // console.log('Amigos:', this.friends);
-      // Ir a poner en escucha los mensajes de sus amigos
-      this.listenFriendMessages(login);
     });
-
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,6 +134,8 @@ export class ChatService {
    * @param login 
    */
   listenFriendMessages(login: boolean) {
+    console.log('Entro a escuchar mensajes...');
+
     var db = firebase.firestore();
 
     this.messagesFriends = [];
@@ -109,6 +143,7 @@ export class ChatService {
     var msgs = [];
     var msg: any;
     var readMessage = true;
+    console.log('AMIGOS', this.friends);
 
     if (this.friends.length > 0) {
       this.friends.forEach((friend, index) => {
@@ -196,7 +231,7 @@ export class ChatService {
                   user.messages[user.messages.length] = msg;
                   // Recibes nuevo mensaje: evento para bajar scroll
                   this.countdownEndSource.next();
-                  
+
                   // Comprobar el chat que tengo abierto
                   db.collection("users").doc(this.userAuth.uid).get()
                     .then((doc) => {
@@ -209,7 +244,7 @@ export class ChatService {
                               msg.messages = n;
                             }
                           });
-                          console.log('Mensajes sin leer:', this.messagesWithoutRead);
+                          // console.log('Mensajes sin leer:', this.messagesWithoutRead);
                           this.sonidito(1);
                         }
                       }
@@ -229,16 +264,16 @@ export class ChatService {
                 }
               });
               this.messagesWithoutRead.push({ 'uid': friend.uid, 'messages': cont });
-              console.log('Mensajes sin leer:', this.messagesWithoutRead);
+              // console.log('Mensajes sin leer:', this.messagesWithoutRead);
             }
             msgs = [];
           }
 
-          console.log('Lista mensajes amigos', this.messagesFriends);
+          // console.log('Lista mensajes amigos', this.messagesFriends);
           // Ha terminado de obtener los mensajes
-          if (this.friends.length - 1 == index && this.gotAllMessages == false) {
+          if (this.friends.length - 1 == index) { //&& this.gotAllMessages == false
             this.gotAllMessages = true;
-            console.log('termine'); // !!!!
+            console.log('Termine');
           }
 
         });
@@ -255,6 +290,7 @@ export class ChatService {
       });
 
     } else {
+
       if (login == true) {
         // Redirigiendo perfil... Sin amigos
         this.router.navigate(['perfil']);
@@ -271,7 +307,7 @@ export class ChatService {
    * En caso de que los mensajes no estén leídos los marca como leidos
    * @param friend amigo seleccionado
    */
-  chatWith(friend: any) {    
+  chatWith(friend: any) {
     if (friend.uid == this.uidFriendSelected) {
       return;
     }
@@ -488,7 +524,7 @@ export class ChatService {
    */
   closeChat() {
     var db = firebase.firestore();
-
+    this.getUser();
     this.uidFriendSelected = '';
     this.chatEnabled = false;
 
@@ -496,8 +532,6 @@ export class ChatService {
       chatOpen: '',
     }).then(() => {
       // console.log("Document successfully written!");
-    }).catch((error) => {
-      console.error("Error writing document: ", error);
     });
   }
 
@@ -532,6 +566,19 @@ export class ChatService {
         doc.forEach(change => {
           query.doc(change.id).delete();
         });
+        // Preguntar si quiere borrarlas
+        // Eliminar imagenes del chat correspondiente
+        var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected;
+
+        const ref = firebase.storage().ref(path);
+        ref.listAll()
+          .then(dir => {
+            dir.items.forEach(fileRef => {
+              var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected + '/' + fileRef.name;
+              this.firestorage.ref(path).delete();
+            });
+          });
+
       });
   }
 

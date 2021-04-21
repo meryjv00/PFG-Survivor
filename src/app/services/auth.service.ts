@@ -25,6 +25,7 @@ export class AuthService {
   // User
   authUser = null;
   user = null;
+  loginRecharge: boolean = true;
 
   constructor(public auth: AngularFireAuth,
     private router: Router,
@@ -52,6 +53,10 @@ export class AuthService {
     }
   }))
 
+  setRechargeFalse() {
+    this.loginRecharge = false;
+  }
+
   /**
   * Registro con email y contraseña
   * @returns 
@@ -77,7 +82,11 @@ export class AuthService {
       //this.limpiarFormularios();
 
       this.updateUserData(this.authUser);
-      this.router.navigate(['perfil']);
+      this.loginRecharge = false;
+      localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(this.authUser));
+      this.friends.listenFriendsRequests();
+      this.friends.listenSentFriendsRequests();
+      this.chat.getFriends(true);
 
     }).catch(function (error) {
       console.log(error);
@@ -96,8 +105,10 @@ export class AuthService {
 
         // this.limpiarFormularios();
         this.updateUserData(user.user);
+        this.loginRecharge = false;
         localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
         this.friends.listenFriendsRequests();
+        this.friends.listenSentFriendsRequests();
         this.chat.getFriends(true);
       })
   }
@@ -113,8 +124,10 @@ export class AuthService {
 
         //this.limpiarFormularios();
         this.updateUserData(user.user);
+        this.loginRecharge = false;
         localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
         this.friends.listenFriendsRequests();
+        this.friends.listenSentFriendsRequests();
         this.chat.getFriends(true);
       })
   }
@@ -135,8 +148,10 @@ export class AuthService {
             photoURL: user.additionalUserInfo.profile['picture']['data']['url']
           }).then(ok => {
             this.updateUserData(user.user);
+            this.loginRecharge = false;
             localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
             this.friends.listenFriendsRequests();
+            this.friends.listenSentFriendsRequests();
             this.chat.getFriends(true);
 
           }).catch(function (error) {
@@ -144,8 +159,10 @@ export class AuthService {
           });
         } else {
           this.updateUserData(user.user);
+          this.loginRecharge = false;
           localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
           this.friends.listenFriendsRequests();
+          this.friends.listenSentFriendsRequests();
           this.chat.getFriends(true);
         }
       })
@@ -157,7 +174,10 @@ export class AuthService {
   logout() {
     this.auth.signOut();
     this.limpiarFormularios();
-    this.chat.stopListenFriendMessages();
+    this.chat.stopListeningFriendMessages(false, 1);
+    this.chat.stopListeningFriends();
+    this.friends.stopListeningFriendsRequests();
+    this.friends.stopListeningSentFriendsRequests();
     this.chat.closeChat();
     localStorage.removeItem(environment.SESSION_KEY_USER_AUTH);
     this.router.navigate(['home']);
@@ -181,15 +201,6 @@ export class AuthService {
       .catch((error) => {
         console.error("Error writing document: ", error);
       });
-
-    /*  const path = 'users/' + user.uid;
-     const u = {
-       email: user.email,
-       displayName: user.displayName,
-       photoURL: user.photoURL
-     }
-     this.db.object(path).update(u)
-       .catch(error => console.log(error)); */
   }
 
   /**

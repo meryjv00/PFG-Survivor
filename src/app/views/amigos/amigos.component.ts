@@ -30,11 +30,14 @@ export class AmigosComponent implements OnInit {
     });
 
     // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
-    if (this.chat.friends.length == 0) {
+    if (this.auth.loginRecharge) {
+      this.auth.setRechargeFalse();
+      this.chat.getFriends(false);
+      this.chat.closeChat();
       this.friends.listenFriendsRequests();
       this.friends.listenSentFriendsRequests();
-      this.chat.getFriends(false);
     }
+
   }
 
   get formChat() { return this.chatFriends.controls; }

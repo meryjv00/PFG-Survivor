@@ -20,10 +20,12 @@ export class ChatService {
   uidFriendSelected = ''; // Amigo seleccionado al cambiar de chat
   chatEnabled = false; // Se activa cuando se pulsa un chat, permite ver los mensajes
   listeningSnapsMessages = []; // Array que contiene los escuchas de los amigos para poder desactivarlos al cerrar
+  listeningFriends = [];
   messagesWithoutRead = []; // Mensajes de cada chat sin leer
   gotAllMessages: boolean = false; // Comprueba si ya se han obtenido todos los mensajes (sin leer) al recargar la página 
   friendSelected: any;
   urlImg: any;
+
   // Avisa al componente de que se ha recibido/enviado un nuevo mensaje
   private countdownEndSource = new Subject<void>();
   public countdownEnd$ = this.countdownEndSource.asObservable();
@@ -66,17 +68,29 @@ export class ChatService {
   getFriends(login: boolean) {
     var db = firebase.firestore();
     console.log('Obteniendo amigos...');
-
+    var contAmigos = 0;
     this.friends = [];
     this.getUser();
 
     var query = db.collection('users').doc(this.userAuth.uid).collection('friends')
 
-    query.onSnapshot(snapshot => {
+    // Obtener nº de amigos, si en caso de tener 0, no carga mensajes ni nada
+    query.get().then((doc) => {
+      doc.forEach(function () {
+        contAmigos++;
+      });
+      // No tienes amigos por lo que la var se establece a true para mostrar la página
+      if (contAmigos == 0) {
+        this.gotAllMessages = true;
+        return;
+      }
+    });
+
+    var unsubscribe = query.onSnapshot(snapshot => {
       snapshot.docChanges().forEach((change, index) => {
         var cont = 0;
-
-        // Obtener nº de amigos
+        // Obtener nº de amigos, es necesario para que si se añade un nuevo amigo, se vuelva a obtener el nº total
+        // por lo que hasta que no acabe de obtenerlos todos, no se pondrán en escucha los mensajes correspondientes a cada chat
         query.get().then((doc) => {
           doc.forEach(function () {
             cont++;
@@ -88,14 +102,13 @@ export class ChatService {
                 this.friends.splice(i, 1);
               }
             });
-            this.chatEnabled = false;
+            this.closeChat();
           } else {
-             
+
             db.collection("users").doc(change.doc.id).get()
               .then((doc) => {
-                console.log('Lenth amigos', this.friends.length);
-                console.log('Nº amigos', cont);
-                console.log('Cargando amigo', change.doc.id);
+                console.log('Nº de amigos inicial', contAmigos);
+                console.log('Nº de amigos posterior', cont);
 
                 const friend = {
                   'uid': change.doc.id,
@@ -104,25 +117,25 @@ export class ChatService {
                   'email': doc.data().email,
                 }
                 this.friends.push(friend);
-                console.log(friend);
+                //console.log(friend);
 
                 if (cont == index + 1) {
                   // Ir a poner en escucha los mensajes de sus amigos
                   console.log('Entro aqui');
-                  this.listenFriendMessages(login);
-
+                  this.stopListeningFriendMessages(login, 2);
+                } else {
+                  if (cont != contAmigos) {
+                    console.log('Has añadido un nuevo amigo');
+                    this.stopListeningFriendMessages(false, 2);
+                  }
                 }
-
 
               });
           }
-
-
         });
-
-
       });
     });
+    this.listeningFriends.push(unsubscribe);
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -271,30 +284,21 @@ export class ChatService {
 
           // console.log('Lista mensajes amigos', this.messagesFriends);
           // Ha terminado de obtener los mensajes
-          if (this.friends.length - 1 == index) { //&& this.gotAllMessages == false
+          if (this.friends.length - 1 == index && this.gotAllMessages == false) {
             this.gotAllMessages = true;
             console.log('Termine');
           }
 
         });
 
-        // Añadir al array para poder dejar de escuchar al cerrar sesión y q al volver a entrar no vuelva 
-        // a escuchar y x lo tanto haya duplicidad de mensajes
+        // Añadir al array para poder dejar de escuchar al cerrar sesión y q al volver a entrar no vuelva a escuchar y x lo tanto haya duplicidad de mensajes
         this.listeningSnapsMessages.push(unsubscribe);
 
-        // Es necesario q esté aquí para q sólo se desplaze al login cuando haya terminado de obtenerlos???
+        // Es necesario q esté aquí para q sólo se desplaze al login cuando haya terminado de obtenerlos
         if (login == true) {
-          // Redirigiendo perfil...
           this.router.navigate(['perfil']);
         }
       });
-
-    } else {
-
-      if (login == true) {
-        // Redirigiendo perfil... Sin amigos
-        this.router.navigate(['perfil']);
-      }
     }
 
   }
@@ -308,9 +312,9 @@ export class ChatService {
    * @param friend amigo seleccionado
    */
   chatWith(friend: any) {
-    if (friend.uid == this.uidFriendSelected) {
-      return;
-    }
+    /*     if (friend.uid == this.uidFriendSelected) {
+          return;
+        } */
 
     var db = firebase.firestore();
 
@@ -489,7 +493,6 @@ export class ChatService {
    */
   deleteMsgs(message: any, type: number) {
     this.sonidito(2);
-    console.log(message.storageRef);
 
     var db = firebase.firestore();
 
@@ -530,23 +533,37 @@ export class ChatService {
 
     db.collection("users").doc(this.userAuth.uid).update({
       chatOpen: '',
-    }).then(() => {
-      // console.log("Document successfully written!");
     });
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  //~~~~~~~~~~~~~~~~~~~~~~~~~~STOP LISTENING FRIEND MESSAGES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~STOP LISTENING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   /**
-  * Parar escucha de los mensajes del amigo
-  * Este método se llama al cerrar sesión
+  * Parar escucha de los mensajes del amigo. Este método se llama al cerrar sesión
   */
-  stopListenFriendMessages() {
+  stopListeningFriendMessages(login: boolean, type: number) {
     console.log('Parando escucha mensajes amigos...');
     // Recorrer todos los mensajes en escucha y eliminarlos
     this.listeningSnapsMessages.forEach(unsubscribe => {
-      console.log('Desactivando...');
+      console.log('Desactivando...MSJ_A');
+      unsubscribe();
+    });
+
+    console.log('terminado leer msj');
+    if (type == 2) {
+      this.listenFriendMessages(login);
+    }
+
+  }
+
+  /**
+  * Parar escucha los amigos. Este método se llama al cerrar sesión
+  */
+  stopListeningFriends() {
+    console.log('Parando escucha amigos...');
+    this.listeningFriends.forEach(unsubscribe => {
+      console.log('Desactivando...A');
       unsubscribe();
     });
   }

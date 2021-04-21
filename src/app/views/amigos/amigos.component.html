@@ -14,18 +14,23 @@
                             <input type="text" placeholder="Buscar aquí" [(ngModel)]="filtroAmigo" name="filtroAmigo">
                         </div>
                     </div>
-
                     <div *ngFor="let friend of chat.friends | filtroAmigos:filtroAmigo; index as i"
                         class="friend-description" (click)="chatWith(friend)">
                         <img src="{{friend.photoURL}}" alt="Foto {{friend.displayName}}" width="100px" class="centrado">
                         <div class="text display-none">
                             <span>{{friend.displayName}}</span>
                         </div>
-                        <!-- <span *ngIf="chat.messagesWithoutRead[i].messages > 0">
+                        <span *ngIf="chat.messagesWithoutRead[i].messages > 0">
                             {{chat.messagesWithoutRead[i].messages}}
-                        </span> -->
+                        </span>
                     </div>
                 </div>
+
+                <!--Columna que aparece si no tienes amigos-->
+                <div class="col-md-9 col-10 card p-0" *ngIf="chat.friends.length == 0">
+                    <h1 class="text-white">Todavía no tienes amigos!!!</h1>
+                </div>
+
                 <!--Chat-->
                 <div class="col-md-9 col-10 card p-0" *ngIf="chat.chatEnabled == true">
                     <!--Información amigo chat abierto-->

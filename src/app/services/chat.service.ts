@@ -5,31 +5,32 @@ import 'firebase/firestore';
 import { environment } from 'src/environments/environment';
 import * as _ from "lodash";
 import { AngularFireStorage } from '@angular/fire/storage';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
   msgEnviar = ''; // Variable ngmodel de enviar mensaje !!!Cambiar
-
   userAuth: any | null; // Usuario guardado en session storage para obtener bien los datos al recargar la pagina
   friends = []; // Lista de amigos
   messagesFriends = []; // Array de mensajes de tus amigos
   messagesWithFriend = []; // Array de mensajes de amigos ya convertidos: mensajes que se van mostrando en cada chat
   uidFriendSelected = ''; // Amigo seleccionado al cambiar de chat
   chatEnabled = false; // Se activa cuando se pulsa un chat, permite ver los mensajes
-  listeningSnapsMessages = []; // Array que contiene los escuchas de los amigos para poder desactivarlos al cerrar
-  listeningFriends = [];
+  listeningSnapsMessages = []; // Array que contiene los escuchas de los mensajes de los amigos para poder desactivarlos al cerrar sesión
+  listeningFriends = []; // Array que contiene las escuchas de los amigos para poder desactivarlos al cerrar sesión
   messagesWithoutRead = []; // Mensajes de cada chat sin leer
   gotAllMessages: boolean = false; // Comprueba si ya se han obtenido todos los mensajes (sin leer) al recargar la página 
-  friendSelected: any;
-  urlImg: any;
-
-  // Avisa al componente de que se ha recibido/enviado un nuevo mensaje
+  friendSelected: any; // Guarda toda la información el usuario seleccionado
+  urlImg: any; // Guarda la url de la imagen del chat para mostrarla en el modal
+  // Avisa al componente de que se ha recibido/enviado un nuevo mensaje para que el scroll baje automáticamente
   private countdownEndSource = new Subject<void>();
   public countdownEnd$ = this.countdownEndSource.asObservable();
 
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CONSTRUCTOR~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   constructor(
     private router: Router,
     public firestorage: AngularFireStorage) {
@@ -38,6 +39,9 @@ export class ChatService {
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  /**
+   * Obtiene el usuario almacenado en localStorage, el cual se almacena al iniciar sesión
+   */
   getUser() {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
@@ -46,7 +50,6 @@ export class ChatService {
   /**
    * Suena mensaje dependiendo del tipo
    * @param type 1: mensaje sin leer / 2: borrar mensaje / 3: borrar chat
-   * 
    */
   sonidito(type: number) {
     if (type == 1) {
@@ -79,7 +82,8 @@ export class ChatService {
       doc.forEach(function () {
         contAmigos++;
       });
-      // No tienes amigos por lo que la var se establece a true para mostrar la página
+      // No tienes amigos por lo que la var se establece a true para mostrar la pág
+      // No se sigue con la ejecución del método ya que no hay amigos que cargar y por lo tanto mensajes asociados
       if (contAmigos == 0) {
         this.gotAllMessages = true;
         return;
@@ -95,7 +99,7 @@ export class ChatService {
           doc.forEach(function () {
             cont++;
           });
-
+          // Amigo borrado
           if (change.type === 'removed') {
             this.friends.forEach((user, i) => {
               if (user.uid == change.doc.id) {
@@ -103,13 +107,11 @@ export class ChatService {
               }
             });
             this.closeChat();
-          } else {
-
+          }
+          // Cargando todos los amigos o nuevo amigo añadido
+          else {
             db.collection("users").doc(change.doc.id).get()
               .then((doc) => {
-                console.log('Nº de amigos inicial', contAmigos);
-                console.log('Nº de amigos posterior', cont);
-
                 const friend = {
                   'uid': change.doc.id,
                   'displayName': doc.data().displayName,
@@ -117,19 +119,15 @@ export class ChatService {
                   'email': doc.data().email,
                 }
                 this.friends.push(friend);
-                //console.log(friend);
-
+                // Ultima pos del array -> se redirige a poner en escucha todos los mensajes de los amigos obtenidos
                 if (cont == index + 1) {
-                  // Ir a poner en escucha los mensajes de sus amigos
-                  console.log('Entro aqui');
                   this.stopListeningFriendMessages(login, 2);
                 } else {
+                  // Se ha añadido un nuevo mensaje
                   if (cont != contAmigos) {
-                    console.log('Has añadido un nuevo amigo');
                     this.stopListeningFriendMessages(false, 2);
                   }
                 }
-
               });
           }
         });
@@ -150,19 +148,17 @@ export class ChatService {
     console.log('Entro a escuchar mensajes...');
 
     var db = firebase.firestore();
-
+    this.getUser();
     this.messagesFriends = [];
     this.messagesWithoutRead = [];
     var msgs = [];
     var msg: any;
     var readMessage = true;
-    console.log('AMIGOS', this.friends);
 
     if (this.friends.length > 0) {
       this.friends.forEach((friend, index) => {
         // console.log('Recorriendo amigos para recibir sus mensajes...');
         msgs = [];
-        this.getUser();
 
         var query = firebase.firestore()
           .collection('users').doc(this.userAuth.uid).collection('friends')
@@ -294,7 +290,7 @@ export class ChatService {
         // Añadir al array para poder dejar de escuchar al cerrar sesión y q al volver a entrar no vuelva a escuchar y x lo tanto haya duplicidad de mensajes
         this.listeningSnapsMessages.push(unsubscribe);
 
-        // Es necesario q esté aquí para q sólo se desplaze al login cuando haya terminado de obtenerlos
+        // En caso de venir de login y no de recargar la página se redirige al perfil
         if (login == true) {
           this.router.navigate(['perfil']);
         }
@@ -317,7 +313,6 @@ export class ChatService {
         } */
 
     var db = firebase.firestore();
-
     this.messagesWithFriend = [];
     this.uidFriendSelected = friend.uid;
     this.friendSelected = friend;
@@ -384,8 +379,7 @@ export class ChatService {
       .then(ok => {
         // console.log('Añadido en mis mensajes');
         this.msgEnviar = '';
-        // Una vez añadido en mis mensajes, se añadirá en los suyos para poder insertar el mismo uid en ambos sitios, esto nos servirá 
-        // a la hora de eliminar mensajes en ambos chats
+        // Una vez añadido en mis mensajes, se añadirá en los suyos para poder insertar el mismo uid en ambos sitios, esto nos servirá a la hora de eliminar mensajes en ambos chats
 
         //Insertar en sus amigos/mensajes
         db.collection('users').doc(this.uidFriendSelected).collection('friends')
@@ -540,7 +534,8 @@ export class ChatService {
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~STOP LISTENING ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   /**
-  * Parar escucha de los mensajes del amigo. Este método se llama al cerrar sesión
+  * Parar escucha de los mensajes del amigo. Este método se llama al cerrar sesión y 
+  * a la hora de cargar los amigos, así en caso de que se añada una nuevo, se reiniciará la escucha
   */
   stopListeningFriendMessages(login: boolean, type: number) {
     console.log('Parando escucha mensajes amigos...');
@@ -550,7 +545,6 @@ export class ChatService {
       unsubscribe();
     });
 
-    console.log('terminado leer msj');
     if (type == 2) {
       this.listenFriendMessages(login);
     }

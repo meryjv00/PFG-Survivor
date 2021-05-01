@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/storage';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ChatService } from './chat.service';
 
@@ -15,6 +16,9 @@ export class FriendsService {
   sentFriendsRequests = [];
   listeningFriendsRequests = [];
   listeningSentFriendsRequests = [];
+  newFriendInfo: any = 'hola';
+  private newFriend = new Subject<void>();
+  public newFriend$ = this.newFriend.asObservable();
 
   constructor(public firestorage: AngularFireStorage,
     public chat: ChatService) { }
@@ -177,8 +181,16 @@ export class FriendsService {
             doc.forEach(docc => {
               if (docc.id == change.doc.id) {
                 encontrado = true;
+                this.newFriendInfo = docc.id;
               }
             });
+            if (encontrado) {
+              db.collection('users').doc(this.newFriendInfo).get().then(doc => {
+                this.newFriendInfo = doc.data().displayName;
+                console.log('He aceptado solicitud');
+                this.newFriend.next();
+              });
+            }
             this.users.forEach(friend => {
               friend.status = 'unknown';
               if (friend.uid == change.doc.id) {
@@ -203,7 +215,7 @@ export class FriendsService {
                   'email': doc.data().email,
                 }
                 this.friendsRequests.push(friend);
-
+                this.chat.sonidito(1);
               });
           }
         }
@@ -237,8 +249,16 @@ export class FriendsService {
             doc.forEach(docc => {
               if (docc.id == change.doc.id) {
                 encontrado = true;
+                this.newFriendInfo = docc.id;
               }
             });
+            if (encontrado) {
+              db.collection('users').doc(this.newFriendInfo).get().then(doc => {
+                this.newFriendInfo = doc.data().displayName;
+                console.log('Me han aceptado la solicitud');
+                this.newFriend.next();
+              });
+            }
             this.users.forEach(friend => {
               friend.status = 'unknown';
               if (friend.uid == change.doc.id) {

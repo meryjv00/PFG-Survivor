@@ -145,13 +145,18 @@ export class AuthService {
    */
   logout() {
     this.auth.signOut();
-    this.limpiarFormularios();
+    this.setRechargeFalse();
+    this.chat.setStatusOnOff(2);
     this.chat.stopListeningFriendMessages(false, 1);
     this.chat.stopListeningFriends();
     this.friends.stopListeningFriendsRequests();
     this.friends.stopListeningSentFriendsRequests();
     this.chat.closeChat();
-    localStorage.removeItem(environment.SESSION_KEY_USER_AUTH);
+    this.limpiarFormularios();
+
+    setTimeout(() => {
+      localStorage.removeItem(environment.SESSION_KEY_USER_AUTH)
+     }, 2000);
     this.router.navigate(['home']);
   }
 
@@ -165,7 +170,9 @@ export class AuthService {
     db.collection("users").doc(user.uid).set({
       email: user.email,
       displayName: user.displayName,
-      photoURL: user.photoURL
+      photoURL: user.photoURL,
+      chatOpen: "",
+      status: 'online'
     })
       .then(() => {
         // console.log("Document successfully written!");

@@ -48,6 +48,25 @@ export class ChatService {
   }
 
   /**
+   * Marca el usuario como conectado
+   */
+  setStatusOnOff(type: number) {
+    var db = firebase.firestore();
+    this.getUser();
+    if (type == 1) {
+      console.log('User ON');
+      db.collection("users").doc(this.userAuth.uid).update({
+        status: 'online'
+      });
+    } else {
+      console.log('User OFF');
+      db.collection("users").doc(this.userAuth.uid).update({
+        status: 'offline'
+      });
+    }
+  }
+
+  /**
    * Suena mensaje dependiendo del tipo
    * @param type 1: mensaje sin leer / 2: borrar mensaje / 3: borrar chat
    */
@@ -114,6 +133,7 @@ export class ChatService {
               .then((doc) => {
                 const friend = {
                   'uid': change.doc.id,
+                  'status': doc.data().status,
                   'displayName': doc.data().displayName,
                   'photoURL': doc.data().photoURL,
                   'email': doc.data().email,
@@ -121,7 +141,7 @@ export class ChatService {
                 this.friends.push(friend);
                 // Ultima pos del array -> se redirige a poner en escucha todos los mensajes de los amigos obtenidos
                 if (cont == index + 1) {
-                  this.stopListeningFriendMessages(login, 2);
+                  this.stopListeningFriendMessages(false, 2); //login
                 } else {
                   // Se ha añadido un nuevo mensaje
                   if (cont != contAmigos) {
@@ -214,6 +234,7 @@ export class ChatService {
 
               const message = {
                 'id': change.doc.id,
+                'uid': change.doc.data().uid,
                 'displayName': change.doc.data().displayName,
                 'text': change.doc.data().text,
                 'imageURL': change.doc.data().imageURL,
@@ -292,6 +313,7 @@ export class ChatService {
 
         // En caso de venir de login y no de recargar la página se redirige al perfil
         if (login == true) {
+          console.log('Navegando perfil');
           this.router.navigate(['perfil']);
         }
       });
@@ -369,6 +391,7 @@ export class ChatService {
     // Insertar en mis amigos/mensajes
     db.collection('users').doc(this.userAuth.uid).collection('friends')
       .doc(this.uidFriendSelected).collection('messages').add({
+        uid: this.userAuth.uid,
         displayName: this.userAuth.displayName,
         text: this.msgEnviar,
         photoURL: this.userAuth.photoURL,
@@ -384,6 +407,7 @@ export class ChatService {
         //Insertar en sus amigos/mensajes
         db.collection('users').doc(this.uidFriendSelected).collection('friends')
           .doc(this.userAuth.uid).collection('messages').doc(ok.id).set({
+            uid: this.userAuth.uid,
             displayName: this.userAuth.displayName,
             text: msg,
             photoURL: this.userAuth.photoURL,
@@ -432,6 +456,7 @@ export class ChatService {
 
           db.collection('users').doc(this.userAuth.uid).collection('friends')
             .doc(this.uidFriendSelected).collection('messages').add({
+              uid: this.userAuth.uid,
               displayName: this.userAuth.displayName,
               imageURL: url,
               photoURL: this.userAuth.photoURL,
@@ -445,6 +470,7 @@ export class ChatService {
                   .then(url => {
                     db.collection('users').doc(this.uidFriendSelected).collection('friends')
                       .doc(this.userAuth.uid).collection('messages').doc(messageRef.id).set({
+                        uid: this.userAuth.uid,
                         displayName: this.userAuth.displayName,
                         imageURL: url,
                         photoURL: this.userAuth.photoURL,
@@ -520,13 +546,15 @@ export class ChatService {
    * Cierra el chat abierto
    */
   closeChat() {
+    console.log('CERRANDO CHAT');
+    
     var db = firebase.firestore();
     this.getUser();
     this.uidFriendSelected = '';
     this.chatEnabled = false;
 
     db.collection("users").doc(this.userAuth.uid).update({
-      chatOpen: '',
+      chatOpen: ''
     });
   }
 

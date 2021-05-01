@@ -1,0 +1,40 @@
+<div class="container-fluid text-white">
+    <div class="row mt-5">
+        <div class="col-12">
+            <h1>Peticiones de amistad enviadas</h1>
+            <ul>
+                <li *ngFor="let userRequested of friendService.sentFriendsRequests" class="mt-2">
+                    {{userRequested.displayName}} {{userRequested.uid}}
+                    <button class="btn btn-dark ml-2"
+                        (click)="friendService.cancelFriendRequest(userRequested.uid)">Cancelar envio</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-6">
+            <h1>Búsqueda amigo</h1>
+            <input id="buscarAmigoAgregar" name="name" />
+        </div>
+        <div class="col-6">
+            <ul>
+                <ng-container *ngFor="let user of friendService.users">
+                    <li *ngIf="user.uid != chat.userAuth.uid" class="mt-2">
+                        {{user.displayName}}
+                        <button *ngIf="user.status == 'friends'" class="btn btn-primary">
+                            Ya somos amigos
+                        </button>
+                        <button *ngIf="user.status == 'unknown'" class="btn btn-primary" (click)="friendService.sendFriendRequest(user.uid)">
+                            Enviar solicitud de amistad
+                        </button>
+                        <button *ngIf="user.status == 'sentRequest'" class="btn btn-primary" (click)="friendService.cancelFriendRequest(user.uid)">
+                            Cancelar solicitud de amistad
+                        </button>
+                    </li>
+                </ng-container>
+
+            </ul>
+        </div>
+    </div>
+</div>

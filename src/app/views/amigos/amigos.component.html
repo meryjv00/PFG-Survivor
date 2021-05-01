@@ -18,7 +18,7 @@
                         class="friend-description" (click)="chatWith(friend)">
                         <img src="{{friend.photoURL}}" alt="Foto {{friend.displayName}}" width="100px" class="centrado">
                         <div class="text display-none">
-                            <span>{{friend.displayName}}</span>
+                            <span>{{friend.displayName}} {{friend.status}}</span>
                         </div>
                         <span *ngIf="chat.messagesWithoutRead[i].messages > 0">
                             {{chat.messagesWithoutRead[i].messages}}
@@ -61,7 +61,7 @@
                             <div class="col-12 col-md-10 mx-auto">
                                 <div class="row" *ngFor="let message of chat.messagesWithFriend; index as i">
                                     <!--Mis mensajes-->
-                                    <div *ngIf="message.displayName == auth.authUser.displayName; else msgAjeno"
+                                    <div *ngIf="message.uid == auth.authUser.uid; else msgAjeno"
                                         class="col-md-9 col-12 ml-auto">
                                         <div class="d-flex mb-4">
                                             <div class="chat-bubble chat-bubble--right ml-auto"

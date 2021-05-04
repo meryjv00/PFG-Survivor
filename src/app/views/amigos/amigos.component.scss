@@ -68,7 +68,8 @@ $othermsg: #82ccdd;
 
 .card { 
     background-color: $fondo-chat;
-    max-height: 850px;
+    max-height: 87vh;
+    min-height: 87vh;
     border: none;
     border-radius: 0px;
 

@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { environment } from 'src/environments/environment';
 import { ChatService } from './chat.service';
+import { FriendsService } from './friends.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,19 +25,14 @@ export class AuthService {
   // User
   authUser = null;
   user = null;
+  loginRecharge: boolean = true;
 
   constructor(public auth: AngularFireAuth,
     private router: Router,
     private db: AngularFireDatabase,
-    private chat: ChatService) { }
+    private chat: ChatService,
+    private friends: FriendsService) { }
 
-  limpiarFormularios() {
-    this.emailLogin = '';
-    this.nombreRegistro = '';
-    this.passLogin = '';
-    this.emailRegistro = '';
-    this.passRegistro = '';
-  }
 
   /**
    * Información usuario logeado
@@ -50,16 +46,26 @@ export class AuthService {
     }
   }))
 
-  getUser() {
-    setTimeout(() => {
-      if (this.authUser.uid) {
-        var userbd = firebase.database().ref('users/' + this.authUser.uid);
-        userbd.on('value', (snapshot) => {
-          this.user = snapshot.val();
-          // console.log('Usuario logeado: ', this.user);
-        });
-      }
-    }, 1000);
+  /**
+   * Método que se llama desde los constructores de los componentes para en el caso de haber
+   * recargado volver a establecer esta variable a false
+   */
+  setRechargeFalse() {
+    this.loginRecharge = false;
+  }
+
+  /**
+   * Método que llama a todos los métodos necesarios para obtener todos los datos para iniciar sesión
+   * Amigos, escuchar mensajes de amigos, peticiones de amistad...
+   * @param user 
+   */
+  prepareLogin(user: any) {
+    this.updateUserData(user);
+    this.loginRecharge = false;
+    localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user));
+    this.friends.listenFriendsRequests();
+    this.friends.listenSentFriendsRequests();
+    this.chat.getFriends(true);
   }
 
   /**
@@ -75,22 +81,15 @@ export class AuthService {
   }
 
   /**
-   * Establece el nombre que ha introducido y una foto por defecto a 
-   * un usuario que acaba de realizar el registro
+   * Establece el nombre que ha introducido y una foto por defecto a un usuario que acaba de realizar el registro
    * @returns 
    */
   updateProfile() {
     return this.authUser.updateProfile({
       displayName: this.nombreRegistro,
-      photoURL: 'https://image.freepik.com/vector-gratis/vector-alfabeto-mayuscula-floral-l_53876-87377.jpg'
+      photoURL: 'https://www.softzone.es/app/uploads/2018/04/guest.png'
     }).then(ok => {
-      //this.limpiarFormularios();
-
-      this.updateUserData(this.authUser);
-      this.router.navigate(['perfil']);
-
-    }).catch(function (error) {
-      console.log(error);
+      this.prepareLogin(this.authUser);
     });
   }
 
@@ -103,12 +102,8 @@ export class AuthService {
       .then(user => {
         // console.log("Usuario logeado con email: ", user);
         this.authUser = user.user;
-        
-        // this.limpiarFormularios();
-        this.updateUserData(user.user);
-        localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
-        this.chat.getFriends(true);
-      })
+        this.prepareLogin(user.user);
+      });
   }
 
   /**
@@ -119,11 +114,7 @@ export class AuthService {
       .then(user => {
         // console.log("Usuario logeado con Google: ", user);
         this.authUser = user.user;
-
-        //this.limpiarFormularios();
-        this.updateUserData(user.user);
-        localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
-        this.chat.getFriends(true);
+        this.prepareLogin(user.user);
       })
   }
 
@@ -136,23 +127,15 @@ export class AuthService {
         //console.log("Usuario logeado con Facebook: ", user);
         this.authUser = user.user;
 
-        //this.limpiarFormularios();
         // En el caso de tener la foto de facebook por defecto se le establece la que tenga el usuario en fb
         if (user.user.photoURL.startsWith('https://graph.facebook.com/')) {
           user.user.updateProfile({
             photoURL: user.additionalUserInfo.profile['picture']['data']['url']
           }).then(ok => {
-            this.updateUserData(user.user);
-            localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
-            this.chat.getFriends(true);
-
-          }).catch(function (error) {
-            console.log(error);
+            this.prepareLogin(user.user);
           });
         } else {
-          this.updateUserData(user.user);
-          localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
-          this.chat.getFriends(true);
+          this.prepareLogin(user.user);
         }
       })
   }
@@ -162,10 +145,19 @@ export class AuthService {
    */
   logout() {
     this.auth.signOut();
-    this.limpiarFormularios();
-    this.chat.stopListenFriendMessages();
+    this.setRechargeFalse();
+    this.chat.setStatusOnOff(2);
+    this.chat.stopListeningFriendMessages(false, 1);
+    this.chat.stopListeningFriends();
+    this.friends.stopListeningFriendsRequests();
+    this.friends.stopListeningSentFriendsRequests();
     this.chat.closeChat();
-    localStorage.removeItem(environment.SESSION_KEY_USER_AUTH);
+    this.friends.resetSearchFriends();
+    this.limpiarFormularios();
+
+    setTimeout(() => {
+      localStorage.removeItem(environment.SESSION_KEY_USER_AUTH)
+    }, 2000);
     this.router.navigate(['home']);
   }
 
@@ -176,26 +168,33 @@ export class AuthService {
   updateUserData(user: any) {
     var db = firebase.firestore();
 
-    db.collection("users").doc(user.uid).set({
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL
-    })
-      .then(() => {
-        // console.log("Document successfully written!");
-      })
-      .catch((error) => {
-        console.error("Error writing document: ", error);
+    db.collection("users").doc(user.uid).get()
+      .then((doc) => {
+        // No está registrado
+        if (doc.data() == undefined) {
+          db.collection("users").doc(user.uid).set({
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            chatOpen: "",
+            status: 'online',
+            coins: 0,
+          }).then(() => {
+            // Poner en escucha al usuario
+          });
+
+        } 
+        // Si está registrado
+        else {
+          db.collection("users").doc(user.uid).update({
+            status: 'online'
+          }).then(() => {
+            // Poner en escucha al usuario
+          });
+        }
+
       });
 
-    /*  const path = 'users/' + user.uid;
-     const u = {
-       email: user.email,
-       displayName: user.displayName,
-       photoURL: user.photoURL
-     }
-     this.db.object(path).update(u)
-       .catch(error => console.log(error)); */
   }
 
   /**
@@ -207,6 +206,17 @@ export class AuthService {
         console.log('Correo enviado');
         this.emailPass = '';
       });
+  }
+
+  /**
+   * Método que limpia los inputs de los formularios login y registro
+   */
+  limpiarFormularios() {
+    this.emailLogin = '';
+    this.nombreRegistro = '';
+    this.passLogin = '';
+    this.emailRegistro = '';
+    this.passRegistro = '';
   }
 
 }

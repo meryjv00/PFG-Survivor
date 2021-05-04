@@ -14,18 +14,23 @@
                             <input type="text" placeholder="Buscar aquí" [(ngModel)]="filtroAmigo" name="filtroAmigo">
                         </div>
                     </div>
-
-                    <div *ngFor="let friend of chat.friends | filtroAmigos:filtroAmigo; index as i" class="friend-description"
-                        (click)="chatWith(friend)">
+                    <div *ngFor="let friend of chat.friends | filtroAmigos:filtroAmigo; index as i"
+                        class="friend-description" (click)="chatWith(friend)">
                         <img src="{{friend.photoURL}}" alt="Foto {{friend.displayName}}" width="100px" class="centrado">
                         <div class="text display-none">
-                            <span>{{friend.displayName}}</span>
+                            <span>{{friend.displayName}} {{friend.status}}</span>
                         </div>
                         <span *ngIf="chat.messagesWithoutRead[i].messages > 0">
                             {{chat.messagesWithoutRead[i].messages}}
                         </span>
                     </div>
                 </div>
+
+                <!--Columna que aparece si no tienes amigos-->
+                <div class="col-md-9 col-10 card p-0" *ngIf="chat.friends.length == 0">
+                    <h1 class="text-white">Todavía no tienes amigos!!!</h1>
+                </div>
+
                 <!--Chat-->
                 <div class="col-md-9 col-10 card p-0" *ngIf="chat.chatEnabled == true">
                     <!--Información amigo chat abierto-->
@@ -34,12 +39,15 @@
                             <div class="d-flex">
                                 <img src="{{chat.friendSelected.photoURL}}" class="rounded-circle user_img">
                                 <div class="user_info">
-                                    <span>{{chat.friendSelected.displayName}}</span>
+                                    <span>{{chat.friendSelected.displayName}} - {{chat.friendSelected.coins}} monedas</span>
                                     <p>{{chat.messagesWithFriend.length}} mensajes</p>
                                 </div>
                             </div>
                             <div class="align-self-center">
-                                <button (click)="chat.deleteChat()" class="btn btn-light">
+                                <button (click)="friends.deleteFriend(chat.uidFriendSelected)" class="btn btn-light">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                                <button (click)="chat.deleteChat()" class="btn btn-light ml-2">
                                     <mat-icon>delete_forever</mat-icon>
                                 </button>
                                 <button (click)="chat.closeChat()" class="btn btn-light ml-2">
@@ -53,7 +61,7 @@
                             <div class="col-12 col-md-10 mx-auto">
                                 <div class="row" *ngFor="let message of chat.messagesWithFriend; index as i">
                                     <!--Mis mensajes-->
-                                    <div *ngIf="message.displayName == auth.authUser.displayName; else msgAjeno"
+                                    <div *ngIf="message.uid == auth.authUser.uid; else msgAjeno"
                                         class="col-md-9 col-12 ml-auto">
                                         <div class="d-flex mb-4">
                                             <div class="chat-bubble chat-bubble--right ml-auto"
@@ -72,7 +80,8 @@
                                                 </span>
                                             </div>
                                             <mat-menu #menu="matMenu">
-                                                <button *ngIf="message.imageURL" mat-menu-item data-toggle="modal" data-target="#exampleModal"
+                                                <button *ngIf="message.imageURL" mat-menu-item data-toggle="modal"
+                                                    data-target="#exampleModal"
                                                     (click)="saveImgModal(message.imageURL)">
                                                     <mat-icon>visibility</mat-icon>
                                                     <span>Ver ampliada</span>

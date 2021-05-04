@@ -1,17 +1,20 @@
-<h1 class="ml-3">Perfil</h1>
+<div class="container-fluid text-white">
+    <h1 class="ml-3">Perfil</h1>
 
-<div class="ml-3" *ngIf="auth.authUser">
-    <p>UID: {{auth.authUser.uid}}</p>
-    <p>Name: {{auth.authUser.displayName}}</p>
-    <p>Mail: {{auth.authUser.email}}</p>
-    <img [src]="auth.authUser.photoURL" width="150px">
+    <div class="ml-3" *ngIf="auth.authUser">
+        <p>UID: {{auth.authUser.uid}}</p>
+        <p>Name: {{auth.authUser.displayName}}</p>
+        <p>Mail: {{auth.authUser.email}}</p>
+        <img [src]="auth.authUser.photoURL" width="150px">
 
-    <div class="mt-4">
-        <button class="btn btn-dark mr-2" (click)="perfilService.updatePerfil()">Actualizar perfil</button>
-        <button class="btn btn-dark" (click)="perfilService.updatePass()">Actualizar contraseña</button>
+        <div class="mt-4">
+            <button class="btn btn-dark mr-2" (click)="perfilService.updatePerfil()">Actualizar perfil</button>
+            <button class="btn btn-dark" (click)="perfilService.updatePass()">Actualizar contraseña</button>
+        </div>
     </div>
 
 </div>
+
 
 <!-- <p class="ml-3" *ngIf="auth.user">
     {{auth.user.nombre}}

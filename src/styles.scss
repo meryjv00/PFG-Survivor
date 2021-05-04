@@ -1,3 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'scss/customTheme.scss';
 @import '~bootstrap/scss/bootstrap';
+
+@font-face {
+    font-family: mandali;
+    src: url(assets/fonts/Mandali-Regular.ttf) format("opentype");
+}

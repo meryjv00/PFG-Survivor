@@ -14,6 +14,7 @@ import { PerfilComponent } from './views/perfil/perfil.component';
 import { RankingsComponent } from './views/rankings/rankings.component';
 import { RegistroComponent } from './views/registro/registro.component';
 import { TiendaComponent } from './views/tienda/tienda.component';
+import { ComunidadComponent } from './views/comunidad/comunidad.component';
 
 // Environment
 import { environment } from 'src/environments/environment';
@@ -48,7 +49,8 @@ import { FiltroAmigosPipe } from './pipes/filtro-amigos.pipe';
     AmigosComponent,
     RankingsComponent,
     TiendaComponent,
-    FiltroAmigosPipe
+    FiltroAmigosPipe,
+    ComunidadComponent
   ],
   imports: [
     BrowserModule,

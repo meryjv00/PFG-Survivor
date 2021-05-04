@@ -46,37 +46,46 @@ export class FriendsService {
     var db = firebase.firestore();
     this.users = [];
     var query = db.collection("users");
-
-    query.get().then((doc) => {
-      doc.forEach(change => {
-        query.doc(change.id).get().then(doc => {
-          if (doc.data().displayName == value) {
-            var user = {
-              'uid': doc.id,
-              'displayName': doc.data().displayName,
-              'photoURL': doc.data().photoURL,
-              'email': doc.data().email,
-              'status': 'unknown'
+    if (value.length >= 1) {
+      query.get().then((doc) => {
+        doc.forEach(change => {
+          query.doc(change.id).get().then(doc => {
+            // Quitando el usuario conectado
+            if (doc.id != this.userAuth.uid) {
+              // Convertir a minusculas y quitar tildes para así hacer una búsqueda más generica
+              var name = doc.data().displayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+              var busqueda = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+              if (name.indexOf(busqueda) > -1) {
+                var user = {
+                  'uid': doc.id,
+                  'displayName': doc.data().displayName,
+                  'photoURL': doc.data().photoURL,
+                  'email': doc.data().email,
+                  'status': doc.data().status,
+                  'coins': doc.data().coins,
+                  'relation': 'unknown'
+                }
+                this.users.push(user);
+                // Comprobar si ya está entre mis amigos
+                this.chat.friends.forEach(friend => {
+                  if (change.id == friend.uid) {
+                    console.log('El amigo buscado está entre mis amigos');
+                    user.relation = 'friends';
+                  }
+                });
+                // Comprobar si ya le he enviado solicitud
+                this.sentFriendsRequests.forEach(friend => {
+                  if (change.id == friend.uid) {
+                    console.log('El amigo buscado ya ha sido enviada solic');
+                    user.relation = 'sentRequest';
+                  }
+                });
+              }
             }
-            this.users.push(user);
-            // Comprobar si ya está entre mis amigos
-            this.chat.friends.forEach(friend => {
-              if (change.id == friend.uid) {
-                console.log('El amigo buscado está entre mis amigos');
-                user.status = 'friends';
-              }
-            });
-            // Comprobar si ya le he enviado solicitud
-            this.sentFriendsRequests.forEach(friend => {
-              if (change.id == friend.uid) {
-                console.log('El amigo buscado ya ha sido enviada solic');
-                user.status = 'sentRequest';
-              }
-            });
-          }
+          });
         });
       });
-    });
+    }
   }
 
   /**
@@ -88,9 +97,16 @@ export class FriendsService {
     this.getUser();
     this.users.forEach(friend => {
       if (friend.uid == uid) {
-        friend.status = 'sentRequest';
+        friend.relation = 'sentRequest';
       }
     });
+    // Eliminar de amigos sugeridos
+    this.chat.suggestedFriends.forEach((friendSuggested, index) => {
+      if (friendSuggested.uid == uid) {
+        this.chat.suggestedFriends.splice(index, 1);
+      }
+    });
+
     db.collection('users').doc(uid).collection('friendsRequests').doc(this.userAuth.uid).set({});
     db.collection('users').doc(this.userAuth.uid).collection('sentFriendsRequests').doc(uid).set({});
   }
@@ -113,6 +129,13 @@ export class FriendsService {
    */
   acceptFriendRequest(uid: string) {
     var db = firebase.firestore();
+    // Eliminar de amigos sugeridos
+    this.chat.suggestedFriends.forEach((friendSuggested, index) => {
+      if (friendSuggested.uid == uid) {
+        this.chat.suggestedFriends.splice(index, 1);
+      }
+    });
+
     db.collection('users').doc(this.userAuth.uid).collection('friends').doc(uid).set({});
     db.collection('users').doc(uid).collection('friends').doc(this.userAuth.uid).set({});
     this.deleteFriendRequest(uid);
@@ -146,7 +169,7 @@ export class FriendsService {
     });
     this.users.forEach(friend => {
       if (friend.uid == uid) {
-        friend.status = 'unknown';
+        friend.relation = 'unknown';
       }
     });
     var db = firebase.firestore();
@@ -169,7 +192,7 @@ export class FriendsService {
         var encontrado = false;
         // Peticion de amistad borrada
         if (change.type === 'removed') {
-          console.log('Solicitud de amistad borrada');
+          // console.log('Solicitud de amistad borrada');
           this.friendsRequests.forEach((friend, index) => {
             if (friend.uid == change.doc.id) {
               this.friendsRequests.splice(index, 1);
@@ -192,12 +215,12 @@ export class FriendsService {
               });
             }
             this.users.forEach(friend => {
-              friend.status = 'unknown';
+              friend.relation = 'unknown';
               if (friend.uid == change.doc.id) {
                 if (encontrado) {
-                  friend.status = 'friends';
+                  friend.relation = 'friends';
                 } else {
-                  friend.status = 'unknown';
+                  friend.relation = 'unknown';
                 }
               }
             });
@@ -213,6 +236,8 @@ export class FriendsService {
                   'displayName': doc.data().displayName,
                   'photoURL': doc.data().photoURL,
                   'email': doc.data().email,
+                  'status': doc.data().status,
+                  'coins': doc.data().coins,
                 }
                 this.friendsRequests.push(friend);
                 this.chat.sonidito(1);
@@ -220,7 +245,7 @@ export class FriendsService {
           }
         }
       });
-      console.log('Solicitudes de amistad', this.friendsRequests);
+      //console.log('Solicitudes de amistad', this.friendsRequests);
     });
     this.listeningFriendsRequests.push(unsubscribe);
   }
@@ -255,17 +280,17 @@ export class FriendsService {
             if (encontrado) {
               db.collection('users').doc(this.newFriendInfo).get().then(doc => {
                 this.newFriendInfo = doc.data().displayName;
-                console.log('Me han aceptado la solicitud');
+                //console.log('Me han aceptado la solicitud');
                 this.newFriend.next();
               });
             }
             this.users.forEach(friend => {
-              friend.status = 'unknown';
+              friend.relation = 'unknown';
               if (friend.uid == change.doc.id) {
                 if (encontrado) {
-                  friend.status = 'friends';
+                  friend.relation = 'friends';
                 } else {
-                  friend.status = 'unknown';
+                  friend.relation = 'unknown';
                 }
               }
             });
@@ -281,13 +306,15 @@ export class FriendsService {
                   'displayName': doc.data().displayName,
                   'photoURL': doc.data().photoURL,
                   'email': doc.data().email,
+                  'status': doc.data().status,
+                  'coins': doc.data().coins,
                 }
                 this.sentFriendsRequests.push(friend);
               });
           }
         }
       });
-      console.log('Solicitudes de amistad enviadas', this.sentFriendsRequests);
+      //console.log('Solicitudes de amistad enviadas', this.sentFriendsRequests);
     });
     this.listeningSentFriendsRequests.push(unsubscribe);
   }
@@ -296,9 +323,9 @@ export class FriendsService {
    * Para de escuchar las peticiones de amistad que recibes. Este método se llama al cerrar sesión
    */
   stopListeningFriendsRequests() {
-    console.log('Parando peticiones de amistad...');
+    //console.log('Parando peticiones de amistad...');
     this.listeningFriendsRequests.forEach(unsubscribe => {
-      console.log('Desactivando...PA');
+      //console.log('Desactivando...PA');
       unsubscribe();
     });
   }
@@ -307,9 +334,9 @@ export class FriendsService {
    * Para de escuchar la peticiones de amistad que envias. Este método se llama al cerrar sesión.
    */
   stopListeningSentFriendsRequests() {
-    console.log('Parando peticiones de amistad enviadas...');
+    //console.log('Parando peticiones de amistad enviadas...');
     this.listeningSentFriendsRequests.forEach(unsubscribe => {
-      console.log('Desactivando...PAE');
+      //console.log('Desactivando...PAE');
       unsubscribe();
     });
   }

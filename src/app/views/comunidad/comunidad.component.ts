@@ -10,13 +10,13 @@ import { FriendsService } from 'src/app/services/friends.service';
   styleUrls: ['./comunidad.component.scss']
 })
 export class ComunidadComponent implements OnInit {
+  palabraBuscar: string = '';
 
   constructor(public friendService: FriendsService,
     public chat: ChatService,
     public auth: AuthService,
     public toastr: ToastrService) {
-
-    this.friendService.resetSearchFriends();
+      
     // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
     if (this.auth.loginRecharge) {
       this.auth.setRechargeFalse();
@@ -36,6 +36,7 @@ export class ComunidadComponent implements OnInit {
 
 
   updateValue(e) {
+    this.palabraBuscar = e.target.value;
     this.friendService.searchFriends(e.target.value);
   }
 

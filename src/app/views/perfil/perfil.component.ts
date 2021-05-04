@@ -30,11 +30,5 @@ export class PerfilComponent implements OnInit {
 
   ngOnInit(): void { }
 
-  saveImg(url: any) {
-    this.perfilService.uploadImgBD(url)
-      .then(success => {
-        this.toastr.success('Foto actualizada con éxito', 'Foto')
-      })
-  }
-
+ 
 }

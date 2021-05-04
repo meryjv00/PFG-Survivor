@@ -87,7 +87,7 @@ export class AuthService {
   updateProfile() {
     return this.authUser.updateProfile({
       displayName: this.nombreRegistro,
-      photoURL: 'https://image.freepik.com/vector-gratis/vector-alfabeto-mayuscula-floral-l_53876-87377.jpg'
+      photoURL: 'https://www.softzone.es/app/uploads/2018/04/guest.png'
     }).then(ok => {
       this.prepareLogin(this.authUser);
     });
@@ -152,11 +152,12 @@ export class AuthService {
     this.friends.stopListeningFriendsRequests();
     this.friends.stopListeningSentFriendsRequests();
     this.chat.closeChat();
+    this.friends.resetSearchFriends();
     this.limpiarFormularios();
 
     setTimeout(() => {
       localStorage.removeItem(environment.SESSION_KEY_USER_AUTH)
-     }, 2000);
+    }, 2000);
     this.router.navigate(['home']);
   }
 
@@ -167,16 +168,33 @@ export class AuthService {
   updateUserData(user: any) {
     var db = firebase.firestore();
 
-    db.collection("users").doc(user.uid).set({
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-      chatOpen: "",
-      status: 'online'
-    })
-      .then(() => {
-        // console.log("Document successfully written!");
+    db.collection("users").doc(user.uid).get()
+      .then((doc) => {
+        // No está registrado
+        if (doc.data() == undefined) {
+          db.collection("users").doc(user.uid).set({
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            chatOpen: "",
+            status: 'online',
+            coins: 0,
+          }).then(() => {
+            // Poner en escucha al usuario
+          });
+
+        } 
+        // Si está registrado
+        else {
+          db.collection("users").doc(user.uid).update({
+            status: 'online'
+          }).then(() => {
+            // Poner en escucha al usuario
+          });
+        }
+
       });
+
   }
 
   /**

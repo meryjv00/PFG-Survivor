@@ -1,6 +1,7 @@
 // Colores
-$primary: #DB5B6B;
-$secondary: #f3e7e7;
+$primary: #29536b;
+$secondary: #9abed3;
+$gris: #b8b6b4; 
 
 body {
     background-color: #212f3d !important;
@@ -15,4 +16,18 @@ body {
 }
 #bt-fb:hover {
     background-color: #3343a0;
+}
+
+.gris {
+    color: $gris;
+}
+
+.btn-style {
+    font-family: "Motiva Sans",Arial,Helvetica,sans-serif;
+    color: white;
+    font-size: 15px;
+    background: rgba( 103, 193, 245, 0.2 ) !important;
+    &:hover {
+        background: linear-gradient( -60deg, #29536b 5%,#387091 95%) !important;
+    }
 }

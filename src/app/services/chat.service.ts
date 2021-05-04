@@ -27,6 +27,9 @@ export class ChatService {
   // Avisa al componente de que se ha recibido/enviado un nuevo mensaje para que el scroll baje automáticamente
   private countdownEndSource = new Subject<void>();
   public countdownEnd$ = this.countdownEndSource.asObservable();
+  suggestedFriends = []; // Sugerencias de amigos "Amigos de mis amigos"
+  sentRequested = []; // uid amigos a los que envie solic
+  msgsWithoutRead2 = [];
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CONSTRUCTOR~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,15 +140,33 @@ export class ChatService {
                   'displayName': doc.data().displayName,
                   'photoURL': doc.data().photoURL,
                   'email': doc.data().email,
+                  'coins': doc.data().coins,
                 }
                 this.friends.push(friend);
+
+                // Pone en escucha los datos de ese usuario
+                var unsubscribe2 = db.collection("users").doc(change.doc.id)
+                  .onSnapshot({
+                    includeMetadataChanges: true
+                  }, (doc) => {
+                    // Buscar usuario y actualizar sus datos
+                    this.friends.forEach(friend => {
+                      if (friend.uid == change.doc.id) {
+                        friend.status = doc.data().status;
+                      }
+                    });
+                  });
+                this.listeningFriends.push(unsubscribe2);
+
                 // Ultima pos del array -> se redirige a poner en escucha todos los mensajes de los amigos obtenidos
                 if (cont == index + 1) {
                   this.stopListeningFriendMessages(false, 2); //login
+                  this.getSuggestedFriends();
                 } else {
                   // Se ha añadido un nuevo mensaje
                   if (cont != contAmigos) {
                     this.stopListeningFriendMessages(false, 2);
+                    this.getSuggestedFriends();
                   }
                 }
               });
@@ -155,6 +176,76 @@ export class ChatService {
     });
     this.listeningFriends.push(unsubscribe);
   }
+
+
+  /**
+ * Sugerencias de amigos "Amigos de mis amigos"
+ */
+  getSuggestedFriends() {
+    var db = firebase.firestore();
+    this.suggestedFriends = [];
+
+    //Buscar en las peticiones de amistad que yo he enviado
+    db.collection('users').doc(this.userAuth.uid).collection('sentFriendsRequests').get().then((doc) => {
+      doc.forEach(docu => {
+        this.sentRequested.push(docu.id);
+      });
+
+      // Recorrer mis amigos para buscar los amigos de cada uno
+      this.friends.forEach(friend => {
+        db.collection('users').doc(friend.uid).collection('friends').get().then((doc) => {
+          //console.log('AMIGOOOOOOOOOOOO => ', friend.uid);
+          doc.forEach(docu => {
+            //Buscar datos del usuario quitando a el usuario conectado
+            if (docu.id != this.userAuth.uid) {
+              db.collection('users').doc(docu.id).get().then((doc) => {
+                //console.log(docu.id);
+                var encontrado = false;
+                // Recorro la lista de mis amigos
+                this.friends.forEach(friend => {
+                  if (friend.uid == docu.id) {
+                    encontrado = true;
+                  }
+                });
+
+                // Recorro la lista de sugerencias
+                this.suggestedFriends.forEach(suggestedFriend => {
+                  if (suggestedFriend.uid == docu.id) {
+                    encontrado = true;
+                  }
+                });
+
+                // Recorro la lista de peticiones de amistad enviadas
+                this.sentRequested.forEach(uidRequested => {
+                  if (uidRequested == docu.id) {
+                    encontrado = true;
+                  }
+                });
+
+                // En caso de que no se haya encontrado se agrega
+                if (!encontrado) {
+                  const friend = {
+                    'uid': docu.id,
+                    'status': doc.data().status,
+                    'displayName': doc.data().displayName,
+                    'photoURL': doc.data().photoURL,
+                    'email': doc.data().email,
+                    'coins': doc.data().coins,
+                    'relation': 'unknown'
+                  }
+                  this.suggestedFriends.push(friend);
+                }
+              });
+            }
+          });
+        });
+
+      });
+
+    });
+
+  }
+
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~LISTEN FRIEND MESSAGES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -171,6 +262,7 @@ export class ChatService {
     this.getUser();
     this.messagesFriends = [];
     this.messagesWithoutRead = [];
+    this.msgsWithoutRead2 = [];
     var msgs = [];
     var msg: any;
     var readMessage = true;
@@ -197,7 +289,7 @@ export class ChatService {
                       console.log('Mensaje borrado: ', message.id);
                       user.messages.splice(index, 1);
                       // Si todavía no está leido -> Descontar uno del contador de mensajes sin leer
-                      if (message.isRead == false && message.displayName == friend.displayName) {
+                      if (message.isRead == false && message.uid == friend.uid) { // !!!
                         this.messagesWithoutRead.forEach(msg => {
                           if (msg.uid == friend.uid) {
                             var n = msg.messages - 1;
@@ -267,14 +359,14 @@ export class ChatService {
                     .then((doc) => {
                       // En caso de no tener el chat abierto añadimos un mensaje más sin leer
                       if (doc.data().chatOpen != friend.uid) {
-                        if (msg.displayName == friend.displayName && msg.isRead == false) {
+                        if (msg.uid == friend.uid && msg.isRead == false) { //!!!!
                           this.messagesWithoutRead.forEach(msg => {
                             if (msg.uid == friend.uid) {
                               var n = msg.messages + 1;
                               msg.messages = n;
                             }
                           });
-                          // console.log('Mensajes sin leer:', this.messagesWithoutRead);
+                          console.log('Mensajes sin leer:', this.messagesWithoutRead);
                           this.sonidito(1);
                         }
                       }
@@ -284,24 +376,63 @@ export class ChatService {
             }
             // Cargar mensajes inicialmente
             if (!encontrado) {
-              this.messagesFriends.push({ 'uid': friend.uid, 'messages': msgs });
+              this.messagesFriends.push({
+                'uid': friend.uid,
+                'displayName': friend.displayName,
+                'photoURL': friend.photoURL,
+                'messages': msgs
+              });
               // Recorro los mensajes en busca de aquellos que tengan mi nombre y que el atributo read sea false
               var cont = 0;
               msgs.forEach(msg => {
-                if (msg.displayName == friend.displayName && msg.isRead == false) {
+                if (msg.uid == friend.uid && msg.isRead == false) { // !!!!!!!!!!!
                   // console.log('mensaje sin leer: ', friend.uid, msg.id);
                   cont++;
                 }
               });
-              this.messagesWithoutRead.push({ 'uid': friend.uid, 'messages': cont });
-              // console.log('Mensajes sin leer:', this.messagesWithoutRead);
+              this.messagesWithoutRead.push({
+                'uid': friend.uid,
+                'displayName': friend.displayName,
+                'photoURL': friend.photoURL,
+                'messages': cont
+              });
             }
             msgs = [];
           }
 
+          //console.log(this.messagesWithoutRead[index].messages);
           // console.log('Lista mensajes amigos', this.messagesFriends);
+          setTimeout(() => {
+            // console.log('HOLA', this.messagesWithoutRead[index].messages);
+            if (this.messagesWithoutRead[index].messages > 0) {
+              var enc = false;
+              //console.log('Hay mensajes sin leer', this.messagesWithoutRead[index].uid);
+              this.msgsWithoutRead2.forEach(msg => {
+                if (msg.uid == this.messagesWithoutRead[index].uid) {
+                  enc = true;
+                  var ms = this.messagesWithoutRead[index].messages;
+                  msg.messages = ms++;
+                }
+              });
+              if (!enc) {
+                this.msgsWithoutRead2.push({ 'uid': friend.uid, 'messages': this.messagesWithoutRead[index].messages });
+              }
+            }
+            //Buscarlo y borrarlo
+            else {
+              this.msgsWithoutRead2.forEach((msg, index2) => {
+                if (msg.uid == this.messagesWithoutRead[index].uid) {
+                  this.msgsWithoutRead2.splice(index2, 1);
+                }
+              });
+            }
+          }, 500);
+
+          // console.log(this.msgsWithoutRead2);
+
           // Ha terminado de obtener los mensajes
           if (this.friends.length - 1 == index && this.gotAllMessages == false) {
+            console.log(this.msgsWithoutRead2);
             this.gotAllMessages = true;
             console.log('Termine');
           }
@@ -351,7 +482,7 @@ export class ChatService {
 
         // Poner en leído los mensajes del chat correspondiente
         this.messagesWithFriend.forEach(msg => {
-          if (msg.displayName != this.userAuth.displayName && msg.isRead == false) {
+          if (msg.uid != this.userAuth.uid && msg.isRead == false) { // !!!
             // Pongo en leido sus mensajes en su cuenta
             db.collection('users').doc(this.uidFriendSelected).collection('friends')
               .doc(this.userAuth.uid).collection('messages').doc(msg.id).update({
@@ -546,8 +677,8 @@ export class ChatService {
    * Cierra el chat abierto
    */
   closeChat() {
-    console.log('CERRANDO CHAT');
-    
+    //console.log('CERRANDO CHAT');
+
     var db = firebase.firestore();
     this.getUser();
     this.uidFriendSelected = '';
@@ -566,10 +697,10 @@ export class ChatService {
   * a la hora de cargar los amigos, así en caso de que se añada una nuevo, se reiniciará la escucha
   */
   stopListeningFriendMessages(login: boolean, type: number) {
-    console.log('Parando escucha mensajes amigos...');
+    //console.log('Parando escucha mensajes amigos...');
     // Recorrer todos los mensajes en escucha y eliminarlos
     this.listeningSnapsMessages.forEach(unsubscribe => {
-      console.log('Desactivando...MSJ_A');
+      //console.log('Desactivando...MSJ_A');
       unsubscribe();
     });
 
@@ -583,9 +714,9 @@ export class ChatService {
   * Parar escucha los amigos. Este método se llama al cerrar sesión
   */
   stopListeningFriends() {
-    console.log('Parando escucha amigos...');
+    //console.log('Parando escucha amigos...');
     this.listeningFriends.forEach(unsubscribe => {
-      console.log('Desactivando...A');
+      //console.log('Desactivando...A');
       unsubscribe();
     });
   }

@@ -1,10 +1,11 @@
-/* @import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
- */ 
- /* font-family: 'Montserrat', sans-serif; */
- 
+$gris:#b8b6b4; 
+
 *{
     box-sizing: border-box;	
     outline: 0;
+}
+.header-nav {
+    background-color: #171A21;
 }
 
 .badge {
@@ -14,22 +15,22 @@
     padding: 4px 6px;
     top: 22px;
     left: 27px;
-    background-color: rgb(171, 171, 185);
+    background-color: rgb(83, 83, 95);
 }
+
 img {
     border-radius: 30px;
-    border: 1px solid black;
 }
 
 header {
-    padding: 20px 0;
+    padding: 10px 0;
     transition: padding .3s,height .3s;
 
     ul {
         list-style-type: none;
         padding: 0;
         margin: 0;
-        li{
+        li {
             display: inline-flex;
             padding: 10px;
         }
@@ -39,8 +40,10 @@ header {
         &>ul {
             font-size: 16px;
             font-weight: 700;
-            color: #1d1c1d;
+            color: #b8b6b4;
             &>li>a {
+                font-family: 'Mandali', sans-serif;
+                font-size: 20px;
                 cursor: pointer;
                 position: relative;
                 text-decoration: none;

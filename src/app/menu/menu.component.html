@@ -1,35 +1,71 @@
-<div class="container-fluid bg-light">
-  <!--Menú navegación-->
+<!--Menú navegación-->
+<div class="container-fluid header-nav">
   <div class="row">
-    <div class="col-lg-9 mx-auto col-12">
-      <header class="d-flex bg-light justify-content-between align-items-center">
+    <div class="col-lg-10 mx-auto col-12">
+      <header class="d-flex justify-content-between align-items-center">
         <!--1º línea apartados-->
-        <div class="">
-          <nav class="nav">
-            <ul>
-              <!--Inicio-->
-              <li class="ml-4"><mat-icon>home</mat-icon><a routerLink="home" class="ml-1">Inicio</a></li>
-              <!--Tienda-->
-              <li class="ml-4"><mat-icon>shopping_cart</mat-icon><a routerLink="tienda" class="ml-1">Tienda</a></li>
-              <!--Rankings-->
-              <li class="ml-4"><mat-icon>star</mat-icon><a routerLink="rankings" class="ml-1">Rankings</a></li>
-              <!--CUENTA LOGEADA-->
-              <ng-container *ngIf="auth.userState | async as user">
-                <li class="ml-4"><mat-icon>people_alt</mat-icon><a routerLink="comunidad" class="ml-1">Comunidad</a></li>
-              </ng-container>
-            </ul>
-          </nav>
-        </div>
+        <nav class="nav">
+          <ul>
+            <!--Inicio-->
+            <li class="ml-4">
+              <mat-icon class="my-auto">home</mat-icon><a routerLink="home" class="ml-1">Inicio</a>
+            </li>
+            <!--Tienda-->
+            <li class="ml-4">
+              <mat-icon class="my-auto">shopping_cart</mat-icon><a routerLink="tienda" class="ml-1">Tienda</a>
+            </li>
+            <!--Rankings-->
+            <li class="ml-4">
+              <mat-icon class="my-auto">star</mat-icon><a routerLink="rankings" class="ml-1">Rankings</a>
+            </li>
+            <!--CUENTA LOGEADA-->
+            <ng-container *ngIf="auth.userState | async as user">
+              <!--Comunidad-->
+              <li class="ml-4">
+                <mat-icon class="my-auto">people_alt</mat-icon><a routerLink="comunidad" class="ml-1">Comunidad</a>
+              </li>
+              <!--Amigos-->
+              <li class="ml-4">
+                <mat-icon class="my-auto">people_alt</mat-icon><a routerLink="amigos" class="ml-1">Amigos</a>
+              </li>
+            </ng-container>
+          </ul>
+        </nav>
         <!--2º línea apartados-->
-        <div class="">
+        <div>
           <!--CUENTA LOGEADA-->
           <ng-container *ngIf="auth.userState | async as user;else login">
-            <!--Chat amigos-->
-            <button routerLink="amigos" mat-mini-fab color="warn">
+            <!--Alerta notificaciones mensajes-->
+            <button mat-mini-fab class="btn-style" [matMenuTriggerFor]="notificationsMessages">
               <mat-icon>mail</mat-icon>
+              <span *ngIf="chat.msgsWithoutRead2.length > 0"
+                class="badge">{{chat.msgsWithoutRead2.length}}</span>
             </button>
-            <!--Alerta notificaciones-->
-            <button mat-mini-fab color="warn" class="ml-2" [matMenuTriggerFor]="notifications">
+            <mat-menu #notificationsMessages="matMenu" xPosition="before" class="mt-2" aria-colcount="menu">
+              <ng-container *ngIf="chat.msgsWithoutRead2.length > 0; else noNotifsMessages">
+                <ng-container  *ngFor="let userMessage of chat.messagesWithoutRead">
+                <div *ngIf="userMessage.messages > 0" class="d-flex align-items-center px-2 py-2 notific_item">
+                  <div>
+                    <img src="{{userMessage.photoURL}}" alt="profile_pic" style="width: 50px" class="border">
+                  </div>
+                  <div class="pl-3">
+                    <p class="m-0 mb-1">
+                      Tienes <span>{{userMessage.messages}}</span> mensajes sin leer de <span>{{userMessage.displayName}}</span>
+                    </p>
+                  </div>
+                </div>
+                </ng-container>
+              </ng-container>
+
+              <ng-template #noNotifsMessages>
+                <div class="px-2 py-2">
+                  <span>¡No tienes ningun ningún mensaje sin leer!</span>
+                </div>
+              </ng-template>
+            </mat-menu>
+
+            <!--Alerta notificaciones amigos-->
+            <button mat-mini-fab class="ml-2 btn-style" [matMenuTriggerFor]="notifications">
               <mat-icon>notifications</mat-icon>
               <span *ngIf="friendService.friendsRequests.length > 0"
                 class="badge">{{friendService.friendsRequests.length}}</span>
@@ -58,8 +94,9 @@
                 </div>
               </ng-template>
             </mat-menu>
+
             <!--Imágen perfil-->
-            <img [matMenuTriggerFor]="beforeMenu" src="{{auth.authUser.photoURL}}" alt="" width="60px" class="ml-2">
+            <img [matMenuTriggerFor]="beforeMenu" src="{{auth.authUser.photoURL}}" alt="" width="60px" class="ml-3">
             <mat-menu #beforeMenu="matMenu" xPosition="before">
               <!--Ver perfil-->
               <button mat-menu-item routerLink="perfil">
@@ -72,10 +109,11 @@
               </button>
             </mat-menu>
           </ng-container>
+          
           <!--CUENTA SIN LOGEAR-->
           <ng-template #login>
-            <button mat-raised-button (click)="openLogin()" class="btn-primary mr-3">Entrar</button>
-            <button mat-raised-button (click)="openRegistro()" class="btn-primary">Registrarse</button>
+            <button mat-raised-button (click)="openLogin()" class="btn-style mr-3">Inicia sesión</button>
+            <button mat-raised-button (click)="openRegistro()" class="btn-style">Registrate</button>
           </ng-template>
         </div>
       </header>

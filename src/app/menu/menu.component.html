@@ -59,7 +59,7 @@
 
               <ng-template #noNotifsMessages>
                 <div class="px-2 py-2">
-                  <span>¡No tienes ningun ningún mensaje sin leer!</span>
+                  <span>¡No tienes ningún mensaje sin leer!</span>
                 </div>
               </ng-template>
             </mat-menu>
@@ -96,7 +96,8 @@
             </mat-menu>
 
             <!--Imágen perfil-->
-            <img [matMenuTriggerFor]="beforeMenu" src="{{auth.authUser.photoURL}}" alt="" width="60px" class="ml-3">
+            <img [matMenuTriggerFor]="beforeMenu" src="{{auth.user.photoURL}}" alt="" width="60px" class="ml-3">
+            <span class="gris">{{auth.user.displayName}}</span>
             <mat-menu #beforeMenu="matMenu" xPosition="before">
               <!--Ver perfil-->
               <button mat-menu-item routerLink="perfil">

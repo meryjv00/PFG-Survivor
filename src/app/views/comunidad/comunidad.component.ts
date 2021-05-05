@@ -3,6 +3,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-comunidad',
@@ -20,6 +21,7 @@ export class ComunidadComponent implements OnInit {
     // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
     if (this.auth.loginRecharge) {
       this.auth.setRechargeFalse();
+      this.auth.listenDataLogedUser();
       this.chat.getFriends(false);
       this.chat.closeChat();
       this.friendService.listenFriendsRequests();

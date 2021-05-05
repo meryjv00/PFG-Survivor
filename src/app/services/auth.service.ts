@@ -3,7 +3,6 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import firebase from 'firebase/app';
 import { Router } from '@angular/router';
-import { AngularFireDatabase } from '@angular/fire/database';
 import { environment } from 'src/environments/environment';
 import { ChatService } from './chat.service';
 import { FriendsService } from './friends.service';
@@ -26,10 +25,11 @@ export class AuthService {
   authUser = null;
   user = null;
   loginRecharge: boolean = true;
+  userAuth: any | null;
+  providerId: string = null;
 
   constructor(public auth: AngularFireAuth,
     private router: Router,
-    private db: AngularFireDatabase,
     private chat: ChatService,
     private friends: FriendsService) { }
 
@@ -40,6 +40,8 @@ export class AuthService {
   userState = this.auth.authState.pipe(map(authState => {
     if (authState) {
       this.authUser = authState;
+      this.providerId = this.authUser.providerData[0].providerId;
+      
       return authState;
     } else {
       return null;
@@ -60,9 +62,9 @@ export class AuthService {
    * @param user 
    */
   prepareLogin(user: any) {
+    localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user));
     this.updateUserData(user);
     this.loginRecharge = false;
-    localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user));
     this.friends.listenFriendsRequests();
     this.friends.listenSentFriendsRequests();
     this.chat.getFriends(true);
@@ -181,20 +183,42 @@ export class AuthService {
             coins: 0,
           }).then(() => {
             // Poner en escucha al usuario
+            this.listenDataLogedUser();
           });
 
-        } 
+        }
         // Si está registrado
         else {
           db.collection("users").doc(user.uid).update({
             status: 'online'
           }).then(() => {
             // Poner en escucha al usuario
+            this.listenDataLogedUser();
           });
         }
 
       });
 
+  }
+
+  listenDataLogedUser() {
+    var db = firebase.firestore();
+    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+    this.userAuth = JSON.parse(this.userAuth);
+    
+    db.collection("users").doc(this.userAuth.uid)
+      .onSnapshot({
+        includeMetadataChanges: true
+      }, (doc) => {
+        this.user = {
+          'uid': doc.id,
+          'status': doc.data().status,
+          'displayName': doc.data().displayName,
+          'photoURL': doc.data().photoURL,
+          'email': doc.data().email,
+          'coins': doc.data().coins,
+        }
+      });
   }
 
   /**

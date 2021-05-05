@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-amigos',
@@ -13,7 +14,7 @@ import { FriendsService } from 'src/app/services/friends.service';
 export class AmigosComponent implements OnInit {
   chatFriends: FormGroup;
   @ViewChild('scrollMe') private myScrollContainer: ElementRef;
-  disableScrollDown = false
+  disableScrollDown = false;
   urlImg = '';
   filtroAmigo = '';
   // En esucha si se envian nuevos mensajes para que el scroll baje automáticamente
@@ -32,6 +33,7 @@ export class AmigosComponent implements OnInit {
     // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
     if (this.auth.loginRecharge) {
       this.auth.setRechargeFalse();
+      this.auth.listenDataLogedUser();
       this.chat.getFriends(false);
       this.chat.closeChat();
       this.friends.listenFriendsRequests();
@@ -95,4 +97,5 @@ export class AmigosComponent implements OnInit {
   saveImgModal(urlImg: string) {
     this.urlImg = urlImg;
   }
+
 }

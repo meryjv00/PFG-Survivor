@@ -3,8 +3,8 @@ import { AuthService } from '../services/auth.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LoginComponent } from '../views/login/login.component';
 import { RegistroComponent } from '../views/registro/registro.component';
-import { FriendsService } from '../services/friends.service';
 import { ChatService } from '../services/chat.service';
+import { FriendsService } from '../services/friends.service';
 
 @Component({
   selector: 'app-menu',
@@ -16,7 +16,9 @@ export class MenuComponent implements OnInit {
   constructor(public auth: AuthService,
     public ngmodal: NgbModal,
     public friendService: FriendsService,
-    public chat: ChatService) { }
+    public chat: ChatService) {
+      
+    }
 
   ngOnInit(): void {
   }

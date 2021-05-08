@@ -19,24 +19,40 @@ export class TiendaComponent implements OnInit {
     public shop: ShopService) {
 
     this.getUser();
-    this.shop.getItems();
     
     if (this.auth.loginRecharge && this.userAuth != null) {
+      this.shop.getItems();
       this.auth.setRechargeFalse();
       this.auth.listenDataLogedUser();
       this.chat.getFriends(false);
       this.chat.closeChat();
       this.friendService.listenFriendsRequests();
       this.friendService.listenSentFriendsRequests();
+    }else {
+      this.shop.getItems();
     }
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   getUser() {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
   }
 
+
+  /**
+   * Comprar item
+   * @param item 
+   */
+  buyItem(item: any) {
+    var canBuy;
+    canBuy = this.shop.checkItem(item);
+    if (canBuy) {
+      // Confirmación comprar
+      this.shop.buyItem(item);
+    } else {
+      alert('No tienes suficientes monedas para comprar este arma');
+    }
+  }
 }

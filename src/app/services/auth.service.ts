@@ -27,6 +27,7 @@ export class AuthService {
   loginRecharge: boolean = true;
   userAuth: any | null;
   providerId: string = null;
+  listeningUser = [];
 
   constructor(public auth: AngularFireAuth,
     private router: Router,
@@ -146,9 +147,11 @@ export class AuthService {
    * Cerrar sesión cuenta
    */
   logout() {
+    this.user = null;
     this.auth.signOut();
     this.setRechargeFalse();
     this.chat.setStatusOnOff(2);
+    this.stopListeningUser();
     this.chat.stopListeningFriendMessages(false, 1);
     this.chat.stopListeningFriends();
     this.friends.stopListeningFriendsRequests();
@@ -180,7 +183,7 @@ export class AuthService {
             photoURL: user.photoURL,
             chatOpen: "",
             status: 'online',
-            coins: 0,
+            coins: 10,
           }).then(() => {
             // Poner en escucha al usuario
             this.listenDataLogedUser();
@@ -201,12 +204,15 @@ export class AuthService {
 
   }
 
+  /**
+   * Pone en escucha los datos del usuario, se llama al iniciar sesión y recargar página
+   */
   listenDataLogedUser() {
     var db = firebase.firestore();
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
     
-    db.collection("users").doc(this.userAuth.uid)
+    var unsubscribe = db.collection("users").doc(this.userAuth.uid)
       .onSnapshot({
         includeMetadataChanges: true
       }, (doc) => {
@@ -219,6 +225,18 @@ export class AuthService {
           'coins': doc.data().coins,
         }
       });
+
+      this.listeningUser.push(unsubscribe);
+  }
+
+  /**
+   * Se para la escucha de los metadatos del usuario logeado
+   */
+  stopListeningUser() {
+    this.listeningUser.forEach(unsubscribe => {
+      // console.log('Desactivando USER...');
+      unsubscribe();
+    });
   }
 
   /**

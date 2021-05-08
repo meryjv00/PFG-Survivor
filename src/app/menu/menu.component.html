@@ -96,8 +96,8 @@
             </mat-menu>
 
             <!--Imágen perfil-->
-            <img [matMenuTriggerFor]="beforeMenu" src="{{auth.user.photoURL}}" alt="" width="60px" class="ml-3">
-            <span class="gris">{{auth.user.displayName}}</span>
+            <img *ngIf="auth.user" [matMenuTriggerFor]="beforeMenu" src="{{auth.user.photoURL}}" alt="" width="60px" class="ml-3">
+            <span *ngIf="auth.user" class="gris">{{auth.user.displayName}}</span>
             <mat-menu #beforeMenu="matMenu" xPosition="before">
               <!--Ver perfil-->
               <button mat-menu-item routerLink="perfil">

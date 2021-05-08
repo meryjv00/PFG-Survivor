@@ -134,41 +134,51 @@ export class ChatService {
           else {
             db.collection("users").doc(change.doc.id).get()
               .then((doc) => {
-                const friend = {
-                  'uid': change.doc.id,
-                  'status': doc.data().status,
-                  'displayName': doc.data().displayName,
-                  'photoURL': doc.data().photoURL,
-                  'email': doc.data().email,
-                  'coins': doc.data().coins,
-                }
-                this.friends.push(friend);
+                // Obtener desde cuando son amigos
+                db.collection('users').doc(this.userAuth.uid).collection('friends').doc(change.doc.id).get()
+                  .then(docuAmig => {
+                    var date = '';
+                    date += docuAmig.data().friendshipDate.toDate();
+                    
+                    const friend = {
+                      'uid': change.doc.id,
+                      'status': doc.data().status,
+                      'displayName': doc.data().displayName,
+                      'photoURL': doc.data().photoURL,
+                      'email': doc.data().email,
+                      'coins': doc.data().coins,
+                      'friendshipDate': date.substring(4,15)
+                    }
+                    this.friends.push(friend);
 
-                // Pone en escucha los datos de ese usuario
-                var unsubscribe2 = db.collection("users").doc(change.doc.id)
-                  .onSnapshot({
-                    includeMetadataChanges: true
-                  }, (doc) => {
-                    // Buscar usuario y actualizar sus datos
-                    this.friends.forEach(friend => {
-                      if (friend.uid == change.doc.id) {
-                        friend.status = doc.data().status;
+                    // Pone en escucha los datos de ese usuario
+                    var unsubscribe2 = db.collection("users").doc(change.doc.id)
+                      .onSnapshot({
+                        includeMetadataChanges: true
+                      }, (doc) => {
+                        // Buscar usuario y actualizar sus datos
+                        this.friends.forEach(friend => {
+                          if (friend.uid == change.doc.id) {
+                            friend.status = doc.data().status;
+                          }
+                        });
+                      });
+                    this.listeningFriends.push(unsubscribe2);
+
+                    // Ultima pos del array -> se redirige a poner en escucha todos los mensajes de los amigos obtenidos
+                    if (cont == index + 1) {
+                      this.stopListeningFriendMessages(false, 2); //login
+                      this.getSuggestedFriends();
+                    } else {
+                      // Se ha añadido un nuevo mensaje
+                      if (cont != contAmigos) {
+                        this.stopListeningFriendMessages(false, 2);
+                        this.getSuggestedFriends();
                       }
-                    });
-                  });
-                this.listeningFriends.push(unsubscribe2);
+                    }
 
-                // Ultima pos del array -> se redirige a poner en escucha todos los mensajes de los amigos obtenidos
-                if (cont == index + 1) {
-                  this.stopListeningFriendMessages(false, 2); //login
-                  this.getSuggestedFriends();
-                } else {
-                  // Se ha añadido un nuevo mensaje
-                  if (cont != contAmigos) {
-                    this.stopListeningFriendMessages(false, 2);
-                    this.getSuggestedFriends();
-                  }
-                }
+                  });
+
               });
           }
         });
@@ -402,7 +412,7 @@ export class ChatService {
 
           //console.log(this.messagesWithoutRead[index].messages);
           // console.log('Lista mensajes amigos', this.messagesFriends);
-          setTimeout(() => {
+           setTimeout(() => {
             // console.log('HOLA', this.messagesWithoutRead[index].messages);
             if (this.messagesWithoutRead[index].messages > 0) {
               var enc = false;
@@ -426,7 +436,7 @@ export class ChatService {
                 }
               });
             }
-          }, 500);
+          }, 500); 
 
           // console.log(this.msgsWithoutRead2);
 

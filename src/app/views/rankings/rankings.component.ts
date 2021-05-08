@@ -20,6 +20,7 @@ export class RankingsComponent implements OnInit {
     this.getUser();
     if (this.auth.loginRecharge && this.userAuth != null) {
       this.auth.setRechargeFalse();
+      this.auth.listenDataLogedUser();
       this.chat.getFriends(false);
       this.chat.closeChat();
       this.friendService.listenFriendsRequests();

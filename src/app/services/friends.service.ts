@@ -136,8 +136,12 @@ export class FriendsService {
       }
     });
 
-    db.collection('users').doc(this.userAuth.uid).collection('friends').doc(uid).set({});
-    db.collection('users').doc(uid).collection('friends').doc(this.userAuth.uid).set({});
+    db.collection('users').doc(this.userAuth.uid).collection('friends').doc(uid).set({
+      'friendshipDate': firebase.firestore.Timestamp.now(),
+    });
+    db.collection('users').doc(uid).collection('friends').doc(this.userAuth.uid).set({
+      'friendshipDate': firebase.firestore.Timestamp.now(),
+    });
     this.deleteFriendRequest(uid);
   }
 

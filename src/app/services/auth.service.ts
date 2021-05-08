@@ -3,7 +3,6 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import firebase from 'firebase/app';
 import { Router } from '@angular/router';
-import { AngularFireDatabase } from '@angular/fire/database';
 import { environment } from 'src/environments/environment';
 import { ChatService } from './chat.service';
 import { FriendsService } from './friends.service';
@@ -26,10 +25,12 @@ export class AuthService {
   authUser = null;
   user = null;
   loginRecharge: boolean = true;
+  userAuth: any | null;
+  providerId: string = null;
+  listeningUser = [];
 
   constructor(public auth: AngularFireAuth,
     private router: Router,
-    private db: AngularFireDatabase,
     private chat: ChatService,
     private friends: FriendsService) { }
 
@@ -40,6 +41,8 @@ export class AuthService {
   userState = this.auth.authState.pipe(map(authState => {
     if (authState) {
       this.authUser = authState;
+      this.providerId = this.authUser.providerData[0].providerId;
+      
       return authState;
     } else {
       return null;
@@ -60,9 +63,9 @@ export class AuthService {
    * @param user 
    */
   prepareLogin(user: any) {
+    localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user));
     this.updateUserData(user);
     this.loginRecharge = false;
-    localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user));
     this.friends.listenFriendsRequests();
     this.friends.listenSentFriendsRequests();
     this.chat.getFriends(true);
@@ -144,9 +147,11 @@ export class AuthService {
    * Cerrar sesión cuenta
    */
   logout() {
+    this.user = null;
     this.auth.signOut();
     this.setRechargeFalse();
     this.chat.setStatusOnOff(2);
+    this.stopListeningUser();
     this.chat.stopListeningFriendMessages(false, 1);
     this.chat.stopListeningFriends();
     this.friends.stopListeningFriendsRequests();
@@ -178,23 +183,60 @@ export class AuthService {
             photoURL: user.photoURL,
             chatOpen: "",
             status: 'online',
-            coins: 0,
+            coins: 10,
           }).then(() => {
             // Poner en escucha al usuario
+            this.listenDataLogedUser();
           });
 
-        } 
+        }
         // Si está registrado
         else {
           db.collection("users").doc(user.uid).update({
             status: 'online'
           }).then(() => {
             // Poner en escucha al usuario
+            this.listenDataLogedUser();
           });
         }
 
       });
 
+  }
+
+  /**
+   * Pone en escucha los datos del usuario, se llama al iniciar sesión y recargar página
+   */
+  listenDataLogedUser() {
+    var db = firebase.firestore();
+    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+    this.userAuth = JSON.parse(this.userAuth);
+    
+    var unsubscribe = db.collection("users").doc(this.userAuth.uid)
+      .onSnapshot({
+        includeMetadataChanges: true
+      }, (doc) => {
+        this.user = {
+          'uid': doc.id,
+          'status': doc.data().status,
+          'displayName': doc.data().displayName,
+          'photoURL': doc.data().photoURL,
+          'email': doc.data().email,
+          'coins': doc.data().coins,
+        }
+      });
+
+      this.listeningUser.push(unsubscribe);
+  }
+
+  /**
+   * Se para la escucha de los metadatos del usuario logeado
+   */
+  stopListeningUser() {
+    this.listeningUser.forEach(unsubscribe => {
+      // console.log('Desactivando USER...');
+      unsubscribe();
+    });
   }
 
   /**

@@ -15,12 +15,13 @@ export class HomeComponent implements OnInit {
   constructor(public auth: AuthService,
     public friendService: FriendsService,
     public chat: ChatService) {
-      
+
     this.getUser();
     console.log('CONSTRUCTOR HOME');
-     if (this.auth.loginRecharge && this.userAuth != null) {
+    if (this.auth.loginRecharge && this.userAuth != null) {
       this.chat.closeChat();
-    } 
+      this.auth.listenDataLogedUser();
+    }
 
   }
 
@@ -32,5 +33,5 @@ export class HomeComponent implements OnInit {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
   }
-  
+
 }

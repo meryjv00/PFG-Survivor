@@ -1,6 +1,6 @@
 <div class="container gris">
     <h1>Tienda</h1>
-
+    <h2 *ngIf="auth.user">{{auth.user.coins}} monedas</h2>
     <div class="row">
         <div class="col-4" *ngFor="let item of shop.items">
             <img src="{{item.img}}" alt="" width="300px" height="180px">
@@ -10,6 +10,10 @@
                 </span>
                 <p>{{item.description}}</p>
             </div>
+            <ng-container *ngIf="auth.user">
+                <button *ngIf="item.owned" class="btn btn-primary mb-4">Ya tienes esta arma >>> {{item.obtainedDate}}</button>
+                <button *ngIf="!item.owned" (click)="buyItem(item)" class="btn btn-primary mb-4">Comprar</button>
+            </ng-container>
         </div>
     </div>
 </div>

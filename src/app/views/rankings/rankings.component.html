@@ -1,1 +1,41 @@
-<h1 class="gris">Rankings</h1>
+<div class="container-fluid gris">
+    <!--Ranking monedas-->
+    <h1>Ranking monedas</h1>
+    <ul>
+        <li *ngFor="let user of rankings.rankingCoins; index as i">
+            {{i + 1}} {{user.displayName}} - {{user.coins}} monedas
+        </li>
+    </ul>
+
+    <!--Ranking Nivel 1-->
+    <h1>Ranking Nivel 1</h1>
+    <div class="row">
+        <div class="col">
+            <h2>Ranking enemigos</h2>
+            <ul>
+                <li *ngFor="let user of rankings.lvl1RankingEnemies; index as i">
+                    {{i + 1}} {{user.uid}} - {{user.enemiesKilled}} enemigos
+                </li>
+            </ul>
+        </div>
+        <div class="col">
+            <h2>Ranking puntuacion</h2>
+            <ul>
+                <li *ngFor="let user of rankings.lvl1RankingPunctuation; index as i">
+                    {{i + 1}} {{user.uid}} - {{user.punctuation}} puntos
+                </li>
+            </ul>
+        </div>
+        <div class="col">
+            <h2>Ranking tiempo</h2>
+            <ul>
+                <li *ngFor="let user of rankings.lvl1RankingTime; index as i">
+                    {{i + 1}} {{user.uid}} - {{user.time}} tiempo aguantado
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+</div>
+

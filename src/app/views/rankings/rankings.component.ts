@@ -3,6 +3,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
 import { PerfilService } from 'src/app/services/perfil.service';
+import { RankingsService } from 'src/app/services/rankings.service';
 import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-rankings',
@@ -15,9 +16,14 @@ export class RankingsComponent implements OnInit {
   constructor(public auth: AuthService,
     public perfilService: PerfilService,
     public friendService: FriendsService,
-    public chat: ChatService) {
+    public chat: ChatService,
+    public rankings: RankingsService) {
 
     this.getUser();
+
+    this.rankings.getRankingCoins();
+    this.rankings.getRankingsLevels();
+
     if (this.auth.loginRecharge && this.userAuth != null) {
       this.auth.setRechargeFalse();
       this.auth.listenDataLogedUser();

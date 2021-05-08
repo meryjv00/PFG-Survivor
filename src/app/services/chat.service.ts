@@ -139,7 +139,7 @@ export class ChatService {
                   .then(docuAmig => {
                     var date = '';
                     date += docuAmig.data().friendshipDate.toDate();
-                    
+
                     const friend = {
                       'uid': change.doc.id,
                       'status': doc.data().status,
@@ -147,7 +147,7 @@ export class ChatService {
                       'photoURL': doc.data().photoURL,
                       'email': doc.data().email,
                       'coins': doc.data().coins,
-                      'friendshipDate': date.substring(4,15)
+                      'friendshipDate': date.substring(4, 15)
                     }
                     this.friends.push(friend);
 
@@ -282,8 +282,7 @@ export class ChatService {
         // console.log('Recorriendo amigos para recibir sus mensajes...');
         msgs = [];
 
-        var query = firebase.firestore()
-          .collection('users').doc(this.userAuth.uid).collection('friends')
+        var query = db.collection('users').doc(this.userAuth.uid).collection('friends')
           .doc(friend.uid).collection('messages')
           .orderBy('timestamp', 'asc')
 
@@ -412,7 +411,7 @@ export class ChatService {
 
           //console.log(this.messagesWithoutRead[index].messages);
           // console.log('Lista mensajes amigos', this.messagesFriends);
-           setTimeout(() => {
+          setTimeout(() => {
             // console.log('HOLA', this.messagesWithoutRead[index].messages);
             if (this.messagesWithoutRead[index].messages > 0) {
               var enc = false;
@@ -436,7 +435,7 @@ export class ChatService {
                 }
               });
             }
-          }, 500); 
+          }, 500);
 
           // console.log(this.msgsWithoutRead2);
 

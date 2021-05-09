@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
+import { RankingsService } from 'src/app/services/rankings.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -24,7 +25,8 @@ export class AmigosComponent implements OnInit {
   constructor(public chat: ChatService,
     private formBuilder: FormBuilder,
     public auth: AuthService,
-    public friends: FriendsService) {
+    public friends: FriendsService,
+    public rankings: RankingsService) {
 
     this.chatFriends = this.formBuilder.group({
       text: ['', [Validators.required]],
@@ -32,6 +34,8 @@ export class AmigosComponent implements OnInit {
 
     // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
     if (this.auth.loginRecharge) {
+      this.rankings.getPositionRankings();
+      this.rankings.getPositionRankingCoins();
       this.auth.setRechargeFalse();
       this.auth.listenDataLogedUser();
       this.chat.getFriends(false);

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
+import { RankingsService } from 'src/app/services/rankings.service';
 import { ShopService } from 'src/app/services/shop.service';
 import { environment } from 'src/environments/environment';
 
@@ -16,20 +17,21 @@ export class TiendaComponent implements OnInit {
   constructor(public auth: AuthService,
     public friendService: FriendsService,
     public chat: ChatService,
-    public shop: ShopService) {
+    public shop: ShopService,
+    public rankings: RankingsService) {
 
     this.getUser();
-    
+    this.shop.getItems();
+
     if (this.auth.loginRecharge && this.userAuth != null) {
-      this.shop.getItems();
+      this.rankings.getPositionRankings();
+      this.rankings.getPositionRankingCoins();
       this.auth.setRechargeFalse();
       this.auth.listenDataLogedUser();
       this.chat.getFriends(false);
       this.chat.closeChat();
       this.friendService.listenFriendsRequests();
       this.friendService.listenSentFriendsRequests();
-    }else {
-      this.shop.getItems();
     }
   }
 
@@ -39,7 +41,6 @@ export class TiendaComponent implements OnInit {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
   }
-
 
   /**
    * Comprar item

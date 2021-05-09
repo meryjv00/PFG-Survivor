@@ -5,6 +5,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
 import { PerfilService } from 'src/app/services/perfil.service';
+import { RankingsService } from 'src/app/services/rankings.service';
 
 @Component({
   selector: 'app-perfil',
@@ -27,7 +28,8 @@ export class PerfilComponent implements OnInit {
     public toastr: ToastrService,
     public chat: ChatService,
     public friendService: FriendsService,
-    private formBuilder: FormBuilder) {
+    private formBuilder: FormBuilder,
+    private rankings: RankingsService) {
 
     this.name = this.formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(3)]]
@@ -44,7 +46,8 @@ export class PerfilComponent implements OnInit {
 
     // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
     if (this.auth.loginRecharge) {
-
+      this.rankings.getPositionRankings();
+      this.rankings.getPositionRankingCoins();
       this.auth.setRechargeFalse();
       this.auth.listenDataLogedUser();
       this.chat.getFriends(false);

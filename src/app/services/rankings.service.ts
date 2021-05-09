@@ -1,22 +1,43 @@
 import { Injectable } from '@angular/core';
 import firebase from 'firebase/app';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RankingsService {
+  getRankings: boolean = true;
   rankingCoins = [];
-  lvl1RankingEnemies = [];
-  lvl1RankingPunctuation = [];
-  lvl1RankingTime = [];
   lvlRankings = [];
+  logedUserRankings = [];
+  unsubscribeListeners = [];
+  userAuth: any | null;
+  posRankingCoins = 0;
+
   constructor() { }
+
+  /**
+   * Obtiene el usuario almacenado en localStorage, el cual se almacena al iniciar sesión
+   */
+  getUser() {
+    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+    this.userAuth = JSON.parse(this.userAuth);
+  }
+
+  setGetRankingsFalse() {
+    this.getRankings = false;
+  }
+  setGetRankingsTrue() {
+    this.getRankings = true;
+  }
 
   /**
    * Obtener rankings de monedas
    */
   getRankingCoins() {
     this.rankingCoins = [];
+    this.getUser();
+
     var query = firebase.firestore().collection('users')
       .orderBy('coins', 'desc')
       .limit(15)
@@ -43,15 +64,254 @@ export class RankingsService {
 
         }
         // Cargar ususario
-        else {
+        else if (change.type == 'added') {
           const user = {
             'uid': change.doc.id,
             'displayName': change.doc.data().displayName,
             'email': change.doc.data().email,
             'photoURL': change.doc.data().photoURL,
-            'coins': change.doc.data().coins
+            'coins': change.doc.data().coins,
+            'me': false
           }
           this.rankingCoins.push(user);
+          if (this.userAuth != undefined) {
+            if (change.doc.id == this.userAuth.uid) {
+              user.me = true;
+            }
+          }
+
+        }
+
+      });
+    });
+    this.unsubscribeListeners.push(unsubscribe);
+  }
+
+  /**
+   * Obtener rankings de todos los niveles
+   */
+  getRankingsLevels(userLoged: any) {
+    this.lvlRankings = [];
+
+    firebase.firestore().collection('rankings').orderBy('lvl', 'asc').get()
+      .then((doc) => {
+        doc.forEach(doc => {
+          //console.log(doc.id, doc.data().lvl);
+          this.lvlRankings.push({
+            'Nivel': doc.data().lvl,
+            'RankingPuntuacion': [],
+            'RankingEnemigos': [],
+            'RankingTiempo': []
+          });
+
+          // QUERY
+          var query = firebase.firestore().collection('rankings').doc(doc.id).collection('users')
+            .limit(15)
+
+          // PUNTUACION
+          var unsubscribeP = query.orderBy('punctuation', 'desc')
+            .onSnapshot(snapshot => {
+              snapshot.docChanges().forEach(change => {
+
+                // Datos modificados del usuario
+                if (change.type === 'modified') {
+                  //console.log('Modificado puntuacion');
+
+                  // Update puntuacion
+                  this.lvlRankings[doc.data().lvl - 1].RankingPuntuacion.forEach(user => {
+                    if (user.uid == change.doc.id) {
+                      user.punctuation = change.doc.data().punctuation;
+                    }
+                  });
+                }
+                // Cargar ususario puntuacion
+                else if (change.type == 'added') {
+                  const user = {
+                    'uid': change.doc.id,
+                    'enemiesKilled': change.doc.data().enemiesKilled,
+                    'punctuation': change.doc.data().punctuation,
+                    'time': change.doc.data().time,
+                    'photoURL': '',
+                    'displayName': '',
+                    'coins': '',
+                    'email': '',
+                    'me': false
+                  }
+                  this.lvlRankings[doc.data().lvl - 1].RankingPuntuacion.push(user);
+
+                  // Buscar información del usuario para buscar su nombre, foto de perfil...
+                  firebase.firestore().collection("users").doc(change.doc.id.trim()).get()
+                    .then((docu) => {
+                      user.photoURL = docu.data().photoURL;
+                      user.displayName = docu.data().displayName;
+                      user.coins = docu.data().coins;
+                      user.email = docu.data().email;
+                      if (userLoged != undefined) {
+                        if (docu.id == userLoged.uid) {
+                          user.me = true;
+                        }
+                      }
+                    });
+                }
+                // Re-Ordenar ranking puntuacion
+                this.lvlRankings[doc.data().lvl - 1].RankingPuntuacion.sort(function (o1, o2) {
+                  if (o1.punctuation < o2.punctuation) {
+                    return 1;
+                  } else if (o1.punctuation > o2.punctuation) {
+                    return -1;
+                  }
+                  return 0;
+                });
+
+              });
+            });
+
+          // ENEMIGOS
+          var unsubscribeE = query.orderBy('enemiesKilled', 'desc')
+            .onSnapshot(snapshot => {
+              snapshot.docChanges().forEach(change => {
+
+                if (change.type === 'modified') {
+                  //console.log('Modificado enemigos');
+                  // Update Enemigos matados
+                  this.lvlRankings[doc.data().lvl - 1].RankingEnemigos.forEach(user => {
+                    if (user.uid == change.doc.id) {
+                      user.enemiesKilled = change.doc.data().enemiesKilled;
+                    }
+                  });
+                }
+                // Cargar ususario enemigos
+                else if (change.type == 'added') {
+                  const user = {
+                    'uid': change.doc.id,
+                    'enemiesKilled': change.doc.data().enemiesKilled,
+                    'punctuation': change.doc.data().punctuation,
+                    'time': change.doc.data().time,
+                    'photoURL': '',
+                    'displayName': '',
+                    'coins': '',
+                    'email': '',
+                    'me': false
+                  }
+                  this.lvlRankings[doc.data().lvl - 1].RankingEnemigos.push(user);
+
+                  // Buscar información del usuario para buscar su nombre, foto de perfil...
+                  firebase.firestore().collection("users").doc(change.doc.id.trim()).get()
+                    .then((docu) => {
+                      user.photoURL = docu.data().photoURL;
+                      user.displayName = docu.data().displayName;
+                      user.coins = docu.data().coins;
+                      user.email = docu.data().email;
+                      if (userLoged != undefined) {
+                        if (docu.id == userLoged.uid) {
+                          user.me = true;
+                        }
+                      }
+                    });
+                }
+                // Re-Ordenar ranking enemigos  
+                this.lvlRankings[doc.data().lvl - 1].RankingEnemigos.sort(function (o1, o2) {
+                  if (o1.enemiesKilled < o2.enemiesKilled) {
+                    return 1;
+                  } else if (o1.enemiesKilled > o2.enemiesKilled) {
+                    return -1;
+                  }
+                  return 0;
+                });
+
+              });
+            });
+
+          // TIEMPO
+          var unsubscribeT = query.orderBy('time', 'desc')
+            .onSnapshot(snapshot => {
+              snapshot.docChanges().forEach(change => {
+
+                if (change.type === 'modified') {
+                  //console.log('Modificado tiempo');
+                  // Update Tiempo aguantado
+                  this.lvlRankings[doc.data().lvl - 1].RankingTiempo.forEach(user => {
+                    if (user.uid == change.doc.id) {
+                      user.time = change.doc.data().time;
+                    }
+                  });
+                }
+                // Cargar ususario tiempo
+                else if (change.type == 'added') {
+                  const user = {
+                    'uid': change.doc.id,
+                    'enemiesKilled': change.doc.data().enemiesKilled,
+                    'punctuation': change.doc.data().punctuation,
+                    'time': change.doc.data().time,
+                    'photoURL': '',
+                    'displayName': '',
+                    'coins': '',
+                    'email': '',
+                    'me': false
+                  }
+                  this.lvlRankings[doc.data().lvl - 1].RankingTiempo.push(user);
+
+                  // Buscar información del usuario para buscar su nombre, foto de perfil...
+                  firebase.firestore().collection("users").doc(change.doc.id.trim()).get()
+                    .then((docu) => {
+                      user.photoURL = docu.data().photoURL;
+                      user.displayName = docu.data().displayName;
+                      user.coins = docu.data().coins;
+                      user.email = docu.data().email;
+                      if (userLoged != undefined) {
+                        if (docu.id == userLoged.uid) {
+                          user.me = true;
+                        }
+                      }
+                    });
+                }
+                // Re-Ordenar ranking tiempo
+                this.lvlRankings[doc.data().lvl - 1].RankingTiempo.sort(function (o1, o2) {
+                  if (o1.time < o2.time) {
+                    return 1;
+                  } else if (o1.time > o2.time) {
+                    return -1;
+                  }
+                  return 0;
+                });
+
+              });
+            });
+
+          // Añadir para unsubscribe al hacer deslogin
+          console.log(this.lvlRankings);
+          this.unsubscribeListeners.push(unsubscribeE);
+          this.unsubscribeListeners.push(unsubscribeP);
+          this.unsubscribeListeners.push(unsubscribeT);
+
+        });
+
+      });
+
+  }
+
+  /**
+   * Obtener posicion del usuario logeado en ranking monedas
+   */
+  getPositionRankingCoins() {
+    this.getUser();
+    this.posRankingCoins = 0;
+    var query = firebase.firestore().collection('users').orderBy('coins', 'desc')
+
+    query.onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        // Obtener pos del usuario logeado
+        if (change.doc.id === this.userAuth.uid) {
+          var cont = 1;
+          query.get()
+            .then(docUser => {
+              docUser.forEach(docU => {
+                if (docU.id == change.doc.id) {
+                  this.posRankingCoins = cont;
+                }
+                cont++;
+              });
+            });
         }
 
       });
@@ -59,96 +319,106 @@ export class RankingsService {
   }
 
   /**
-   * Obtener rankings nivel 1
+   * Obtener posicion del usuario logeado en todos los rankings
    */
-  getRankingsLevels() {
-    this.lvlRankings = [];
-    var usersP = [];
-    var usersT = [];
-    var usersE = [];
-    var lvl = 1;
-    // Puntuacion
-    var query = firebase.firestore().collection('rankings').doc('iE4mrKP3gPm180WkLPX9').collection('users')
-      .limit(15)
+  getPositionRankings() {
+    console.log('MIS RANKINGS...');
+    this.logedUserRankings = [];
+    this.getUser();
 
-    var unsubscribe = query.onSnapshot(snapshot => {
-      snapshot.docChanges().forEach(change => {
-
-        if (change.type === 'modified') {
-          // Update puntuacion
-          this.lvl1RankingPunctuation.forEach(user => {
-            if (user.uid == change.doc.id) {
-              user.punctuation = change.doc.data().punctuation;
-            }
+    firebase.firestore().collection('rankings').orderBy('lvl', 'asc').get()
+      .then((doc) => {
+        doc.forEach(doc => {
+          console.log('RANKING ID: ', doc.id);
+          this.logedUserRankings.push({
+            'Nivel': doc.data().lvl,
+            'RankingPuntuacion': [],
+            'RankingEnemigos': [],
+            'RankingTiempo': []
           });
-          // Update Enemigos matados
-          this.lvl1RankingEnemies.forEach(user => {
-            if (user.uid == change.doc.id) {
-              user.enemiesKilled = change.doc.data().enemiesKilled;
-            }
-          });
-          // Update Tiempo aguantado
-          this.lvl1RankingTime.forEach(user => {
-            if (user.uid == change.doc.id) {
-              user.time = change.doc.data().time;
-            }
-          });
-        }
-        // Cargar ususario
-        else {
-          // Buscar información del usuario para buscar su nombre, foto de perfil...
-          const user = {
-            'uid': change.doc.id,
-            'enemiesKilled': change.doc.data().enemiesKilled,
-            'punctuation': change.doc.data().punctuation,
-            'time': change.doc.data().time
-          }
-          usersE.push(user);
-          usersP.push(user);
-          usersT.push(user);
-        }
-      });
 
-      this.lvlRankings.push({
-        'Nivel': lvl,
-        'RankingPuntuacion': usersP,
-        'RankingEnemigos': usersE,
-        'RankingTiempo': usersT
-      });
-      console.log(this.lvlRankings);
+          var query = firebase.firestore().collection('rankings').doc(doc.id).collection('users')
 
-      // Ordenar ranking enemigos  
-      this.lvlRankings[lvl - 1].RankingEnemigos.sort(function (o1, o2) {
-        if (o1.enemiesKilled < o2.enemiesKilled) {
-          return 1;
-        } else if (o1.enemiesKilled > o2.enemiesKilled) {
-          return -1;
-        }
-        return 0;
-      });
-      // Ordenar ranking puntuacion
-      this.lvlRankings[lvl - 1].RankingPuntuacion.sort(function (o1, o2) {
-        if (o1.punctuation < o2.punctuation) {
-          return 1;
-        } else if (o1.punctuation > o2.punctuation) {
-          return -1;
-        }
-        return 0;
-      });
-      // Ordenar ranking tiempo
-      this.lvlRankings[lvl - 1].RankingTiempo.sort(function (o1, o2) {
-        if (o1.time < o2.time) {
-          return 1;
-        } else if (o1.time > o2.time) {
-          return -1;
-        }
-        return 0;
-      });
+          // PUNTUACION
+          query.orderBy('punctuation', 'desc')
+            .onSnapshot(snapshot => {
+              snapshot.docChanges().forEach(change => {
+                // Obtener pos del usuario logeado
+                if (change.doc.id == this.userAuth.uid) {
+                  var cont = 1;
+                  query.orderBy('punctuation', 'desc').get()
+                    .then(docUser => {
+                      docUser.forEach(docU => {
+                        if (docU.id == change.doc.id) {
+                          this.logedUserRankings[doc.data().lvl - 1].RankingPuntuacion[0] = cont;
+                        }
+                        cont++;
+                      });
+                    });
+                  this.logedUserRankings[doc.data().lvl - 1].RankingPuntuacion[1] = change.doc.data().punctuation;
+                }
 
-      lvl++;
-    });
+              });
+            });
 
+          // ENEMIGOS
+          query.orderBy('enemiesKilled', 'desc')
+            .onSnapshot(snapshot => {
+              snapshot.docChanges().forEach(change => {
+                // Obtener pos del usuario logeado
+                if (change.doc.id == this.userAuth.uid) {
+                  var cont = 1;
+                  query.orderBy('enemiesKilled', 'desc').get()
+                    .then(docUser => {
+                      docUser.forEach(docU => {
+                        if (docU.id == change.doc.id) {
+                          this.logedUserRankings[doc.data().lvl - 1].RankingEnemigos[0] = cont;
+                        }
+                        cont++;
+                      });
+                    });
+                  this.logedUserRankings[doc.data().lvl - 1].RankingEnemigos[1] = change.doc.data().enemiesKilled;
+                }
+
+              });
+            });
+
+          // TIEMPO
+          query.orderBy('time', 'desc')
+            .onSnapshot(snapshot => {
+              snapshot.docChanges().forEach(change => {
+                // Obtener pos del usuario logeado
+                if (change.doc.id == this.userAuth.uid) {
+                  var cont = 1;
+                  query.orderBy('time', 'desc').get()
+                    .then(docUser => {
+                      docUser.forEach(docU => {
+                        if (docU.id == change.doc.id) {
+                          this.logedUserRankings[doc.data().lvl - 1].RankingTiempo[0] = cont;
+                        }
+                        cont++;
+                      });
+                    });
+                  this.logedUserRankings[doc.data().lvl - 1].RankingTiempo[1] = change.doc.data().time;
+                }
+
+              });
+            });
+
+          console.log(this.logedUserRankings);
+
+        });
+      });
   }
 
+  /**
+   * Dejar de escuchar los listeners para que no haya duplicidad de escucha
+   */
+  stopListeningRankingsItems() {
+    this.unsubscribeListeners.forEach(unsubscribe => {
+      console.log('Desactivando...');
+      unsubscribe();
+    });
+  }
 
 }

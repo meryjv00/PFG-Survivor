@@ -21,10 +21,15 @@ export class RankingsComponent implements OnInit {
 
     this.getUser();
 
-    this.rankings.getRankingCoins();
-    this.rankings.getRankingsLevels();
-
+    if(this.rankings.getRankings == true) {
+      this.rankings.setGetRankingsFalse();
+      this.rankings.getRankingCoins();
+      this.rankings.getRankingsLevels(this.userAuth);
+    }
+   
     if (this.auth.loginRecharge && this.userAuth != null) {
+      this.rankings.getPositionRankings(); 
+      this.rankings.getPositionRankingCoins();
       this.auth.setRechargeFalse();
       this.auth.listenDataLogedUser();
       this.chat.getFriends(false);
@@ -32,11 +37,9 @@ export class RankingsComponent implements OnInit {
       this.friendService.listenFriendsRequests();
       this.friendService.listenSentFriendsRequests();
     }
-
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   getUser() {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);

@@ -74,6 +74,7 @@ export class AuthService {
     this.rankings.stopListeningRankingsItems();
     this.rankings.setGetRankingsTrue();
     this.rankings.getPositionRankings();
+    this.rankings.getPositionRankingCoins();
     this.router.navigate(['home']);
   }
 

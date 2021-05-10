@@ -24,7 +24,7 @@ export class RankingsComponent implements OnInit {
     if(this.rankings.getRankings == true) {
       this.rankings.setGetRankingsFalse();
       this.rankings.getRankingCoins();
-      this.rankings.getRankingsLevels(this.userAuth);
+      this.rankings.getRankingsLevels();
     }
    
     if (this.auth.loginRecharge && this.userAuth != null) {

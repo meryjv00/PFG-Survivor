@@ -75,7 +75,7 @@
                 <div *ngFor="let userFriend of friendService.friendsRequests"
                   class="d-flex align-items-center px-2 py-2 notific_item">
                   <div>
-                    <img src="{{userFriend.photoURL}}" alt="profile_pic" style="width: 50px" class="border">
+                    <img src="{{userFriend.photoURL}}" alt="profile_pic" width="50px" height="50px" class="rounded-circle">
                   </div>
                   <div class="pl-3">
                     <p class="m-0 mb-1">
@@ -96,7 +96,7 @@
             </mat-menu>
 
             <!--Imágen perfil-->
-            <img *ngIf="auth.user" [matMenuTriggerFor]="beforeMenu" src="{{auth.user.photoURL}}" alt="" width="60px" class="ml-3">
+            <img *ngIf="auth.user" [matMenuTriggerFor]="beforeMenu" src="{{auth.user.photoURL}}" alt="" width="50px" height="50px" class=" rounded-circle ml-3">
             <span *ngIf="auth.user" class="gris">{{auth.user.displayName}}</span>
             <mat-menu #beforeMenu="matMenu" xPosition="before">
               <!--Ver perfil-->

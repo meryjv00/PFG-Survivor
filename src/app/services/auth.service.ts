@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { ChatService } from './chat.service';
 import { FriendsService } from './friends.service';
+import { RankingsService } from './rankings.service';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +33,8 @@ export class AuthService {
   constructor(public auth: AngularFireAuth,
     private router: Router,
     private chat: ChatService,
-    private friends: FriendsService) { }
+    private friends: FriendsService,
+    private rankings: RankingsService) { }
 
 
   /**
@@ -69,6 +71,11 @@ export class AuthService {
     this.friends.listenFriendsRequests();
     this.friends.listenSentFriendsRequests();
     this.chat.getFriends(true);
+    this.rankings.stopListeningRankingsItems();
+    this.rankings.setGetRankingsTrue();
+    this.rankings.getPositionRankings();
+    this.rankings.getPositionRankingCoins();
+    this.router.navigate(['home']);
   }
 
   /**
@@ -150,6 +157,7 @@ export class AuthService {
     this.user = null;
     this.auth.signOut();
     this.setRechargeFalse();
+    this.rankings.stopListeningRankingsItems();
     this.chat.setStatusOnOff(2);
     this.stopListeningUser();
     this.chat.stopListeningFriendMessages(false, 1);
@@ -158,11 +166,12 @@ export class AuthService {
     this.friends.stopListeningSentFriendsRequests();
     this.chat.closeChat();
     this.friends.resetSearchFriends();
+    this.rankings.setGetRankingsTrue();
     this.limpiarFormularios();
 
     setTimeout(() => {
       localStorage.removeItem(environment.SESSION_KEY_USER_AUTH)
-    }, 2000);
+    }, 500);
     this.router.navigate(['home']);
   }
 

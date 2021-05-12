@@ -90,7 +90,7 @@ export class ChatService {
    * Cargar amigos
    * @param login True: viene de login // False: recargar página
    */
-  getFriends(login: boolean) {
+  getFriends() {
     var db = firebase.firestore();
     console.log('Obteniendo amigos...');
     var contAmigos = 0;
@@ -104,8 +104,7 @@ export class ChatService {
       doc.forEach(function () {
         contAmigos++;
       });
-      // No tienes amigos por lo que la var se establece a true para mostrar la pág
-      // No se sigue con la ejecución del método ya que no hay amigos que cargar y por lo tanto mensajes asociados
+      // No tienes amigos por lo que se no hay que cargar mensajes de amigos y se muestra la página 
       if (contAmigos == 0) {
         this.gotAllMessages = true;
         return;
@@ -167,10 +166,10 @@ export class ChatService {
 
                     // Ultima pos del array -> se redirige a poner en escucha todos los mensajes de los amigos obtenidos
                     if (cont == index + 1) {
-                      this.stopListeningFriendMessages(false, 2); //login
+                      this.stopListeningFriendMessages(false, 2); 
                       this.getSuggestedFriends();
                     } else {
-                      // Se ha añadido un nuevo mensaje
+                      // Se ha añadido un nuevo amigo
                       if (cont != contAmigos) {
                         this.stopListeningFriendMessages(false, 2);
                         this.getSuggestedFriends();
@@ -178,7 +177,6 @@ export class ChatService {
                     }
 
                   });
-
               });
           }
         });
@@ -266,8 +264,6 @@ export class ChatService {
    * @param login 
    */
   listenFriendMessages(login: boolean) {
-    console.log('Entro a escuchar mensajes...');
-
     var db = firebase.firestore();
     this.getUser();
     this.messagesFriends = [];
@@ -279,7 +275,6 @@ export class ChatService {
 
     if (this.friends.length > 0) {
       this.friends.forEach((friend, index) => {
-        // console.log('Recorriendo amigos para recibir sus mensajes...');
         msgs = [];
 
         var query = db.collection('users').doc(this.userAuth.uid).collection('friends')
@@ -313,10 +308,9 @@ export class ChatService {
             }
             // Mensaje actualizado (marcado como leído)
             else if (change.type === 'modified') {
-              console.log('Actualizando leido');
               readMessage = false;
               this.messagesFriends.forEach(user => {
-                if (user.uid == this.uidFriendSelected) { //friend.uid alternativa
+                if (user.uid == this.uidFriendSelected) { 
                   user.messages.forEach(message => {
                     if (message.id == change.doc.id) {
                       console.log('Mensaje actualizado: ', message.id);
@@ -412,7 +406,7 @@ export class ChatService {
           //console.log(this.messagesWithoutRead[index].messages);
           // console.log('Lista mensajes amigos', this.messagesFriends);
           setTimeout(() => {
-            // console.log('HOLA', this.messagesWithoutRead[index].messages);
+            // console.log('MENSAJES', this.messagesWithoutRead[index].messages);
             if (this.messagesWithoutRead[index].messages > 0) {
               var enc = false;
               //console.log('Hay mensajes sin leer', this.messagesWithoutRead[index].uid);
@@ -436,8 +430,6 @@ export class ChatService {
               });
             }
           }, 500);
-
-          // console.log(this.msgsWithoutRead2);
 
           // Ha terminado de obtener los mensajes
           if (this.friends.length - 1 == index && this.gotAllMessages == false) {
@@ -470,10 +462,9 @@ export class ChatService {
    * @param friend amigo seleccionado
    */
   chatWith(friend: any) {
-    /*     if (friend.uid == this.uidFriendSelected) {
-          return;
-        } */
-
+/*     if (friend.uid == this.uidFriendSelected) {
+      return;
+    } */
     var db = firebase.firestore();
     this.messagesWithFriend = [];
     this.uidFriendSelected = friend.uid;
@@ -522,56 +513,86 @@ export class ChatService {
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SEND MESSAGE TO FRIEND~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   /**
-   * Enviar mensaje al amigo cuyo chat tienes abierto
-   */
+  * Enviar mensaje al amigo cuyo chat tienes abierto
+  * Este chat se agrega primeramente en mis mensajes y después en los suyos
+  */
   sendMessageFriend() {
-    var db = firebase.firestore();
     var msg = this.msgEnviar;
 
-    // Insertar en mis amigos/mensajes
-    db.collection('users').doc(this.userAuth.uid).collection('friends')
-      .doc(this.uidFriendSelected).collection('messages').add({
-        uid: this.userAuth.uid,
-        displayName: this.userAuth.displayName,
-        text: this.msgEnviar,
-        photoURL: this.userAuth.photoURL,
+    this.sendMessage(this.userAuth, this.uidFriendSelected, this.msgEnviar)
+      .then((ok) => {
+        this.msgEnviar = ''; // Vaciar ngmodel del input chat
+
+        this.sendMessageWithId(ok.id, this.userAuth, this.uidFriendSelected, msg)
+          .then(() => {
+            this.setMessageRead(ok);
+          });
+      });
+  }
+
+  /**
+   * Añadir mensaje
+   * @param emisor datos completos del emisor
+   * @param receptorUID uid receptor
+   * @param message texto del mensaje a enviar
+   * @returns 
+   */
+  sendMessage(emisor: any, receptorUID: string, message: string) {
+    var db = firebase.firestore();
+    return db.collection('users').doc(emisor.uid).collection('friends')
+      .doc(receptorUID).collection('messages').add({
+        uid: emisor.uid,
+        displayName: emisor.displayName,
+        text: message,
+        photoURL: emisor.photoURL,
         isRead: false,
         timestamp: firebase.firestore.Timestamp.now(),
+      });
+  }
 
+  /**
+   * Añadir mensaje con id
+   * @param id id del mensaje a insertar
+   * @param emisor datos completos del emisor
+   * @param receptorUID uid del receptor
+   * @param message texto del mensaje a enviar
+   * @returns 
+   */
+  sendMessageWithId(id: string, emisor: any, receptorUID: string, message: string) {
+    var db = firebase.firestore();
+    return db.collection('users').doc(receptorUID).collection('friends')
+      .doc(emisor.uid).collection('messages').doc(id).set({
+        uid: emisor.uid,
+        displayName: emisor.displayName,
+        text: message,
+        photoURL: emisor.photoURL,
+        isRead: false,
+        timestamp: firebase.firestore.Timestamp.now(),
       })
-      .then(ok => {
-        // console.log('Añadido en mis mensajes');
-        this.msgEnviar = '';
-        // Una vez añadido en mis mensajes, se añadirá en los suyos para poder insertar el mismo uid en ambos sitios, esto nos servirá a la hora de eliminar mensajes en ambos chats
+  }
 
-        //Insertar en sus amigos/mensajes
-        db.collection('users').doc(this.uidFriendSelected).collection('friends')
-          .doc(this.userAuth.uid).collection('messages').doc(ok.id).set({
-            uid: this.userAuth.uid,
-            displayName: this.userAuth.displayName,
-            text: msg,
-            photoURL: this.userAuth.photoURL,
-            isRead: false,
-            timestamp: firebase.firestore.Timestamp.now(),
-          })
-          .then(okk => {
-            // Comprobar si el usuario receptor tiene tu chat abierto, en ese caso actualizar como leído
-            db.collection("users").doc(this.uidFriendSelected).get()
-              .then((doc) => {
-                if (doc.data().chatOpen == this.userAuth.uid) {
-                  // Pongo en leido sus mensajes en su cuenta
-                  db.collection('users').doc(this.uidFriendSelected).collection('friends')
-                    .doc(this.userAuth.uid).collection('messages').doc(ok.id).update({
-                      isRead: true,
-                    })
-                  // Pongo en leído sus mensajes en mi cuenta
-                  db.collection('users').doc(this.userAuth.uid).collection('friends')
-                    .doc(this.uidFriendSelected).collection('messages').doc(ok.id).update({
-                      isRead: true,
-                    })
-                }
-              });
-          });
+  /**
+   * Comprueba si el usuario tiene el chat abierto al enviar mensaje para actualizar
+   * el leido del mensaje
+   * @param docM del mensaje a actualizar
+   */
+  setMessageRead(docM: any) {
+    var db = firebase.firestore();
+
+    db.collection("users").doc(this.uidFriendSelected).get()
+      .then((doc) => {
+        if (doc.data().chatOpen == this.userAuth.uid) {
+          // Pongo en leido sus mensajes en su cuenta
+          db.collection('users').doc(this.uidFriendSelected).collection('friends')
+            .doc(this.userAuth.uid).collection('messages').doc(docM.id).update({
+              isRead: true,
+            });
+          // Pongo en leído sus mensajes en mi cuenta
+          db.collection('users').doc(this.userAuth.uid).collection('friends')
+            .doc(this.uidFriendSelected).collection('messages').doc(docM.id).update({
+              isRead: true,
+            });
+        }
       });
   }
 
@@ -579,68 +600,81 @@ export class ChatService {
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SEND IMAGE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   /**
-   * Enviar imágen en un chat
-   * @param event 
-   */
+  * Enviar imágen en un chat
+  * @param event 
+  */
   sendImg(event) {
-    var db = firebase.firestore();
     var file = event.target.files[0];
     var az = Math.floor(Math.random() * 100000000);
     var filePath1 = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected + '/' + az;
     var filePath2 = 'images/' + this.uidFriendSelected + '/' + this.userAuth.uid + '/' + az;
 
+    // Subir imagen en la carpeta de mi chat
     this.firestorage.ref(filePath1).put(file).then(fileSnapshot => {
-      return fileSnapshot.ref.getDownloadURL()
+      fileSnapshot.ref.getDownloadURL()
         .then(url => {
-          console.log('Foto subida', url);
-
-          db.collection('users').doc(this.userAuth.uid).collection('friends')
-            .doc(this.uidFriendSelected).collection('messages').add({
-              uid: this.userAuth.uid,
-              displayName: this.userAuth.displayName,
-              imageURL: url,
-              photoURL: this.userAuth.photoURL,
-              isRead: false,
-              storageRef: az,
-              timestamp: firebase.firestore.Timestamp.now(),
-            }).then(messageRef => {
-
+          this.sendImgFriend(this.userAuth, this.uidFriendSelected, url, az)
+            .then(messageRef => {
+              // Subir imagen en la carpeta del chat del amigo
               this.firestorage.ref(filePath2).put(file).then(fileSnapshot => {
-                return fileSnapshot.ref.getDownloadURL()
+                fileSnapshot.ref.getDownloadURL()
                   .then(url => {
-                    db.collection('users').doc(this.uidFriendSelected).collection('friends')
-                      .doc(this.userAuth.uid).collection('messages').doc(messageRef.id).set({
-                        uid: this.userAuth.uid,
-                        displayName: this.userAuth.displayName,
-                        imageURL: url,
-                        photoURL: this.userAuth.photoURL,
-                        isRead: false,
-                        storageRef: az,
-                        timestamp: firebase.firestore.Timestamp.now(),
-                      })
-                      .then(okk => {
-                        // Comprobar si el usuario receptor tiene tu chat abierto, en ese caso actualizar como leído
-                        db.collection("users").doc(this.uidFriendSelected).get()
-                          .then((doc) => {
-                            if (doc.data().chatOpen == this.userAuth.uid) {
-                              // Pongo en leido sus mensajes en su cuenta
-                              db.collection('users').doc(this.uidFriendSelected).collection('friends')
-                                .doc(this.userAuth.uid).collection('messages').doc(messageRef.id).update({
-                                  isRead: true,
-                                })
-                              // Pongo en leído sus mensajes en mi cuenta
-                              db.collection('users').doc(this.userAuth.uid).collection('friends')
-                                .doc(this.uidFriendSelected).collection('messages').doc(messageRef.id).update({
-                                  isRead: true,
-                                })
-                            }
-                          });
+                    this.sendImgWithId(messageRef.id, this.userAuth, this.uidFriendSelected, url, az)
+                      .then(() => {
+                        this.setMessageRead(messageRef);
                       });
                   });
               });
             });
         });
     });
+  }
+
+  /**
+   * Enviar imagen a amigo
+   * @param emisor 
+   * @param receptorUID 
+   * @param url 
+   * @param nombreImg 
+   * @returns 
+   */
+  sendImgFriend(emisor: any, receptorUID: any, url: string, nombreImg: any) {
+    var db = firebase.firestore();
+
+    return db.collection('users').doc(emisor.uid).collection('friends')
+      .doc(receptorUID).collection('messages').add({
+        uid: emisor.uid,
+        displayName: emisor.displayName,
+        imageURL: url,
+        photoURL: emisor.photoURL,
+        isRead: false,
+        storageRef: nombreImg,
+        timestamp: firebase.firestore.Timestamp.now(),
+      });
+  }
+
+  /**
+   * Enviar imagen a amigo estableciendole el id al mensaje para que sea el mismo en ambos mensajes
+   * @param id 
+   * @param emisor 
+   * @param receptorUID 
+   * @param url 
+   * @param nombreImg 
+   * @returns 
+   */
+  sendImgWithId(id: string, emisor: any, receptorUID: any, url: string, nombreImg: any) {
+    var db = firebase.firestore();
+
+    return db.collection('users').doc(receptorUID).collection('friends')
+      .doc(emisor.uid).collection('messages').doc(id).set({
+        uid: emisor.uid,
+        displayName: emisor.displayName,
+        imageURL: url,
+        photoURL: emisor.photoURL,
+        isRead: false,
+        storageRef: nombreImg,
+        timestamp: firebase.firestore.Timestamp.now(),
+      });
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -654,29 +688,34 @@ export class ChatService {
   deleteMsgs(message: any, type: number) {
     this.sonidito(2);
 
-    var db = firebase.firestore();
-
-    db.collection('users').doc(this.userAuth.uid).collection('friends')
-      .doc(this.uidFriendSelected).collection('messages').doc(message.id).delete()
-      // Comprobar si tiene foto asociada y en ese caso eliminarla
-      .then(ok => {
-        if (message.storageRef) {
-          var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected + '/' + message.storageRef;
-          this.firestorage.ref(path).delete();
-        }
-      });
+    // Eliminar para mi
+    this.deleteMessages(this.userAuth.uid, this.uidFriendSelected, message);
 
     // Eliminar para todos
     if (type == 2) {
-      db.collection('users').doc(this.uidFriendSelected).collection('friends')
-        .doc(this.userAuth.uid).collection('messages').doc(message.id).delete()
-        .then(ok => {
-          if (message.storageRef) {
-            var path = 'images/' + this.uidFriendSelected + '/' + this.userAuth.uid + '/' + message.storageRef;
-            this.firestorage.ref(path).delete();
-          }
-        });
+      this.deleteMessages(this.uidFriendSelected, this.userAuth.uid, message);
     }
+  }
+
+  /**
+   * Elimina un mensaje del chat, en el caso que tenga foto asociada la
+   * elimina también del storage
+   * @param uidEmisor 
+   * @param uidReceptor 
+   * @param message 
+   */
+  deleteMessages(uidEmisor: string, uidReceptor: string, message: any) {
+    var db = firebase.firestore();
+
+    db.collection('users').doc(uidEmisor).collection('friends')
+      .doc(uidReceptor).collection('messages').doc(message.id).delete()
+      // Comprobar si tiene foto asociada y en ese caso eliminarla
+      .then(() => {
+        if (message.storageRef) {
+          var path = 'images/' + uidEmisor + '/' + uidReceptor + '/' + message.storageRef;
+          this.firestorage.ref(path).delete();
+        }
+      });
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -686,8 +725,6 @@ export class ChatService {
    * Cierra el chat abierto
    */
   closeChat() {
-    //console.log('CERRANDO CHAT');
-
     var db = firebase.firestore();
     this.getUser();
     this.uidFriendSelected = '';
@@ -707,12 +744,10 @@ export class ChatService {
   */
   stopListeningFriendMessages(login: boolean, type: number) {
     //console.log('Parando escucha mensajes amigos...');
-    // Recorrer todos los mensajes en escucha y eliminarlos
     this.listeningSnapsMessages.forEach(unsubscribe => {
       //console.log('Desactivando...MSJ_A');
       unsubscribe();
     });
-
     if (type == 2) {
       this.listenFriendMessages(login);
     }
@@ -723,7 +758,6 @@ export class ChatService {
   * Parar escucha los amigos. Este método se llama al cerrar sesión
   */
   stopListeningFriends() {
-    //console.log('Parando escucha amigos...');
     this.listeningFriends.forEach(unsubscribe => {
       //console.log('Desactivando...A');
       unsubscribe();
@@ -748,7 +782,6 @@ export class ChatService {
         // Preguntar si quiere borrarlas
         // Eliminar imagenes del chat correspondiente
         var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected;
-
         const ref = firebase.storage().ref(path);
         ref.listAll()
           .then(dir => {
@@ -757,7 +790,6 @@ export class ChatService {
               this.firestorage.ref(path).delete();
             });
           });
-
       });
   }
 

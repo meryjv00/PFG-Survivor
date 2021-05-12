@@ -26,7 +26,7 @@ export class ComunidadComponent implements OnInit {
       this.rankings.getPositionRankings();
       this.rankings.getPositionRankingCoins();
       this.auth.listenDataLogedUser();
-      this.chat.getFriends(false);
+      this.chat.getFriends();
       this.chat.closeChat();
       this.friendService.listenFriendsRequests();
       this.friendService.listenSentFriendsRequests();

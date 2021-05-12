@@ -193,59 +193,19 @@ export class FriendsService {
 
     var unsubscribe = query.onSnapshot(snapshot => {
       snapshot.docChanges().forEach(change => {
-        var encontrado = false;
         // Peticion de amistad borrada
         if (change.type === 'removed') {
-          // console.log('Solicitud de amistad borrada');
           this.friendsRequests.forEach((friend, index) => {
             if (friend.uid == change.doc.id) {
               this.friendsRequests.splice(index, 1);
             }
           });
-          // Se obtienen los amigos, se comprueba si la solicitud de borrar es de aceptar o rechazar, comprobando
-          // si el usuario está ahora entre mis amigos
-          db.collection('users').doc(this.userAuth.uid).collection('friends').get().then(doc => {
-            doc.forEach(docc => {
-              if (docc.id == change.doc.id) {
-                encontrado = true;
-                this.newFriendInfo = docc.id;
-              }
-            });
-            if (encontrado) {
-              db.collection('users').doc(this.newFriendInfo).get().then(doc => {
-                this.newFriendInfo = doc.data().displayName;
-                console.log('He aceptado solicitud');
-                this.newFriend.next();
-              });
-            }
-            this.users.forEach(friend => {
-              friend.relation = 'unknown';
-              if (friend.uid == change.doc.id) {
-                if (encontrado) {
-                  friend.relation = 'friends';
-                } else {
-                  friend.relation = 'unknown';
-                }
-              }
-            });
-          });
+          this.friendRequestDeleted(change);
         }
         // Peticion de amistad recogida
         else {
           if (change.doc.id != this.userAuth.uid) {
-            db.collection("users").doc(change.doc.id).get()
-              .then((doc) => {
-                const friend = {
-                  'uid': change.doc.id,
-                  'displayName': doc.data().displayName,
-                  'photoURL': doc.data().photoURL,
-                  'email': doc.data().email,
-                  'status': doc.data().status,
-                  'coins': doc.data().coins,
-                }
-                this.friendsRequests.push(friend);
-                this.chat.sonidito(1);
-              });
+            this.loadFriendRequest(change,1);
           }
         }
       });
@@ -253,6 +213,7 @@ export class FriendsService {
     });
     this.listeningFriendsRequests.push(unsubscribe);
   }
+
 
   /**
    * Pone en escucha las peticiones de amistad que he enviado
@@ -265,56 +226,19 @@ export class FriendsService {
     var query = db.collection('users').doc(this.userAuth.uid).collection('sentFriendsRequests')
     var unsubscribe = query.onSnapshot(snapshot => {
       snapshot.docChanges().forEach(change => {
-        var encontrado = false;
         // Peticion de amistad enviada borrada
         if (change.type === 'removed') {
           this.sentFriendsRequests.forEach((friend, index) => {
             if (friend.uid == change.doc.id) {
               this.sentFriendsRequests.splice(index, 1);
             }
-          });
-          // Se obtienen los amigos, se comprueba si la solicitud de borrar es de aceptar o rechazar, comprobando si el usuario está ahora entre mis amigos
-          db.collection('users').doc(this.userAuth.uid).collection('friends').get().then(doc => {
-            doc.forEach(docc => {
-              if (docc.id == change.doc.id) {
-                encontrado = true;
-                this.newFriendInfo = docc.id;
-              }
-            });
-            if (encontrado) {
-              db.collection('users').doc(this.newFriendInfo).get().then(doc => {
-                this.newFriendInfo = doc.data().displayName;
-                //console.log('Me han aceptado la solicitud');
-                this.newFriend.next();
-              });
-            }
-            this.users.forEach(friend => {
-              friend.relation = 'unknown';
-              if (friend.uid == change.doc.id) {
-                if (encontrado) {
-                  friend.relation = 'friends';
-                } else {
-                  friend.relation = 'unknown';
-                }
-              }
-            });
-          });
+          });          
+          this.friendRequestDeleted(change);
         }
         // Peticion de amistad enviada recogida
         else {
           if (change.doc.id != this.userAuth.uid) {
-            db.collection("users").doc(change.doc.id).get()
-              .then((doc) => {
-                const friend = {
-                  'uid': change.doc.id,
-                  'displayName': doc.data().displayName,
-                  'photoURL': doc.data().photoURL,
-                  'email': doc.data().email,
-                  'status': doc.data().status,
-                  'coins': doc.data().coins,
-                }
-                this.sentFriendsRequests.push(friend);
-              });
+            this.loadFriendRequest(change,2);
           }
         }
       });
@@ -324,10 +248,71 @@ export class FriendsService {
   }
 
   /**
+ * Solicitud de amistad borrada, puede haberla rechazado o denegado.
+ * Comprobaremos si ahora somos amigos
+ * @param change 
+ */
+  friendRequestDeleted(change: any) {
+    var encontrado = false;
+    var db = firebase.firestore();
+    
+    db.collection('users').doc(this.userAuth.uid).collection('friends').get().then(doc => {
+      doc.forEach(docc => {
+        if (docc.id == change.doc.id) {          
+          encontrado = true;
+          this.newFriendInfo = docc.id;
+        }
+      });
+      if (encontrado) {
+        db.collection('users').doc(this.newFriendInfo).get().then(doc => {
+          this.newFriendInfo = doc.data().displayName;
+          console.log('He aceptado solicitud');
+          this.newFriend.next();
+        });
+      }
+      this.users.forEach(friend => {        
+        friend.relation = 'unknown';
+        if (friend.uid == change.doc.id) {
+          if (encontrado) {
+            friend.relation = 'friends';
+          }
+        }
+      });
+    });
+  }
+
+  /**
+   * Añadir petición de amistad 
+   * @param change doc usuario a buscar
+   * @param type 1: peticion de amistad recibida / 2: peticion de amistad enviada
+   */
+  loadFriendRequest(change: any, type: number) {
+    var db = firebase.firestore();
+
+    db.collection("users").doc(change.doc.id).get()
+      .then((doc) => {
+        const friend = {
+          'uid': change.doc.id,
+          'displayName': doc.data().displayName,
+          'photoURL': doc.data().photoURL,
+          'email': doc.data().email,
+          'status': doc.data().status,
+          'coins': doc.data().coins,
+        }
+        if (type == 1) {
+          this.friendsRequests.push(friend);
+          this.chat.sonidito(1);
+        } else if (type == 2) {
+          this.sentFriendsRequests.push(friend);
+        }
+        
+      });
+  }
+
+  /**
    * Para de escuchar las peticiones de amistad que recibes. Este método se llama al cerrar sesión
    */
   stopListeningFriendsRequests() {
-    //console.log('Parando peticiones de amistad...');
     this.listeningFriendsRequests.forEach(unsubscribe => {
       //console.log('Desactivando...PA');
       unsubscribe();
@@ -338,7 +323,6 @@ export class FriendsService {
    * Para de escuchar la peticiones de amistad que envias. Este método se llama al cerrar sesión.
    */
   stopListeningSentFriendsRequests() {
-    //console.log('Parando peticiones de amistad enviadas...');
     this.listeningSentFriendsRequests.forEach(unsubscribe => {
       //console.log('Desactivando...PAE');
       unsubscribe();

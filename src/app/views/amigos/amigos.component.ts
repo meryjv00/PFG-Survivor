@@ -38,7 +38,7 @@ export class AmigosComponent implements OnInit {
       this.rankings.getPositionRankingCoins();
       this.auth.setRechargeFalse();
       this.auth.listenDataLogedUser();
-      this.chat.getFriends(false);
+      this.chat.getFriends();
       this.chat.closeChat();
       this.friends.listenFriendsRequests();
       this.friends.listenSentFriendsRequests();

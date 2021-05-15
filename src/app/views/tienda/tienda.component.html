@@ -11,7 +11,8 @@
                 <p>{{item.description}}</p>
             </div>
             <ng-container *ngIf="auth.user">
-                <button *ngIf="item.owned" class="btn btn-primary mb-4">Ya tienes esta arma >>> {{item.obtainedDate}}</button>
+                <button *ngIf="item.owned" class="btn btn-primary mb-4">Ya tienes esta arma >>>
+                    {{item.obtainedDate}}</button>
                 <button *ngIf="!item.owned" (click)="buyItem(item)" class="btn btn-primary mb-4">Comprar</button>
             </ng-container>
         </div>

@@ -1,11 +1,15 @@
 $gris:#b8b6b4; 
 
-*{
-    box-sizing: border-box;	
-    outline: 0;
-}
-.header-nav {
-    background-color: #171A21;
+.header-nav{
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 999;
+    width: 100%;
+    min-width: 1280px;
+    height: 66px;
+    background-color: rgba(17,17,17,0.75);
+    box-shadow: 0 3px 7px 0 rgb(0 0 0 / 35%);
 }
 
 .badge {
@@ -21,6 +25,9 @@ $gris:#b8b6b4;
 img {
     border-radius: 30px;
 }
+.active {
+    color: rgb(255, 255, 255);
+}
 
 header {
     padding: 10px 0;
@@ -33,41 +40,13 @@ header {
         li {
             display: inline-flex;
             padding: 10px;
-        }
-    }
-
-    .nav {
-        &>ul {
-            font-size: 16px;
-            font-weight: 700;
-            color: #b8b6b4;
-            &>li>a {
-                font-family: 'Mandali', sans-serif;
-                font-size: 20px;
-                cursor: pointer;
-                position: relative;
+            margin-left: 10px;
+            a {
                 text-decoration: none;
-                color: inherit;
-                &:hover:before {
-                    width: 100%;
-                }
-                &:before {
-                    content: "";
-                    position: absolute;
-                    left: 0;
-                    bottom: -3px;
-                    width: 0;
-                    height: 2px;
-                    background: currentColor;
-                    transition: width .2s;
-                }
-                
             }
-        }
+        } 
     }
+
+    
 }
-
-
-
-
 

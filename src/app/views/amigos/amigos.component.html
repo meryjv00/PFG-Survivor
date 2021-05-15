@@ -1,4 +1,4 @@
-<div class="contenedor-principal">
+<div class="container-fluid margin-header">
     <h1 *ngIf="chat.gotAllMessages == false; else gotFriendsMessages">
         <mat-spinner></mat-spinner>
     </h1>
@@ -35,7 +35,7 @@
                 </div>
 
                 <!--Chat-->
-                <div class="col-md-9 col-10 card p-0" *ngIf="chat.chatEnabled == true">
+                <div class="col-md-9 col-10 card p-0 bg-primary" *ngIf="chat.chatEnabled == true">
                     <!--Información amigo chat abierto-->
                     <div class="card-header">
                         <div class="d-flex justify-content-between bd-highlight">

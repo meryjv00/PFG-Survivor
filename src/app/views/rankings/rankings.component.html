@@ -1,13 +1,13 @@
-<div class="container-fluid gris">
+<div class="container gris margin-header">
     <!--Ranking monedas-->
     <h1>Ranking monedas</h1>
     <ul>
-        <li *ngFor="let user of rankings.rankingCoins; index as i" class="mt-2" [ngClass]="{'bg-dark': user.me === true}">
+        <li *ngFor="let user of rankings.rankingCoins; index as i" class="mt-2" [ngClass]="{'bg-primary': user.me === true}">
             {{i + 1}} <img src="{{user.photoURL}}" alt="" width="40px" height="40px" class="rounded-circle">
             {{user.displayName}} - {{user.coins}} monedas
         </li>
     </ul>
-    <div *ngIf="auth.user && rankings.posRankingCoins != 0" class="bg-primary">
+    <div *ngIf="auth.user && rankings.posRankingCoins != 0" class="text-dark bg-secondary">
         Tu posición en el ranking {{rankings.posRankingCoins}} - {{auth.user.coins}} monedas
     </div>
 
@@ -20,19 +20,19 @@
                 <h2>Ranking enemigos</h2>
                 <ul *ngIf="rankings.lvlRankings[i]">
                     <li *ngFor="let user of rankings.lvlRankings[i].RankingEnemigos; index as i"
-                        [ngClass]="{'bg-dark': user.me === true}">
+                        [ngClass]="{'bg-primary': user.me === true}">
                         {{i + 1}} <img *ngIf="user.photoURL" src="{{user.photoURL}}" alt="" width="40px" height="40px"
                             class="rounded-circle">
                         {{user.displayName}} - {{user.enemiesKilled}} enemigos
                     </li>
                 </ul>
                 <ng-container *ngIf="rankings.logedUserRankings.length > 0 && auth.user">
-                    <div class="bg-primary"
+                    <div class="bg-secondary text-dark"
                         *ngIf="rankings.logedUserRankings[i].RankingEnemigos.length == 0; else lvlJugado">
                         No has jugado este nivel todavía
                     </div>
                     <ng-template #lvlJugado>
-                        <div class="bg-primary">
+                        <div class="bg-secondary text-dark">
                             Tu posición en el ranking: {{rankings.logedUserRankings[i].RankingEnemigos[0]}} -
                             {{rankings.logedUserRankings[i].RankingEnemigos[1]}} enemigos
                         </div>
@@ -44,19 +44,19 @@
                 <h2>Ranking puntuacion</h2>
                 <ul *ngIf="rankings.lvlRankings[i]">
                     <li *ngFor="let user of rankings.lvlRankings[i].RankingPuntuacion; index as i"
-                        [ngClass]="{'bg-dark': user.me === true}">
+                        [ngClass]="{'bg-primary': user.me === true}">
                         {{i + 1}} <img *ngIf="user.photoURL" src="{{user.photoURL}}" alt="" width="40px" height="40px"
                             class="rounded-circle">
                         {{user.displayName}} - {{user.punctuation}} puntos
                     </li>
                 </ul>
                 <ng-container *ngIf="rankings.logedUserRankings.length > 0 && auth.user">
-                    <div class="bg-primary"
+                    <div class="bg-secondary text-dark"
                         *ngIf="rankings.logedUserRankings[i].RankingPuntuacion.length == 0; else lvlJugado">
                         No has jugado este nivel todavía
                     </div>
                     <ng-template #lvlJugado>
-                        <div class="bg-primary">
+                        <div class="bg-secondary text-dark">
                             Tu posición en el ranking: {{rankings.logedUserRankings[i].RankingPuntuacion[0]}} -
                             {{rankings.logedUserRankings[i].RankingPuntuacion[1]}} puntuacion
                         </div>
@@ -68,19 +68,19 @@
                 <h2>Ranking tiempo</h2>
                 <ul *ngIf="rankings.lvlRankings[i]">
                     <li *ngFor="let user of rankings.lvlRankings[i].RankingTiempo; index as i"
-                        [ngClass]="{'bg-dark': user.me === true}">
+                        [ngClass]="{'bg-primary': user.me === true}">
                         {{i + 1}} <img *ngIf="user.photoURL" src="{{user.photoURL}}" alt="" width="40px" height="40px"
                             class="rounded-circle">
                         {{user.displayName}} - {{user.time}} tiempo aguantado
                     </li>
                 </ul>
                 <ng-container *ngIf="rankings.logedUserRankings.length > 0 && auth.user">
-                    <div class="bg-primary"
+                    <div class="bg-secondary text-dark"
                         *ngIf="rankings.logedUserRankings[i].RankingTiempo.length == 0; else lvlJugado">
                         No has jugado este nivel todavía
                     </div>
                     <ng-template #lvlJugado>
-                        <div class="bg-primary">
+                        <div class="bg-secondary text-dark">
                             Tu posición en el ranking: {{rankings.logedUserRankings[i].RankingTiempo[0]}} -
                             {{rankings.logedUserRankings[i].RankingTiempo[1]}} tiempo aguantado
                         </div>

@@ -1,20 +1,43 @@
-<div class="container gris">
-    <h1>Tienda</h1>
-    <h2 *ngIf="auth.user">{{auth.user.coins}} monedas</h2>
+<div class="container margin-header">
+    <div class="text-center gris">
+        <h1 class="text-light">Tienda Survivor</h1>
+        <h3 *ngIf="auth.user">Saldo: {{auth.user.coins}} 
+            <img class="mb-2" src="../../../assets/imgs/coin.png" alt="" width="20px">
+        </h3>
+    </div>
+   
     <div class="row">
-        <div class="col-4" *ngFor="let item of shop.items">
-            <img src="{{item.img}}" alt="" width="300px" height="180px">
-            <div>
-                <span>
-                    {{item.name}} - {{item.price}} monedas - {{item.rarity}}
-                </span>
-                <p>{{item.description}}</p>
+        <div class="col-lg-4 col-md-6 col-12" *ngFor="let item of shop.items"> 
+            <!--Objeto tienda-->
+            <div class="card mt-4 w-100 bg-success text-white" style="width: 18rem; ">
+                <!--Imagen arma-->
+                <div class="img-hover-zoom">
+                    <img class="card-img-top" src="{{item.img}}" alt="{{item.name}}">
+                </div>
+                <div class="card-body">
+                    <!--Información arma-->
+                    <h5 class="card-title d-flex">{{item.name}}</h5>
+                    <p class="card-text m-0">
+                        {{item.price}} 
+                        <img class="" src="../../../assets/imgs/coin.png" alt="" width="15px" height="15px">
+                        - {{item.rarity}} 
+                    </p>
+                    <p class="card-text">{{item.description}}</p>
+                    <!--Si el usuario ha iniciado sesión-->
+                    <ng-container *ngIf="auth.user">
+                        <!--Fecha obtencion arma-->
+                        <div *ngIf="item.owned" class="float-left mt-2">
+                            {{item.obtainedDate}}
+                        </div>
+                        <!--Comprar arma o arma ya obtenida-->
+                        <div class="float-right">
+                            <button *ngIf="item.owned" class="btn btn-light">
+                                Ya tienes esta arma</button>
+                            <button *ngIf="!item.owned" (click)="buyItem(item)" class="btn btn-light">Comprar</button>
+                        </div>
+                    </ng-container>
+                </div>
             </div>
-            <ng-container *ngIf="auth.user">
-                <button *ngIf="item.owned" class="btn btn-primary mb-4">Ya tienes esta arma >>>
-                    {{item.obtainedDate}}</button>
-                <button *ngIf="!item.owned" (click)="buyItem(item)" class="btn btn-primary mb-4">Comprar</button>
-            </ng-container>
         </div>
     </div>
 </div>

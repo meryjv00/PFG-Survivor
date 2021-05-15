@@ -51,7 +51,7 @@
               <mat-icon>mail</mat-icon>
               <span *ngIf="chat.msgsWithoutRead2.length > 0" class="badge">{{chat.msgsWithoutRead2.length}}</span>
             </button>
-            <mat-menu #notificationsMessages="matMenu" xPosition="before" class="mt-2" aria-colcount="menu">
+            <mat-menu #notificationsMessages="matMenu" xPosition="before"  aria-colcount="menu" class="bg-dark gris mt-2">
               <ng-container *ngIf="chat.msgsWithoutRead2.length > 0; else noNotifsMessages">
                 <ng-container *ngFor="let userMessage of chat.messagesWithoutRead">
                   <div *ngIf="userMessage.messages > 0" class="d-flex align-items-center px-2 py-2 notific_item">
@@ -81,7 +81,7 @@
               <span *ngIf="friendService.friendsRequests.length > 0"
                 class="badge">{{friendService.friendsRequests.length}}</span>
             </button>
-            <mat-menu #notifications="matMenu" xPosition="before" class="mt-2" aria-colcount="menu">
+            <mat-menu #notifications="matMenu" xPosition="before" class="bg-dark gris mt-2" aria-colcount="menu">
               <ng-container *ngIf="friendService.friendsRequests.length > 0; else noNotifs">
                 <div *ngFor="let userFriend of friendService.friendsRequests"
                   class="d-flex align-items-center px-2 py-2 notific_item">
@@ -109,7 +109,6 @@
             <!--Imágen perfil-->
             <img *ngIf="auth.user" [matMenuTriggerFor]="beforeMenu" src="{{auth.user.photoURL}}" alt="" width="50px"
               height="50px" class=" rounded-circle ml-3">
-            <span *ngIf="auth.user" class="gris">{{auth.user.displayName}}</span>
             <mat-menu #beforeMenu="matMenu" xPosition="before">
               <!--Ver perfil-->
               <button mat-menu-item routerLink="perfil">

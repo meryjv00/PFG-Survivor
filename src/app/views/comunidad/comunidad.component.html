@@ -1,5 +1,5 @@
-<div class="container text-white">
-    <div class="row mt-4">
+<div class="container gris margin-header ">
+    <div class="row">
         <!--Busqueda amigos-->
         <div class="col-7">
             <!--Bloque buscador-->
@@ -41,15 +41,15 @@
         <div class="col-5">
             <!--Peticiones de amistad enviadas-->
             <div class="aside-block" *ngIf="friendService.sentFriendsRequests.length > 0">
-                <div class="titulo oscuro1">
+                <div class="titulo">
                     <span class="d-block text-center">Peticiones de amistad enviadas</span>
                 </div>
-                <div class="contenido-block">
+                <div class="contenido-block text-dark bg-secondary">
                     <ul>
                         <li *ngFor="let userRequested of friendService.sentFriendsRequests" class="mt-2">
                             <img src="{{userRequested.photoURL}}" alt="foto_{{userRequested.displayName}}" width="70px" class="rounded-circle">
                             {{userRequested.displayName}} - {{userRequested.email}} - {{userRequested.coins}} monedas - {{userRequested.status}}
-                            <button mat-raised-button class="btn-style ml-2"
+                            <button  class="btn btn-dark ml-2"
                                 (click)="friendService.cancelFriendRequest(userRequested.uid)">Cancelar envio</button>
                         </li>
                     </ul>
@@ -60,7 +60,7 @@
                 <div class="titulo oscuro1">
                     <span class="d-block text-center">Sugerencias de amistad</span>
                 </div>
-                <div class="contenido-block">
+                <div class="contenido-block text-dark bg-secondary">
                     <ul *ngIf="chat.suggestedFriends.length > 0">
                         <li *ngFor="let userSuggested of chat.suggestedFriends">
                             <img src="{{userSuggested.photoURL}}" alt="foto_{{userSuggested.displayName}}" width="70px" class="rounded-circle">
@@ -71,7 +71,7 @@
                             </button>
                         </li>
                     </ul>
-                    <span *ngIf="chat.suggestedFriends.length == 0">
+                    <span *ngIf="chat.suggestedFriends.length == 0" class="text-dark bg-secondary">
                         No tienes sugerencias de amistad, agrega algun amigo
                     </span>
                 </div>

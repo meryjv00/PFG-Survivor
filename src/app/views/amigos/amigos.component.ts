@@ -1,11 +1,14 @@
 import { Component, OnInit, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
 import { RankingsService } from 'src/app/services/rankings.service';
 import { environment } from 'src/environments/environment';
+import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
+import { UserComponent } from '../user/user.component';
 
 @Component({
   selector: 'app-amigos',
@@ -26,7 +29,8 @@ export class AmigosComponent implements OnInit {
     private formBuilder: FormBuilder,
     public auth: AuthService,
     public friends: FriendsService,
-    public rankings: RankingsService) {
+    public rankings: RankingsService,
+    public ngmodal: NgbModal) {
 
     this.chatFriends = this.formBuilder.group({
       text: ['', [Validators.required]],
@@ -53,6 +57,10 @@ export class AmigosComponent implements OnInit {
       this.onComplete.emit();
       this.disableScrollDown = false;
     });
+  }
+
+  ngOnDestroy() {
+    this.chat.urlImgsChat = [];
   }
 
   ngAfterViewChecked() {
@@ -101,5 +109,24 @@ export class AmigosComponent implements OnInit {
   saveImgModal(urlImg: string) {
     this.urlImg = urlImg;
   }
+
+  openProfileUser(user: any) {
+    this.chat.getImagenesChat().then(() => {
+      const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+      modalRef.componentInstance.user = user;
+      modalRef.componentInstance.addUser = 'see';
+      modalRef.componentInstance.msgs = this.chat.messagesWithFriend.length;
+    });
+   
+  }
+
+  openConfirmModal() {
+    const modalRef = this.ngmodal.open(ConfirmModalComponent, { size: 'xs' });
+    modalRef.componentInstance.msg = `¿Quieres borrar también el contenido multimedia compartido con ${this.chat.friendSelected.displayName} ?`;
+    modalRef.componentInstance["confirm"].subscribe((event: any) => {
+      this.chat.deleteChat(event);
+    });
+  }
+
 
 }

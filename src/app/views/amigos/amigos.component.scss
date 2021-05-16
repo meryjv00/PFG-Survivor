@@ -1,9 +1,13 @@
 //$fondo-chat: #275757;
-$fondo-chat: #32465A;
+$fondo-chat: #21252e;
 $header-input: rgba(0,0,0,0.3);
 $scroll: #50667e;
 $mymsg:  #F5F5F5;
 $othermsg: #82ccdd;
+
+.mat-menu-item .mat-icon-no-color, .mat-menu-item-submenu-trigger::after {
+    color: #a5a5a5;
+}
 
 .search-box {
     padding: 10px 13px;
@@ -40,6 +44,7 @@ $othermsg: #82ccdd;
         color: white;
         padding: 10px 15px;
         display: flex;
+        align-items: center;
         vertical-align: baseline;
         justify-content: center;
         transition: .3s ease;
@@ -55,15 +60,22 @@ $othermsg: #82ccdd;
                 font-size: 20px;
                 margin-left: 20px;
             }
+            p {
+                font-size: 14px;
+                color: rgba(255,255,255,0.6); 
+                margin-left: 20px;
+            }
+        
         }
     
         &:hover {
             background: $fondo-chat;
-            cursor: pointer;
+            cursor: pointer;      
         }
         
     }
 }
+
 
 .card { 
     max-height: 87vh;
@@ -79,6 +91,9 @@ $othermsg: #82ccdd;
         .user_img {
             height: 70px;
             width: 70px;
+            &:hover {
+                cursor: pointer; 
+            }
         }
         
         .user_info {

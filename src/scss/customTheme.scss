@@ -1,13 +1,11 @@
 // Colores
 $primary: #644769;
-$secondary: #cabc8c;
+$secondary: #4b576b;
 $info: #29536b;
 $dark: #171A21;
 $gris: #b8b6b4; 
 
 $success: #21252e;
-$light: #c9662d;
-$light: #c93756;
 
 body {
     background-color: $dark !important; 
@@ -32,13 +30,13 @@ body {
     font-family: "Motiva Sans",Arial,Helvetica,sans-serif;
     color: white;
     font-size: 15px;
-    background: $light !important;
+    background: $primary !important;
     /* background: rgba(185, 49, 151, 0.2) !important; */
     &:hover {
-        background: linear-gradient( -60deg, #29536b 5%,#387091 95%) !important;
+        background: linear-gradient( -60deg, #99799e 5%,$primary 95%) !important;
     }
 }
 
 .margin-header {
-    margin-top: 8vh;
+    margin-top: 9vh;
 }

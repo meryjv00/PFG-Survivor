@@ -37,7 +37,6 @@ export class ShopService {
           'description': docu.data().description,
           'img': docu.data().img,
           'price': docu.data().price,
-          'rarity': docu.data().rarity,
           'owned': false,
           'obtainedDate': null
         }
@@ -59,6 +58,16 @@ export class ShopService {
     });
   }
 
+/*   getItemsUser(uid?: string) {
+    var db = firebase.firestore();
+
+    db.collection('users').doc(uid).collection('items').get().then((doc) => {
+      doc.forEach(item => {
+        console.log(item);
+        
+      });
+    });
+  } */
   /**
    * Comprueba si el usuario puede comprar o no el arma con las monedas que tiene
    * @param item 

@@ -30,6 +30,7 @@ export class ChatService {
   suggestedFriends = []; // Sugerencias de amigos "Amigos de mis amigos"
   sentRequested = []; // uid amigos a los que envie solic
   msgsWithoutRead2 = [];
+  urlImgsChat = [];
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CONSTRUCTOR~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -166,7 +167,7 @@ export class ChatService {
 
                     // Ultima pos del array -> se redirige a poner en escucha todos los mensajes de los amigos obtenidos
                     if (cont == index + 1) {
-                      this.stopListeningFriendMessages(false, 2); 
+                      this.stopListeningFriendMessages(false, 2);
                       this.getSuggestedFriends();
                     } else {
                       // Se ha añadido un nuevo amigo
@@ -310,7 +311,7 @@ export class ChatService {
             else if (change.type === 'modified') {
               readMessage = false;
               this.messagesFriends.forEach(user => {
-                if (user.uid == this.uidFriendSelected) { 
+                if (user.uid == this.uidFriendSelected) {
                   user.messages.forEach(message => {
                     if (message.id == change.doc.id) {
                       console.log('Mensaje actualizado: ', message.id);
@@ -462,9 +463,9 @@ export class ChatService {
    * @param friend amigo seleccionado
    */
   chatWith(friend: any) {
-/*     if (friend.uid == this.uidFriendSelected) {
-      return;
-    } */
+    /*     if (friend.uid == this.uidFriendSelected) {
+          return;
+        } */
     var db = firebase.firestore();
     this.messagesWithFriend = [];
     this.uidFriendSelected = friend.uid;
@@ -768,9 +769,10 @@ export class ChatService {
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DELETE CHAT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   /**
-   * Elimina los mensajes del chat seleccionado
+   * Vacia el chat del usuario logeado
+   * @param deleteImg boolean: borrar imagenes tmb o no
    */
-  deleteChat() {
+  deleteChat(deleteImg: boolean) {
     this.sonidito(3);
     var db = firebase.firestore();
     var query = db.collection("users").doc(this.userAuth.uid).collection('friends').doc(this.uidFriendSelected).collection('messages');
@@ -779,18 +781,39 @@ export class ChatService {
         doc.forEach(change => {
           query.doc(change.id).delete();
         });
-        // Preguntar si quiere borrarlas
         // Eliminar imagenes del chat correspondiente
-        var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected;
-        const ref = firebase.storage().ref(path);
-        ref.listAll()
-          .then(dir => {
-            dir.items.forEach(fileRef => {
-              var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected + '/' + fileRef.name;
-              this.firestorage.ref(path).delete();
+        if (deleteImg) {
+          var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected;
+          const ref = firebase.storage().ref(path);
+          ref.listAll()
+            .then(dir => {
+              dir.items.forEach(fileRef => {
+                var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected + '/' + fileRef.name;
+                this.firestorage.ref(path).delete();
+              });
             });
-          });
+        }
+
       });
   }
+
+
+  /**
+   * Cargar imágenes de un chat
+   */
+  getImagenesChat() {
+    this.urlImgsChat = [];
+    var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected;
+    const ref = firebase.storage().ref(path);
+    return ref.listAll()
+      .then(dir => {
+        dir.items.forEach(fileRef => {    
+          fileRef.getDownloadURL().then(url => {
+            this.urlImgsChat.push(url);
+          });
+        });
+      });
+  }
+
 
 }

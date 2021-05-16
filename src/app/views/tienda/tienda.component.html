@@ -1,6 +1,6 @@
 <div class="container margin-header">
     <div class="text-center gris">
-        <h1 class="text-light">Tienda Survivor</h1>
+        <h1 class="text-primary">Tienda Survivor</h1>
         <h3 *ngIf="auth.user">Saldo: {{auth.user.coins}} 
             <img class="mb-2" src="../../../assets/imgs/coin.png" alt="" width="20px">
         </h3>
@@ -11,7 +11,7 @@
             <!--Objeto tienda-->
             <div class="card mt-4 w-100 bg-success text-white" style="width: 18rem; ">
                 <!--Imagen arma-->
-                <div class="img-hover-zoom">
+                <div class="img-hover-zoom" >
                     <img class="card-img-top" src="{{item.img}}" alt="{{item.name}}">
                 </div>
                 <div class="card-body">
@@ -20,7 +20,6 @@
                     <p class="card-text m-0">
                         {{item.price}} 
                         <img class="" src="../../../assets/imgs/coin.png" alt="" width="15px" height="15px">
-                        - {{item.rarity}} 
                     </p>
                     <p class="card-text">{{item.description}}</p>
                     <!--Si el usuario ha iniciado sesión-->
@@ -31,9 +30,9 @@
                         </div>
                         <!--Comprar arma o arma ya obtenida-->
                         <div class="float-right">
-                            <button *ngIf="item.owned" class="btn btn-light">
+                            <button *ngIf="item.owned" class="btn btn-primary">
                                 Ya tienes esta arma</button>
-                            <button *ngIf="!item.owned" (click)="buyItem(item)" class="btn btn-light">Comprar</button>
+                            <button *ngIf="!item.owned" (click)="buyItem(item)" class="btn btn-primary">Comprar</button>
                         </div>
                     </ng-container>
                 </div>

@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
 import { RankingsService } from 'src/app/services/rankings.service';
 import { environment } from 'src/environments/environment';
+import { UserComponent } from '../user/user.component';
 
 @Component({
   selector: 'app-comunidad',
@@ -18,7 +20,8 @@ export class ComunidadComponent implements OnInit {
     public chat: ChatService,
     public auth: AuthService,
     public toastr: ToastrService,
-    public rankings: RankingsService) {
+    public rankings: RankingsService,
+    public ngmodal: NgbModal) {
       
     // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
     if (this.auth.loginRecharge) {
@@ -46,4 +49,10 @@ export class ComunidadComponent implements OnInit {
     this.friendService.searchFriends(e.target.value);
   }
 
+  
+  openProfileUser(user: any) {
+    const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+    modalRef.componentInstance.user = user;
+    modalRef.componentInstance.addUser = 'search';
+  }
 }

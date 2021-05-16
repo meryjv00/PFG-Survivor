@@ -7,7 +7,7 @@
         <div class="container-fluid">
             <div class="row">
                 <!--Lista amigos-->
-                <div class="col-md-3 col-2 p-0 column-friends">
+                <div *ngIf="chat.friends.length > 0" class="col-md-3 col-2 p-0 column-friends">
                     <div class="search-box display-none mt-2 mb-4">
                         <div class="input-wrapper">
                             <i class="material-icons">search</i>
@@ -17,45 +17,58 @@
                     <div *ngFor="let friend of chat.friends | filtroAmigos:filtroAmigo; index as i"
                         class="friend-description" (click)="chatWith(friend)">
                         <img src="{{friend.photoURL}}" alt="Foto {{friend.displayName}}" width="100px" class="centrado">
+                        <!-- <div class="circulo" [ngClass]="{'green': friend.status === 'online', 'red' : friend.status === 'offline' }"></div> -->
+
                         <div class="text display-none">
-                            <span>{{friend.displayName}} {{friend.status}}</span>
+                            <span>{{friend.displayName}}</span>
+                            <p>{{friend.status}}</p>
                         </div>
+
                         <ng-container *ngIf="chat.messagesWithoutRead[i]">
                             <span *ngIf="chat.messagesWithoutRead[i].messages > 0">
                                 {{chat.messagesWithoutRead[i].messages}}
                             </span>
                         </ng-container>
-                        
+
                     </div>
                 </div>
 
                 <!--Columna que aparece si no tienes amigos-->
-                <div class="col-md-9 col-10 card p-0" *ngIf="chat.friends.length == 0">
+                <div class="col-md-9 col-10 card p-0 bg-dark" *ngIf="chat.friends.length == 0">
                     <h1 class="text-white">Todavía no tienes amigos!!!</h1>
                 </div>
 
                 <!--Chat-->
-                <div class="col-md-9 col-10 card p-0 bg-primary" *ngIf="chat.chatEnabled == true">
+                <div class="col-md-9 col-10 card p-0 bg-success" *ngIf="chat.chatEnabled == true">
                     <!--Información amigo chat abierto-->
                     <div class="card-header">
-                        <div class="d-flex justify-content-between bd-highlight">
+                        <div class="d-flex justify-content-between">
+                            <!--Información chat usuario-->
                             <div class="d-flex">
-                                <img src="{{chat.friendSelected.photoURL}}" class="rounded-circle user_img">
+                                <img src="{{chat.friendSelected.photoURL}}" class="rounded-circle user_img"
+                                    (click)="openProfileUser(chat.friendSelected)">
                                 <div class="user_info">
-                                    <span>{{chat.friendSelected.displayName}} - {{chat.friendSelected.coins}} monedas - Amigos desde {{chat.friendSelected.friendshipDate}}</span>
+                                    <span>{{chat.friendSelected.displayName}}</span>
                                     <p>{{chat.messagesWithFriend.length}} mensajes</p>
+                                    <!-- <p>{{chat.friendSelected.status}}</p> -->
                                 </div>
                             </div>
+                            <!--Opciones chat-->
                             <div class="align-self-center">
-                                <button (click)="friends.deleteFriend(chat.uidFriendSelected)" class="btn btn-light">
-                                    <mat-icon>delete</mat-icon>
+                                <button mat-icon-button aria-label="Opciones chat" [matMenuTriggerFor]="optionsChat">
+                                    <mat-icon class="gris">more_vert</mat-icon>
                                 </button>
-                                <button (click)="chat.deleteChat()" class="btn btn-light ml-2">
-                                    <mat-icon>delete_forever</mat-icon>
-                                </button>
-                                <button (click)="chat.closeChat()" class="btn btn-light ml-2">
-                                    <mat-icon>clear</mat-icon>
-                                </button>
+                                <mat-menu id="optionsMenu" #optionsChat="matMenu" xPosition="before" class="bg-dark mt-2"
+                                    aria-colcount="menu">
+                                    <button mat-menu-item (click)="openConfirmModal()" class="gris" >
+                                        <mat-icon>delete_forever</mat-icon>
+                                        <span>Vaciar chat</span>
+                                    </button>
+                                    <button mat-menu-item (click)="chat.closeChat()" class="gris">
+                                        <mat-icon>clear</mat-icon>
+                                        <span>Cerrar chat</span>
+                                    </button>
+                                </mat-menu>
                             </div>
                         </div>
                     </div>
@@ -123,7 +136,7 @@
                                     <!-- Modal visualizar imágen en grande -->
                                     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
                                         aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg  modal-dialog-centered" role="document">
+                                        <div class="modal-dialog modal-xs  modal-dialog-centered" role="document">
                                             <div class="modal-content">
                                                 <div class="modal-body p-0">
                                                     <img src="{{urlImg}}" width="100%" />

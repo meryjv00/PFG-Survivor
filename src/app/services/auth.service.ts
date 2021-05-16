@@ -197,7 +197,6 @@ export class AuthService {
             // Poner en escucha al usuario
             this.listenDataLogedUser();
           });
-
         }
         // Si está registrado
         else {

@@ -16,7 +16,7 @@
         <form *ngIf="enabledName" [formGroup]="name" (ngSubmit)="updateName()">
             <!--Nombre-->
             <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Introduce tu nuevo nombre</mat-label>
+                <mat-label class="gris">Introduce tu nuevo nombre</mat-label>
                 <input id="name" matInput formControlName="name">
                 <mat-icon matSuffix>perm_identity</mat-icon>
                 <!--Validación nombre-->
@@ -60,7 +60,7 @@
         <form *ngIf="enabledEmail" [formGroup]="email" (ngSubmit)="updateEmail()" class="mt-2">
              <!--Email-->
              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Introduce tu nuevo email</mat-label>
+                <mat-label class="gris">Introduce tu nuevo email</mat-label>
                 <input id="email" matInput formControlName="email">
                 <mat-icon matSuffix>perm_identity</mat-icon>
                 <!--Validación email-->
@@ -79,7 +79,7 @@
         <form *ngIf="enabledPass" [formGroup]="pass" (ngSubmit)="updatePass()" class="mt-2">
             <!--Password-->
             <mat-form-field appearance="outline" class="w-50 pr-1">
-                <mat-label>Crea una contraseña</mat-label>
+                <mat-label class="gris">Crea una contraseña</mat-label>
                 <input matInput [type]="hide1 ? 'password' : 'text'" formControlName="password">
                 <button type="button" mat-icon-button matSuffix (click)="hide1 = !hide1"
                     [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide1">
@@ -96,7 +96,7 @@
             </mat-form-field>
             <!--Confirmación Password-->
             <mat-form-field appearance="outline" class="w-50 pl-1">
-                <mat-label>Repite la contraseña</mat-label>
+                <mat-label class="gris">Repite la contraseña</mat-label>
                 <input matInput [type]="hide2 ? 'password' : 'text'" formControlName="confirmPassword"
                     pattern="{{pass.value.password}}">
                 <button type="button" mat-icon-button matSuffix (click)="hide2 = !hide2"

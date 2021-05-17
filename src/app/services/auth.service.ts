@@ -70,7 +70,7 @@ export class AuthService {
     this.loginRecharge = false;
     this.friends.listenFriendsRequests();
     this.friends.listenSentFriendsRequests();
-    this.chat.getFriends(true);
+    this.chat.getFriends();
     this.rankings.stopListeningRankingsItems();
     this.rankings.setGetRankingsTrue();
     this.rankings.getPositionRankings();
@@ -197,7 +197,6 @@ export class AuthService {
             // Poner en escucha al usuario
             this.listenDataLogedUser();
           });
-
         }
         // Si está registrado
         else {

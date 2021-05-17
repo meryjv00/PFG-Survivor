@@ -1,10 +1,14 @@
 // Colores
-$primary: #29536b;
-$secondary: #9abed3;
+$primary: #644769;
+$secondary: #4b576b;
+$info: #29536b;
+$dark: #171A21;
 $gris: #b8b6b4; 
 
+$success: #21252e;
+
 body {
-    background-color: #212f3d !important;
+    background-color: $dark !important; 
 }
  
 .cursor-pointer {
@@ -26,8 +30,13 @@ body {
     font-family: "Motiva Sans",Arial,Helvetica,sans-serif;
     color: white;
     font-size: 15px;
-    background: rgba( 103, 193, 245, 0.2 ) !important;
+    background: $primary !important;
+    /* background: rgba(185, 49, 151, 0.2) !important; */
     &:hover {
-        background: linear-gradient( -60deg, #29536b 5%,#387091 95%) !important;
+        background: linear-gradient( -60deg, #99799e 5%,$primary 95%) !important;
     }
+}
+
+.margin-header {
+    margin-top: 9vh;
 }

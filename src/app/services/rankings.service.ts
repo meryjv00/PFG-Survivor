@@ -323,9 +323,8 @@ export class RankingsService {
       'email': '',
       'me': false
     }
-    console.log(user);
-
-    console.log(doc.data().lvl - 1);
+    // console.log(user);
+    // console.log(doc.data().lvl - 1);
 
     if (type == 1) {
       this.lvlRankings[doc.data().lvl - 1].RankingPuntuacion.push(user);

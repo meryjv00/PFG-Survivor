@@ -36,6 +36,8 @@ import { ToastrModule} from 'ngx-toastr';
 // Material 
 import {DemoMaterialModule} from './material-module';
 import { FiltroAmigosPipe } from './pipes/filtro-amigos.pipe';
+import { UserComponent } from './views/user/user.component';
+import { ConfirmModalComponent } from './views/confirm-modal/confirm-modal.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +52,9 @@ import { FiltroAmigosPipe } from './pipes/filtro-amigos.pipe';
     RankingsComponent,
     TiendaComponent,
     FiltroAmigosPipe,
-    ComunidadComponent
+    ComunidadComponent,
+    UserComponent,
+    ConfirmModalComponent
   ],
   imports: [
     BrowserModule,

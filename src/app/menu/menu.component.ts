@@ -5,6 +5,7 @@ import { LoginComponent } from '../views/login/login.component';
 import { RegistroComponent } from '../views/registro/registro.component';
 import { ChatService } from '../services/chat.service';
 import { FriendsService } from '../services/friends.service';
+import { UserComponent } from '../views/user/user.component';
 
 @Component({
   selector: 'app-menu',
@@ -29,5 +30,11 @@ export class MenuComponent implements OnInit {
 
   openRegistro() {
     this.ngmodal.open(RegistroComponent, { size: 'lg' });
+  }
+
+  openProfileUser(user: any) {
+    const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+    modalRef.componentInstance.user = user;
+    modalRef.componentInstance.addUser = 'add';
   }
 }

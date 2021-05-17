@@ -20,7 +20,7 @@
                     <!--Email-->
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-label class="gris">Introduce tu correo electrónico</mat-label>
-                        <input matInput formControlName="email" [(ngModel)]="auth.emailRegistro">
+                        <input id="email" matInput formControlName="email" [(ngModel)]="auth.emailRegistro">
                         <mat-icon matSuffix>mail</mat-icon>
                         <!--Validación email-->
                         <mat-error *ngIf="formRegistro.email.errors && formRegistro.email.errors.required">
@@ -33,7 +33,7 @@
                     <!--Nombre-->
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-label class="gris">Introduce tu nombre</mat-label>
-                        <input matInput formControlName="nombre" [(ngModel)]="auth.nombreRegistro">
+                        <input id="name" matInput formControlName="nombre" [(ngModel)]="auth.nombreRegistro">
                         <mat-icon matSuffix>person</mat-icon>
                         <!--Validación email-->
                         <mat-error *ngIf="formRegistro.nombre.errors && formRegistro.nombre.errors.required">
@@ -47,7 +47,7 @@
                     <!--Password-->
                     <mat-form-field appearance="outline" class="w-50 pr-1">
                         <mat-label class="gris">Crea una contraseña</mat-label>
-                        <input matInput [type]="hide1 ? 'password' : 'text'" formControlName="password"
+                        <input id="pass" matInput [type]="hide1 ? 'password' : 'text'" formControlName="password"
                             [(ngModel)]="auth.passRegistro">
                         <button type="button" mat-icon-button matSuffix (click)="hide1 = !hide1"
                             [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide1">
@@ -65,7 +65,7 @@
                     <!--Confirmación Password-->
                     <mat-form-field appearance="outline" class="w-50 pl-1">
                         <mat-label class="gris">Repite la contraseña</mat-label>
-                        <input matInput [type]="hide2 ? 'password' : 'text'" formControlName="confirmPassword" pattern="{{auth.passRegistro}}">
+                        <input id="confirmPass" matInput [type]="hide2 ? 'password' : 'text'" formControlName="confirmPassword" pattern="{{auth.passRegistro}}">
                         <button type="button" mat-icon-button matSuffix (click)="hide2 = !hide2"
                             [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide2">
                             <mat-icon>{{hide2 ? 'visibility_off' : 'visibility'}}</mat-icon>

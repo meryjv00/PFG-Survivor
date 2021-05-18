@@ -7,7 +7,7 @@ describe('AmigosComponent', () => {
   let fixture: ComponentFixture<AmigosComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({   
       declarations: [ AmigosComponent ]
     })
     .compileComponents();
@@ -19,7 +19,8 @@ describe('AmigosComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  /* it('should create', () => {
     expect(component).toBeTruthy();
-  });
+  }); */
+  
 });

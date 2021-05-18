@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+
+  pfg-survivor:
+    build: .
+    image: meryjv00/angular_alpine:0.0.1
+    container_name: PFG-Survivor
+    ports:
+      - 4200:4200
+    volumes:
+      - ./:/PFG-Survivor
+    networks:
+      - angular
+    restart: always
+
+networks:
+  angular:
+    driver: bridge

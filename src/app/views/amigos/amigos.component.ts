@@ -6,7 +6,6 @@ import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
 import { RankingsService } from 'src/app/services/rankings.service';
-import { environment } from 'src/environments/environment';
 import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
 import { UserComponent } from '../user/user.component';
 

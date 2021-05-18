@@ -335,7 +335,6 @@ export class ChatService {
                 'text': change.doc.data().text,
                 'imageURL': change.doc.data().imageURL,
                 'isRead': change.doc.data().isRead,
-                'photoURL': change.doc.data().photoURL,
                 'storageRef': change.doc.data().storageRef,
                 'timestamp': h.substring(16, 21),
                 'day': h.substring(8, 11) + h.substring(4, 7)
@@ -545,7 +544,6 @@ export class ChatService {
         uid: emisor.uid,
         displayName: emisor.displayName,
         text: message,
-        photoURL: emisor.photoURL,
         isRead: false,
         timestamp: firebase.firestore.Timestamp.now(),
       });
@@ -566,7 +564,6 @@ export class ChatService {
         uid: emisor.uid,
         displayName: emisor.displayName,
         text: message,
-        photoURL: emisor.photoURL,
         isRead: false,
         timestamp: firebase.firestore.Timestamp.now(),
       })
@@ -647,7 +644,6 @@ export class ChatService {
         uid: emisor.uid,
         displayName: emisor.displayName,
         imageURL: url,
-        photoURL: emisor.photoURL,
         isRead: false,
         storageRef: nombreImg,
         timestamp: firebase.firestore.Timestamp.now(),
@@ -671,7 +667,6 @@ export class ChatService {
         uid: emisor.uid,
         displayName: emisor.displayName,
         imageURL: url,
-        photoURL: emisor.photoURL,
         isRead: false,
         storageRef: nombreImg,
         timestamp: firebase.firestore.Timestamp.now(),

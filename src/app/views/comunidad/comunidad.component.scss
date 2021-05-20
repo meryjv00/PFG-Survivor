@@ -55,12 +55,6 @@ ul {
     border-radius: 5px;
     padding: 20px 20px;
     padding-top: 5px;
-    .user {
-        &:hover {
-            cursor: pointer;
-        }
-        padding: 10px;
-    }
 }
 
 .aside-block {
@@ -75,6 +69,5 @@ ul {
 
     .contenido-block {
         padding: 10px;
-    /*  background: linear-gradient( -60deg, #72663f 5%,#9e926b 95%);*/    
     }
 }

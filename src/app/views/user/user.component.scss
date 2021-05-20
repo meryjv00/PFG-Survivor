@@ -1,0 +1,44 @@
+$online:#4caf50;
+$offline:#f44336;
+$fondo-chat: #21252e;
+$scroll: #50667e;
+
+.border-green {
+    border: 2px solid $online;
+}
+.border-red {
+    border: 2px solid $offline;
+}
+
+.morePhotos {
+    cursor: pointer;
+    height: 120px;
+    display: block;
+    text-align: center;
+}
+
+mat-icon {
+    font-size: 40px;
+    margin-right: 16px;
+    margin-top: 20px;
+}
+
+.photos {
+    max-height: 700px;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+        width: 11px;
+    }
+    &::-webkit-scrollbar-track {
+        background: $fondo-chat;
+        border-radius: 20px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: $scroll;
+        border-radius: 20px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.2);
+    }
+}

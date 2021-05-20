@@ -16,11 +16,11 @@
             </div>
             <!--Lista usuarios busqueda-->
             <div class="users mt-2" *ngIf="friendService.users.length > 0">
-                <div *ngFor="let user of friendService.users" class="mt-3 user" (click)="openProfileUser(user)">
+                <div *ngFor="let user of friendService.users" class="mt-3 user">
                     <img src="{{user.photoURL}}" alt="" width="70px" class="rounded-circle">
                     {{user.displayName}} - {{user.email}} - {{user.coins}} monedas - {{user.status}}
                     <!--Botón segun estado-->
-                   <!--  <button *ngIf="user.relation == 'friends'" mat-raised-button class="btn-style">
+                     <button *ngIf="user.relation == 'friends'" mat-raised-button class="btn-style">
                         Ya somos amigos
                     </button>
                     <button *ngIf="user.relation == 'unknown'" mat-raised-button class="btn-style"
@@ -30,7 +30,7 @@
                     <button *ngIf="user.relation == 'sentRequest'" mat-raised-button class="btn-style"
                         (click)="friendService.cancelFriendRequest(user.uid)">
                         Cancelar solicitud de amistad
-                    </button> -->
+                    </button> 
                 </div>
             </div>
             <div class="users mt-2" *ngIf="friendService.users.length == 0 && palabraBuscar.length >= 1">

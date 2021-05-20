@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
+import { RegistroComponent } from '../registro/registro.component';
 
 @Component({
   selector: 'app-user',
@@ -12,6 +13,7 @@ export class UserComponent implements OnInit {
   @Input() public user: any;
   @Input() public addUser: string;
   @Input() public msgs: string;
+  profile: boolean = true;
 
   constructor(
     public ngmodal: NgbModal,
@@ -20,7 +22,7 @@ export class UserComponent implements OnInit {
     public chat: ChatService) {
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
 
   deleteFriend(uid: string) {
@@ -37,12 +39,12 @@ export class UserComponent implements OnInit {
     this.activeModal.close();
   }
 
-  friendRequestSearch(uid: string, type: number) {
-    if (type == 1) {
-      this.friendService.sendFriendRequest(uid);
-    } else {
-      this.friendService.cancelFriendRequest(uid);
-    }
-    this.activeModal.close();
+  seePhotos() {
+    this.profile = false;
   }
+  
+  seeProfile() {
+    this.profile = true;
+  }
+
 }

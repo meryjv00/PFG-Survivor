@@ -1,147 +1,156 @@
-<!--Menú navegación-->
-<div class="container-fluid header-nav">
-  <div class="row">
-    <div class="col-lg-10 mx-auto col-12">
-      <header class="d-flex justify-content-between align-items-center">
-        <!--1º línea apartados-->
-        <nav class="nav">
-          <ul>
-            <!--Inicio-->
-            <li>
-              <a routerLink="home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="d-flex">
-                <mat-icon class="my-auto">home</mat-icon> 
-                <span class="ml-1">Inicio</span>
-              </a>
-            </li>
-            <!--Tienda-->
-            <li>
-              <a routerLink="tienda" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="d-flex">
-                <mat-icon class="my-auto">shopping_cart</mat-icon> 
-                <span class="ml-1">Tienda</span>
-              </a>
-            </li>
-            <!--Rankings-->
-            <li>
-              <a routerLink="rankings" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-                class="d-flex">
-                <mat-icon class="my-auto">star</mat-icon> 
-                <span class="ml-1">Rankings</span>
-              </a>
-            </li>
-            <!--CUENTA LOGEADA-->
-            <ng-container *ngIf="auth.userState | async as user">
-              <!--Comunidad-->
-              <li>
-                <a routerLink="comunidad" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-                  class="d-flex">
-                  <mat-icon class="my-auto">people_alt</mat-icon> 
-                  <span class="ml-1">Comunidad</span>
-                </a>
-              </li>
-              <!--Amigos-->
-              <li>
-                <a routerLink="amigos" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-                  class="d-flex">
-                  <mat-icon class="my-auto">people_alt</mat-icon> 
-                  <span class="ml-1"> Amigos</span>
-                </a>
-              </li>
+<nav class="navbar navbar-expand-lg nav-style">
+  <a class="navbar-brand text-light">Survivor</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <mat-icon class="gris">reorder</mat-icon>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <!--IZQUIERDA-->
+    <ul class="navbar-nav mr-auto">
+      <!--Inicio-->
+      <li class="nav-item">
+        <a routerLink="home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+          class="nav-link text-light d-flex">
+          <!-- <mat-icon class="my-auto">home</mat-icon> -->
+          <span>Inicio</span>
+        </a>
+      </li>
+      <!--Tienda-->
+      <li class="nav-item">
+        <a routerLink="tienda" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+          class="nav-link text-light d-flex">
+          <!-- <mat-icon class="my-auto">shopping_cart</mat-icon> -->
+          <span>Tienda</span>
+        </a>
+      </li>
+      <!--Rankings-->
+      <li class="nav-item">
+        <a routerLink="rankings" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+          class="nav-link text-light d-flex">
+          <!-- <mat-icon class="my-auto">star</mat-icon> -->
+          <span>Rankings</span>
+        </a>
+      </li>
+
+      <!--CUENTA LOGEADA-->
+      <ng-container *ngIf="auth.userState | async as user">
+        <!--Comunidad-->
+        <li class="nav-item">
+          <a routerLink="comunidad" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+            class="nav-link text-light d-flex">
+            <!-- <mat-icon class="my-auto">people_alt</mat-icon>  -->
+            <span>Comunidad</span>
+          </a>
+        </li>
+        <!--Amigos-->
+        <li class="nav-item">
+          <a routerLink="amigos" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+            class="nav-link text-light d-flex">
+            <!-- <mat-icon class="my-auto">people_alt</mat-icon>  -->
+            <span> Amigos</span>
+          </a>
+        </li>
+      </ng-container>
+    </ul>
+
+    <!--DERECHA-->
+    <div class="my-2 my-lg-0">
+      <!--CUENTA LOGEADA-->
+      <ng-container *ngIf="auth.userState | async as user;else login">
+        <!--Alerta notificaciones mensajes-->
+        <button mat-mini-fab class="btn-style" [matMenuTriggerFor]="notificationsMessages">
+          <mat-icon>mail</mat-icon>
+          <span *ngIf="chat.msgsWithoutRead2.length > 0" class="badge">{{chat.msgsWithoutRead2.length}}</span>
+        </button>
+        <mat-menu #notificationsMessages="matMenu" xPosition="before" class="bg-dark gris mt-2">
+          <ng-container *ngIf="chat.msgsWithoutRead2.length > 0; else noNotifsMessages">
+            <ng-container *ngFor="let userMessage of chat.messagesWithoutRead">
+              <div *ngIf="userMessage.messages > 0" class="d-flex align-items-center px-2 py-2 notific_item"
+                routerLink="amigos">
+                <img src="{{userMessage.photoURL}}" alt="profile_pic" width="50px" height="50px"
+                  class="rounded-circle m-0">
+                <p class="ml-3">
+                  Tienes <span>{{userMessage.messages}}</span> mensajes sin leer de
+                  <span>{{userMessage.displayName}}</span>
+                </p>
+              </div>
             </ng-container>
-          </ul>
-        </nav>
-        <!--2º línea apartados-->
-        <div>
-          <!--CUENTA LOGEADA-->
-          <ng-container *ngIf="auth.userState | async as user;else login">
-            <!--Alerta notificaciones mensajes-->
-            <button mat-mini-fab class="btn-style" [matMenuTriggerFor]="notificationsMessages">
-              <mat-icon>mail</mat-icon>
-              <span *ngIf="chat.msgsWithoutRead2.length > 0" class="badge">{{chat.msgsWithoutRead2.length}}</span>
-            </button>
-            <mat-menu #notificationsMessages="matMenu" xPosition="before" aria-colcount="menu"
-              class="bg-dark gris mt-2">
-              <ng-container *ngIf="chat.msgsWithoutRead2.length > 0; else noNotifsMessages">
-                <ng-container *ngFor="let userMessage of chat.messagesWithoutRead">
-                  <div *ngIf="userMessage.messages > 0" class="d-flex align-items-center px-2 py-2 notific_item"
-                    routerLink="amigos">
-                    <div>
-                      <img src="{{userMessage.photoURL}}" alt="profile_pic" style="width: 50px" class="rounded-circle">
-                    </div>
-                    <div class="pl-3">
-                      <p class="m-0 mb-1">
-                        Tienes <span>{{userMessage.messages}}</span> mensajes sin leer de
-                        <span>{{userMessage.displayName}}</span>
-                      </p>
-                    </div>
-                  </div>
-                </ng-container>
-              </ng-container>
-
-              <ng-template #noNotifsMessages>
-                <div class="px-2 py-2">
-                  <span>¡No tienes ningún mensaje sin leer!</span>
-                </div>
-              </ng-template>
-            </mat-menu>
-
-            <!--Alerta notificaciones amigos-->            
-            <button mat-mini-fab class="ml-2 btn-style" [matMenuTriggerFor]="notifications">
-              <mat-icon>notifications</mat-icon>
-              <span *ngIf="friendService.friendsRequests.length > 0"
-                class="badge">{{friendService.friendsRequests.length}}</span>
-            </button>
-            <mat-menu #notifications="matMenu" xPosition="before" class="bg-dark gris mt-2" aria-colcount="menu">
-              <ng-container *ngIf="friendService.friendsRequests.length > 0; else noNotifs">
-                <div *ngFor="let userFriend of friendService.friendsRequests"
-                  class="d-flex align-items-center px-2 py-2 notific_item" (click)="openProfileUser(userFriend)">
-                  <div>
-                    <img src="{{userFriend.photoURL}}" alt="profile_pic" width="50px" height="50px"
-                      class="rounded-circle">
-                  </div>
-                  <div class="pl-3">
-                    <p class="m-0 mb-1">
-                      <span>{{userFriend.displayName}}</span> te ha enviado una solicitud de amistad
-                    </p>
-                    <button class="btn btn-outline-primary"
-                      (click)="friendService.deleteFriendRequest(userFriend.uid)">Rechazar</button>
-                    <button class="btn btn-primary ml-2"
-                      (click)="friendService.acceptFriendRequest(userFriend.uid)">Aceptar</button>
-                  </div>
-                </div>
-              </ng-container>
-              <ng-template #noNotifs>
-                <div class="px-2 py-2">
-                  <span>¡No tienes ninguna notificación nueva!</span>
-                </div>
-              </ng-template>
-            </mat-menu>
-
-            <!--Imágen perfil-->
-            <img *ngIf="auth.user" [matMenuTriggerFor]="beforeMenu" src="{{auth.user.photoURL}}" alt="" width="50px"
-              height="50px" class=" rounded-circle ml-3">
-            <mat-menu #beforeMenu="matMenu" xPosition="before">
-              <!--Ver perfil-->
-              <button mat-menu-item routerLink="perfil">
-                <span class="ml-3">Perfil</span>
-              </button>
-              <!--Salir-->
-              <button mat-menu-item (click)="auth.logout()">
-                <span class="ml-3">Salir</span>
-                <mat-icon class="m-1">logout</mat-icon>
-              </button>
-            </mat-menu>
           </ng-container>
-
-          <!--CUENTA SIN LOGEAR-->
-          <ng-template #login>
-            <button mat-raised-button (click)="openLogin()" class="btn-style mr-3">Inicia sesión</button>
-            <button mat-raised-button (click)="openRegistro()" class="btn-style">Registrate</button>
+          <!--Mensajes leidos-->
+          <ng-template #noNotifsMessages>
+            <div class="px-2 py-2">
+              <p class="text-light">¡No tienes ningún mensaje sin leer!</p>
+            </div>
           </ng-template>
+        </mat-menu>
 
-        </div>
-      </header>
+        <!--Alerta notificaciones amigos-->
+        <button mat-mini-fab class="ml-2 btn-style" [matMenuTriggerFor]="notifications">
+          <mat-icon>notifications</mat-icon>
+          <span *ngIf="friendService.friendsRequests.length > 0"
+            class="badge">{{friendService.friendsRequests.length}}</span>
+        </button>
+        <mat-menu #notifications="matMenu" xPosition="before" class="bg-dark gris mt-2">
+          <ng-container *ngIf="friendService.friendsRequests.length > 0; else noNotifs">
+            <div *ngFor="let userFriend of friendService.friendsRequests"
+              class="d-flex align-items-center px-2 py-2 notific_item" (click)="openProfileUser(userFriend)">
+              <img src="{{userFriend.photoURL}}" alt="profile_pic" width="50px" height="50px"
+                class="rounded-circle m-0">
+              <div class="pl-3">
+                <p class="mb-1">
+                  <span>{{userFriend.displayName}}</span> te ha enviado una solicitud de amistad
+                </p>
+                <button class="btn btn-primary"
+                  (click)="friendService.acceptFriendRequest(userFriend.uid)">Aceptar</button>
+                <button class="btn btn-outline-primary ml-2"
+                  (click)="friendService.deleteFriendRequest(userFriend.uid)">Rechazar</button>
+              </div>
+            </div>
+          </ng-container>
+          <!--No notificaciones-->
+          <ng-template #noNotifs>
+            <div class="px-2 py-2">
+              <span>¡No tienes ninguna notificación nueva!</span>
+            </div>
+          </ng-template>
+        </mat-menu>
+
+        <!--Imágen perfil-->
+        <img *ngIf="auth.user" [matMenuTriggerFor]="perfilMenu" src="{{auth.user.photoURL}}" alt="" width="50px"
+          height="50px" class="rounded-circle ml-3">
+        <mat-menu #perfilMenu="matMenu" xPosition="before" class="bg-dark mt-2">
+          <!--Ver perfil-->
+          <button mat-menu-item routerLink="perfil" class="text-light">
+            <mat-icon>person</mat-icon>
+            <span>Mi Perfil</span>
+          </button>
+          <!--Idioma-->
+          <button mat-menu-item class="text-light" [matMenuTriggerFor]="idiomas">
+            <mat-icon>public</mat-icon>
+            <span>Idiomas</span>
+          </button>
+          <!--Menu idiomas-->
+          <mat-menu #idiomas="matMenu" xPosition="after" class="bg-dark">
+            <button mat-menu-item class="text-light">Castellano</button>
+            <button mat-menu-item class="text-light">Inglés</button>
+            <button mat-menu-item class="text-light">Francés</button>
+          </mat-menu>
+          <!--Salir-->
+          <button mat-menu-item (click)="auth.logout()" class="text-light">
+            <mat-icon>logout</mat-icon>
+            <span>Cerrar sesión</span>
+          </button>
+        </mat-menu>
+
+      </ng-container>
+
+      <!--CUENTA SIN LOGEAR-->
+      <ng-template #login>
+        <button mat-raised-button (click)="openLogin()" class="btn-style mr-3">Inicia sesión</button>
+        <button mat-raised-button (click)="openRegistro()" class="btn-style">Registrate</button>
+      </ng-template>
+
     </div>
   </div>
-
-
-</div>
+</nav>

@@ -91,10 +91,10 @@ export class PerfilComponent implements OnInit {
         this.enableDisableUpdateEmail(2);
         this.email.reset();
       })
-      .catch(error => {        
+      .catch(error => {
         if (error.code === 'auth/requires-recent-login') {
           this.msg = 'Debes relogearte para poder cambiar el email.';
-        }else if(error.code === 'auth/email-already-in-use') {
+        } else if (error.code === 'auth/email-already-in-use') {
           this.msg = 'El email introducido ya está registrado';
         }
       });
@@ -129,6 +129,8 @@ export class PerfilComponent implements OnInit {
   enableDisableUpdateName(type: number) {
     if (type == 1) {
       this.enabledName = true;
+      this.enabledPass = false;
+      this.enabledEmail = false;
     } else {
       this.enabledName = false;
     }
@@ -142,6 +144,7 @@ export class PerfilComponent implements OnInit {
     if (type == 1) {
       this.enabledEmail = true;
       this.enabledPass = false;
+      this.enabledName = false;
     } else {
       this.enabledEmail = false;
       this.msg = '';
@@ -156,10 +159,14 @@ export class PerfilComponent implements OnInit {
     if (type == 1) {
       this.enabledPass = true;
       this.enabledEmail = false;
+      this.enabledName = false;
     } else {
       this.enabledPass = false;
       this.msg = '';
     }
   }
 
+  openFileSelection() {
+    document.getElementById('file').click();
+  }
 }

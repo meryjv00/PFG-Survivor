@@ -11,8 +11,10 @@
                 <div *ngIf="profile">
                     <!--Información principal-->
                     <div class="text-center mt-1">
-                        <img src="{{user.photoURL}}" alt="" class="rounded-circle" width="100px"
+                        <a href="{{user.photoURL}}" target="_blank">
+                            <img src="{{user.photoURL}}" alt="" class="rounded-circle" width="100px"
                             [ngClass]="{'border-green': user.status === 'online', 'border-red' : user.status === 'offline' }">
+                        </a>
                         <h1 class="text-white mr-2 mb-0">{{user.displayName}}</h1>
                         <p>{{user.email}}</p>
 
@@ -32,7 +34,7 @@
                     </div>
                     <!--Fotos compartidas-->
                     <div *ngIf="addUser == 'see'" class="mt-4">
-                        <p class="m-0">Imágenes compartidas</p>
+                        <!-- <p *ngIf="chat.urlImgsChat.length > 0" class="m-0">Imágenes compartidas</p> -->
                         <div class="row">
                             <ng-container *ngFor="let image of chat.urlImgsChat; index as i">
                                 <!--Fotos-->

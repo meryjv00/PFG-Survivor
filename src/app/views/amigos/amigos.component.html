@@ -6,6 +6,13 @@
     <ng-template #gotFriendsMessages>
         <div class="container-fluid">
             <div class="row">
+                <div class="search-box noneSearch100 w-100">
+                    <div class="input-wrapper">
+                        <i class="material-icons">search</i>
+                        <input type="text" placeholder="Buscar aquí" [(ngModel)]="filtroAmigo" name="filtroAmigo">
+                    </div>
+                </div></div>
+            <div class="row">
                 <!--Lista amigos-->
                 <div *ngIf="chat.friends.length > 0" class="col-md-3 col-2 p-0 column-friends">
                     <div class="search-box display-none mt-2 mb-4">
@@ -39,8 +46,12 @@
                 </div>
 
                 <!--Columna que aparece si no tienes amigos-->
-                <div class="col-md-9 col-10 card p-0 bg-dark" *ngIf="chat.friends.length == 0">
-                    <h1 class="text-white">Todavía no tienes amigos!!!</h1>
+                <div class="col-lg-5 col-md-8 col-11 mx-auto p-0 bg-dark mt-5" *ngIf="chat.friends.length == 0">
+                    <div class="mx-auto bg-success rounded shadow-md noFriends d-flex px-3 flex-column align-items-center justify-content-center">
+                        <h1 class="text-white">¡Todavía no tienes amigos!</h1>
+                        <p class="text-light">Agrega alguno desde la sección <a routerLink="/comunidad" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Comunidad</a></p>
+                        <mat-icon class="gris">sentiment_dissatisfied</mat-icon>
+                    </div>
                 </div>
 
                 <!--Chat-->

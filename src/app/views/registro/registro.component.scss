@@ -2,3 +2,20 @@
 mat-form-field {
     font-size: 15px;
 }
+
+::ng-deep {
+    //input outline color
+    .mat-form-field-appearance-outline .mat-form-field-outline {
+        color: #3f448d !important;
+    }
+
+    // mat-input error outline color
+    .mat-form-field-appearance-outline.mat-form-field-invalid.mat-form-field-invalid .mat-form-field-outline-thick{
+        color: rgb(148, 34, 49) !important;
+        opacity: 0.8 !important;
+    }
+
+    .mat-error {
+        color: rgb(148, 34, 49) !important;
+    }
+}

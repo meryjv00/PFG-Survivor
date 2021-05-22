@@ -15,6 +15,13 @@ $offline:#f44336;
     width:10px;
     border-radius:50px;
 }
+
+.noFriends {
+    height: 230px;
+    mat-icon {
+        font-size: 50px;
+    }
+}
 .green {
     background: $online;
 }
@@ -286,4 +293,9 @@ img {
 }
 
 
- 
+@media only screen and (min-width:773px) {
+    .noneSearch100 {
+        display: none;
+    }
+
+}

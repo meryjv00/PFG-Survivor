@@ -1,12 +1,12 @@
 <!--Modal contraseña olvidada-->
-<div class="modal-body">
+<div class="modal-body bg-dark gris">
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
                 <button type="button" class="close" aria-label="Close" (click)="activeModal.close('Cross click')">
                     <i class="fas fa-times fa-sm"></i>
                 </button>
-                <h1 class="text-center text-primary mt-3">Restablecer contraseña</h1>
+                <h1 class="text-center text-white mt-3">Restablecer contraseña</h1>
             </div>
             <div class="col-11 col-lg-10 mx-auto px-3 pb-3">
                 <!--Mensaje error al enviar el correo para reestablecer contraseña-->
@@ -17,7 +17,7 @@
                 <form id="passOlvidada" [formGroup]="passOlvidada" (ngSubmit)="onSubmit()" class="mt-3">
                     <!--Email-->
                     <mat-form-field appearance="outline" class="w-100">
-                        <mat-label>Introduce tu correo electrónico</mat-label>
+                        <mat-label class="text-light">Introduce tu correo electrónico</mat-label>
                         <input id="email" matInput formControlName="email" [(ngModel)]="auth.emailPass">
                         <mat-icon matSuffix>mail</mat-icon>
                         <!--Validación email-->
@@ -36,7 +36,7 @@
                 <!--Volver Login-->
                 <div class="mt-4 text-center mx-auto">
                     <div class="w-100">
-                        <a id="enlaceRegistro" class="cursor-pointer" (click)="backLogin()">Iniciar sesión</a>
+                        <a id="enlaceRegistro" class="cursor-pointer text-secondary" (click)="backLogin()">Iniciar sesión</a>
                     </div>
                 </div>
             </div>

@@ -1,11 +1,11 @@
 <div class="container margin-header">
-    <div class="text-center gris">
-        <h1 class="text-primary">Tienda Survivor</h1>
-        <h3 *ngIf="auth.user">Saldo: {{auth.user.coins}} 
+    <div class="text-center">
+        <h1 class="text-white">Tienda Survivor</h1>
+        <h3 *ngIf="auth.user" class="text-light">Saldo: {{auth.user.coins}} 
             <img class="mb-2" src="../../../assets/imgs/coin.png" alt="" width="20px">
         </h3>
     </div>
-   
+
     <div class="row">
         <div class="col-lg-4 col-md-6 col-12" *ngFor="let item of shop.items"> 
             <!--Objeto tienda-->
@@ -25,7 +25,7 @@
                     <!--Si el usuario ha iniciado sesión-->
                     <ng-container *ngIf="auth.user">
                         <!--Fecha obtencion arma-->
-                        <div *ngIf="item.owned" class="float-left mt-2">
+                        <div *ngIf="item.owned" class="float-left mt-2 text-light">
                             {{item.obtainedDate}}
                         </div>
                         <!--Comprar arma o arma ya obtenida-->

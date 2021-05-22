@@ -1,24 +1,53 @@
 <div class="container margin-header gris">
-    <h1 class="mt-3">Perfil</h1>
 
-    <div *ngIf="auth.user">
-        <img [src]="auth.user.photoURL" width="150px">
-        <input id="file" type="file" (change)="perfilService.updateProfileImage($event)" accept=".png,.jpg" />
+    <div class="text-center" *ngIf="auth.user">
+        <a class="ml-5" href="{{auth.user.photoURL}}" target="_blank">
+            <img [src]="auth.user.photoURL" width="160px" height="160px" class="rounded-circle mt-4">
+        </a>
+        <button (click)="openFileSelection()" mat-mini-fab class="ml-2 btn-style edit">
+            <mat-icon>mode_edit</mat-icon>
+        </button>
+
+        <input class="d-none" id="file" type="file" (change)="perfilService.updateProfileImage($event)"
+            accept=".png,.jpg" />
 
         <!--Nombre-->
-        <p class="mt-3">
-            Name: {{auth.user.displayName}}
-            <button (click)="enableDisableUpdateName(1)" class="btn btn-primary ml-2">
-                Editar
-            </button>
-        </p>
+        <div class="mt-3">
+            <h1 class="text-white">{{auth.user.displayName}}</h1>
+            <p class="m-0">{{auth.user.coins}} monedas</p>
+            <p>{{auth.user.email}}</p>
+        </div>
+
+
+        <button (click)="enableDisableUpdateName(1)" class="btn btn-primary mr-2">
+            Cambiar nombre
+        </button>
+
+        <!--En caso de que se hayan registrado con email y contraseña-->
+        <ng-container *ngIf="auth.providerId">
+            <ng-container *ngIf="auth.providerId == 'password'">
+                <div ngbDropdown class="d-inline-block">
+                    <button class="btn btn-primary" id="dropdownBasic1" ngbDropdownToggle>
+                        Cambiar credenciales
+                    </button>
+                    <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                        <button (click)="enableDisableUpdateEmail(1)" ngbDropdownItem class="btn btn-secondary">
+                            Correo electrónico
+                        </button>
+                        <button (click)="enableDisableUpdatePass(1)" ngbDropdownItem class="btn btn-secondary">
+                            Contraseña
+                        </button>
+                    </div>
+                </div>
+            </ng-container>
+        </ng-container>
+
         <!--Formulario cambiar nombre-->
-        <form *ngIf="enabledName" [formGroup]="name" (ngSubmit)="updateName()">
+        <form id="formName" *ngIf="enabledName" class="mt-4" [formGroup]="name" (ngSubmit)="updateName()">
             <!--Nombre-->
-            <mat-form-field appearance="outline" class="w-100">
+            <mat-form-field appearance="outline" class="w-50">
                 <mat-label class="gris">Introduce tu nuevo nombre</mat-label>
                 <input id="name" matInput formControlName="name">
-                <mat-icon matSuffix>perm_identity</mat-icon>
                 <!--Validación nombre-->
                 <mat-error *ngIf="formName.name.errors && formName.name.errors.required">
                     Este campo es <strong>obligatorio.</strong>
@@ -28,28 +57,17 @@
                     <strong>{{formName.name.errors.minlength.requiredLength}}</strong> carácteres.
                 </mat-error>
             </mat-form-field>
+
             <!--Submit cambiar nombre-->
             <button type="submit" class="btn btn-primary ml-2">
-                Cambiar nombre
+                Confirmar
             </button>
             <!--Submit cancelar-->
-            <button type="button" (click)="enableDisableUpdateName(2)" class="btn btn-primary ml-2">
+            <button type="button" (click)="enableDisableUpdateName(2)" class="btn btn-outline-primary ml-2">
                 Cancelar
             </button>
         </form>
 
-        <p>Status: {{auth.user.status}}</p>
-        <p>Coins: {{auth.user.coins}}</p>
-        <p>Mail: {{auth.user.email}}</p>
-
-        <!--En caso de que se hayan registrado con email y contraseña-->
-        <ng-container *ngIf="auth.providerId">
-            <div *ngIf="auth.providerId == 'password'" class="mt-4">
-                <button class="btn btn-primary" (click)="enableDisableUpdateEmail(1)">Cambiar email</button>
-                <button class="btn btn-primary ml-2" (click)="enableDisableUpdatePass(1)">Cambiar
-                    contraseña</button>
-            </div>
-        </ng-container>
 
         <!--Mensaje error-->
         <div *ngIf="msg" class="alert alert-danger mt-3" role="alert">
@@ -57,12 +75,11 @@
         </div>
 
         <!--Formulario email-->
-        <form *ngIf="enabledEmail" [formGroup]="email" (ngSubmit)="updateEmail()" class="mt-2">
-             <!--Email-->
-             <mat-form-field appearance="outline" class="w-100">
+        <form *ngIf="enabledEmail" [formGroup]="email" (ngSubmit)="updateEmail()" class="mt-4">
+            <!--Email-->
+            <mat-form-field appearance="outline" class="w-50">
                 <mat-label class="gris">Introduce tu nuevo email</mat-label>
                 <input id="email" matInput formControlName="email">
-                <mat-icon matSuffix>perm_identity</mat-icon>
                 <!--Validación email-->
                 <mat-error *ngIf="formEmail.email.errors && formEmail.email.errors.required">
                     Este campo es <strong>obligatorio.</strong>
@@ -71,14 +88,17 @@
                     Introduce un email válido
                 </mat-error>
             </mat-form-field>
-            <button type="submit" class="btn btn-primary">Cambiar</button>
-            <button type="button" class="btn btn-primary ml-2" (click)="enableDisableUpdateEmail(2)">Cancelar</button>
+            <!--Submit-->
+            <button type="submit" class="btn btn-primary ml-2">Confirmar</button>
+            <!--Cancelar-->
+            <button type="button" class="btn btn-outline-primary ml-2"
+                (click)="enableDisableUpdateEmail(2)">Cancelar</button>
         </form>
 
         <!--Formulario contraseña-->
-        <form *ngIf="enabledPass" [formGroup]="pass" (ngSubmit)="updatePass()" class="mt-2">
+        <form *ngIf="enabledPass" [formGroup]="pass" (ngSubmit)="updatePass()" class="mt-4">
             <!--Password-->
-            <mat-form-field appearance="outline" class="w-50 pr-1">
+            <mat-form-field appearance="outline" class="w-25 pr-1">
                 <mat-label class="gris">Crea una contraseña</mat-label>
                 <input matInput [type]="hide1 ? 'password' : 'text'" formControlName="password">
                 <button type="button" mat-icon-button matSuffix (click)="hide1 = !hide1"
@@ -95,7 +115,7 @@
                 </mat-error>
             </mat-form-field>
             <!--Confirmación Password-->
-            <mat-form-field appearance="outline" class="w-50 pl-1">
+            <mat-form-field appearance="outline" class="w-25 pl-1">
                 <mat-label class="gris">Repite la contraseña</mat-label>
                 <input matInput [type]="hide2 ? 'password' : 'text'" formControlName="confirmPassword"
                     pattern="{{pass.value.password}}">
@@ -111,11 +131,15 @@
                     La contraseñas <strong>no coinciden</strong>
                 </mat-error>
             </mat-form-field>
-            
-            <button type="submit" class="btn btn-primary">Cambiar</button>
-            <button type="button" class="btn btn-primary ml-2" (click)="enableDisableUpdatePass(2)">Cancelar</button>
+            <!--Submit-->
+            <button type="submit" class="btn btn-primary ml-2">
+                Confirmar
+            </button>
+            <!--Cancelar-->
+            <button type="button" class="btn btn-outline-primary ml-2" (click)="enableDisableUpdatePass(2)">
+                Cancelar
+            </button>
         </form>
-
 
     </div>
 

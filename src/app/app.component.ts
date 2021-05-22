@@ -36,7 +36,7 @@ export class AppComponent {
       // Subscribe New Friend -> Alert
       this.newFriend = this.friendService.newFriend$.subscribe(() => {
         this.onCompleteFriends.emit();
-        this.toastr.success('Ahora ' + this.friendService.newFriendInfo + ' y tú soys amigos');
+        this.toastr.success('Ahora ' + this.friendService.newFriendInfo + ' y tú sois amigos');
       });
       // Cierre navegador
       window.addEventListener("unload", event => {

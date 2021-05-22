@@ -49,4 +49,10 @@ export class ComunidadComponent implements OnInit {
     this.friendService.searchFriends(e.target.value);
   }
 
+  openProfileUser(user: any) {
+    const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+    modalRef.componentInstance.user = user;
+    modalRef.componentInstance.addUser = 'search';
+  }
+
 }

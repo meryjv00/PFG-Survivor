@@ -13,7 +13,7 @@
                     <div class="text-center mt-1">
                         <a href="{{user.photoURL}}" target="_blank">
                             <img src="{{user.photoURL}}" alt="" class="rounded-circle" width="100px"
-                            [ngClass]="{'border-green': user.status === 'online', 'border-red' : user.status === 'offline' }">
+                                [ngClass]="{'border-green': user.status === 'online', 'border-red' : user.status === 'offline' }">
                         </a>
                         <h1 class="text-white mr-2 mb-0">{{user.displayName}}</h1>
                         <p>{{user.email}}</p>
@@ -31,6 +31,23 @@
                             <button class="btn btn-primary ml-2" (click)="friendRequest(user.uid,2)">Rechazar</button>
                         </ng-container>
 
+                        <!--Vista comunidad-->
+                        <ng-container *ngIf="addUser == 'search'">
+                            <!-- <button *ngIf="user.relation == 'friends'" class="btn btn-primary" (click)="deleteFriend(user.uid)">
+                                Dejar de ser amigos
+                            </button> -->
+                            <button *ngIf="user.relation == 'friends'" class="btn btn-primary">
+                                Ya somos amigos
+                            </button>
+                            <button *ngIf="user.relation == 'unknown'" class="btn btn-primary"
+                                (click)="friendRequest(user.uid,3)">
+                                Enviar solicitud de amistad
+                            </button>
+                            <button *ngIf="user.relation == 'sentRequest'" class="btn btn-primary"
+                                (click)="friendRequest(user.uid,4)">
+                                Cancelar solicitud de amistad
+                            </button>
+                        </ng-container>
                     </div>
                     <!--Fotos compartidas-->
                     <div *ngIf="addUser == 'see'" class="mt-4">

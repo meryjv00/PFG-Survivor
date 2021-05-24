@@ -50,6 +50,7 @@ export class PerfilComponent implements OnInit {
       this.rankings.getPositionRankingCoins();
       this.auth.setRechargeFalse();
       this.auth.listenDataLogedUser();
+      this.auth.getItemsUser(1);
       this.chat.getFriends();
       this.chat.closeChat();
       this.friendService.listenFriendsRequests();

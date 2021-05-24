@@ -7,6 +7,7 @@ import { environment } from 'src/environments/environment';
 import { ChatService } from './chat.service';
 import { FriendsService } from './friends.service';
 import { RankingsService } from './rankings.service';
+import { ShopService } from './shop.service';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +30,8 @@ export class AuthService {
   userAuth: any | null;
   providerId: string = null;
   listeningUser = [];
+  itemsLogedUser = [];
+  itemsUser = [];
 
   constructor(public auth: AngularFireAuth,
     private router: Router,
@@ -44,7 +47,7 @@ export class AuthService {
     if (authState) {
       this.authUser = authState;
       this.providerId = this.authUser.providerData[0].providerId;
-      
+
       return authState;
     } else {
       return null;
@@ -68,6 +71,7 @@ export class AuthService {
     localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user));
     this.updateUserData(user);
     this.loginRecharge = false;
+    this.getItemsUser(1);
     this.friends.listenFriendsRequests();
     this.friends.listenSentFriendsRequests();
     this.chat.getFriends();
@@ -76,6 +80,37 @@ export class AuthService {
     this.rankings.getPositionRankings();
     this.rankings.getPositionRankingCoins();
     this.router.navigate(['home']);
+  }
+
+  getItemsUser(type: number, uid?: string) {
+    this.itemsLogedUser = [];
+    this.itemsUser = [];
+    
+    var db = firebase.firestore();
+    if (type == 1) {
+      this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+      this.userAuth = JSON.parse(this.userAuth);
+      uid = this.userAuth.uid;
+    }
+    
+    return db.collection('users').doc(uid).collection('items').get().then((doc) => {
+      doc.forEach(item => {
+        const itemUsu = {
+          'id': item.id,
+          'name': item.data().name,
+          'description': item.data().description,
+          'img': item.data().img,
+          'price': item.data().price,
+          'obtainedDate': String(item.data().obtainedDate.toDate()).substring(4, 15)
+        }
+        if (type == 1) {
+          this.itemsLogedUser.push(itemUsu);
+        } else {
+          this.itemsUser.push(itemUsu);
+        }
+        
+      });
+    });
   }
 
   /**
@@ -219,7 +254,7 @@ export class AuthService {
     var db = firebase.firestore();
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
-    
+
     var unsubscribe = db.collection("users").doc(this.userAuth.uid)
       .onSnapshot({
         includeMetadataChanges: true
@@ -234,7 +269,7 @@ export class AuthService {
         }
       });
 
-      this.listeningUser.push(unsubscribe);
+    this.listeningUser.push(unsubscribe);
   }
 
   /**

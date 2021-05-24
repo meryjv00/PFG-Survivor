@@ -74,6 +74,7 @@ import { ConfirmModalComponent } from './views/confirm-modal/confirm-modal.compo
     BrowserAnimationsModule,
     ToastrModule.forRoot({
       timeOut: 3000,
+      positionClass: 'toast-bottom-right',
     }),
     // Material 
     DemoMaterialModule

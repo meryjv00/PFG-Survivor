@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
 
@@ -18,7 +19,8 @@ export class UserComponent implements OnInit {
     public ngmodal: NgbModal,
     public activeModal: NgbActiveModal,
     public friendService: FriendsService,
-    public chat: ChatService) {
+    public chat: ChatService,
+    public auth: AuthService) {
   }
 
   ngOnInit(): void { }

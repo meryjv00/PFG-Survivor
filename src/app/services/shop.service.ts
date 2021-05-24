@@ -58,16 +58,6 @@ export class ShopService {
     });
   }
 
-/*   getItemsUser(uid?: string) {
-    var db = firebase.firestore();
-
-    db.collection('users').doc(uid).collection('items').get().then((doc) => {
-      doc.forEach(item => {
-        console.log(item);
-        
-      });
-    });
-  } */
   /**
    * Comprueba si el usuario puede comprar o no el arma con las monedas que tiene
    * @param item 
@@ -92,6 +82,10 @@ export class ShopService {
     // Obtener item
     query.collection('items').doc(item.id).set({
       obtainedDate: firebase.firestore.Timestamp.now(),
+      description: item.description,
+      img: item.img,
+      name: item.name,
+      price: item.price
     }).then(() => {
       // Actualizar estado del item
       this.items.forEach(itemFor => {
@@ -100,6 +94,7 @@ export class ShopService {
           itemFor.obtainedDate = 'Ahora mismo';
         }
       });
+      this.auth.itemsLogedUser.push(item);
       // Quitar monedas
       query.update({
         coins: coinsRestantes

@@ -1,7 +1,6 @@
 //$fondo-chat: #275757;
 $fondo-chat: #21252e;
 $header-input: rgba(0,0,0,0.3);
-$scroll: #50667e;
 $mymsg:  #F5F5F5;
 $othermsg: #82ccdd;
 
@@ -16,12 +15,27 @@ $offline:#f44336;
     border-radius:50px;
 }
 
+.circuloChat {
+    padding-top: 25px;
+    padding-left: 25px;
+    height:100px;
+    width:100px;
+    border-radius:100px;
+    
+    mat-icon {
+        font-size: 50px;
+    }
+}
+
 .noFriends {
     height: 230px;
     mat-icon {
         font-size: 50px;
     }
 }
+
+
+
 .green {
     background: $online;
 }
@@ -39,6 +53,9 @@ $offline:#f44336;
 }
 
 .column-friends {
+    max-height: 77vh;
+    overflow-y: auto;
+
     .friendSelected {
         background: $fondo-chat;
     }
@@ -172,21 +189,6 @@ $offline:#f44336;
                     margin-right: -20px; 
                 }
             } 
-        }
-    
-        &::-webkit-scrollbar {
-            width: 11px;
-        }
-        &::-webkit-scrollbar-track {
-            background: $fondo-chat;
-            border-radius: 20px;
-        }
-        &::-webkit-scrollbar-thumb {
-            background-color: $scroll;
-            border-radius: 20px;
-        }
-        &::-webkit-scrollbar-thumb:hover {
-            box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.2);
         }
     }
 

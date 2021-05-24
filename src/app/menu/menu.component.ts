@@ -33,8 +33,10 @@ export class MenuComponent implements OnInit {
   }
 
   openProfileUser(user: any) {
-    const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
-    modalRef.componentInstance.user = user;
-    modalRef.componentInstance.addUser = 'add';
+    this.auth.getItemsUser(2, user.uid).then(() => {
+      const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+      modalRef.componentInstance.user = user;
+      modalRef.componentInstance.addUser = 'add';
+    });
   }
 }

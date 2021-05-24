@@ -51,7 +51,6 @@
                     </div>
                     <!--Fotos compartidas-->
                     <div *ngIf="addUser == 'see'" class="mt-4">
-                        <!-- <p *ngIf="chat.urlImgsChat.length > 0" class="m-0">Imágenes compartidas</p> -->
                         <div class="row">
                             <ng-container *ngFor="let image of chat.urlImgsChat; index as i">
                                 <!--Fotos-->
@@ -95,6 +94,20 @@
                     </div>
                 </div>
 
+                <ng-container *ngIf="addUser == 'search' || addUser == 'add'">
+                    <div *ngIf="auth.itemsUser.length > 0" class="col-12 mx-auto mt-4 py-3 px-4 rounded">
+                        <h3 class="text-white text-center">Armas obtenidas</h3>
+                        <div class="row">
+                            <div class="col-lg-4 col-6" *ngFor="let item of auth.itemsUser">
+                                <div class="bg-success rounded px-2 py-2 mt-2">
+                                    <img src="{{item.img}}" height="120px" class="rounded w-100">
+                                    <h5 class="text-white mt-1 text-center">{{item.name}}</h5>
+                                    <span class="d-flex justify-content-end">{{item.obtainedDate}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
             </div>
 
         </div>

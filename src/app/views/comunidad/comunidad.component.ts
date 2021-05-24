@@ -22,13 +22,14 @@ export class ComunidadComponent implements OnInit {
     public toastr: ToastrService,
     public rankings: RankingsService,
     public ngmodal: NgbModal) {
-      
+
     // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
     if (this.auth.loginRecharge) {
       this.auth.setRechargeFalse();
       this.rankings.getPositionRankings();
       this.rankings.getPositionRankingCoins();
       this.auth.listenDataLogedUser();
+      this.auth.getItemsUser(1);
       this.chat.getFriends();
       this.chat.closeChat();
       this.friendService.listenFriendsRequests();
@@ -36,7 +37,7 @@ export class ComunidadComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   ngAfterViewInit() {
     document.getElementById('buscarAmigoAgregar')
@@ -50,9 +51,11 @@ export class ComunidadComponent implements OnInit {
   }
 
   openProfileUser(user: any) {
-    const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
-    modalRef.componentInstance.user = user;
-    modalRef.componentInstance.addUser = 'search';
+    this.auth.getItemsUser(2, user.uid).then(() => {
+      const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+      modalRef.componentInstance.user = user;
+      modalRef.componentInstance.addUser = 'search';
+    });
   }
 
 }

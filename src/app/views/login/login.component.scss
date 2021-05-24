@@ -1,4 +1,23 @@
-// Inputs formulario
+$invalid:#f44336;
+$borde: #30353f; 
+
 mat-form-field {
     font-size: 15px;
+}
+
+::ng-deep {
+    //input outline color
+    .mat-form-field-appearance-outline .mat-form-field-outline {
+        color: $borde !important;
+    }
+
+    // mat-input error outline color
+    .mat-form-field-appearance-outline.mat-form-field-invalid.mat-form-field-invalid .mat-form-field-outline-thick{
+        color: $invalid !important;
+        opacity: 0.8 !important;
+    }
+
+    .mat-error {
+        color: $invalid !important;
+    }
 }

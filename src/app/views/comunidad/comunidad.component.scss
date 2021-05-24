@@ -1,3 +1,6 @@
+$success: #21252e;
+$scroll: #50667e;
+
 ul {
     list-style: none;
 }
@@ -5,76 +8,53 @@ ul {
 .search-friend {
     box-shadow: 0 0 10px #0E141D;
     border-radius: 5px;
-    /* background: linear-gradient( -60deg, #48535e 5%,#2e3e4b 95%) !important; */
-    padding: 20px;
-    font-family: "Motiva Sans", sans-serif;
+    padding: 10px;
     font-weight: 400px;
-    font-weight: bold;
     
     span.titulo {
         display: block;
         font-size: 30px;
-        color: #ffffff;
     }
     span.subtitulo {
-        font-size: 14px;
+        font-size: 16px;
     }
-    .search-box {
-        padding: 10px 13px;
-        .input-wrapper {
-            background: #fff;
-            border-radius: 40px;
-            padding: 7px;
-    
-            i { 
-                color: grey;
-                vertical-align: middle;
-                margin-left: 7px;
-            }
-    
-            input {
-                border: none;
-                border-radius: 40px;
-                width: 80%;
-                padding-left: 10px;
-                &::placeholder {
-                    color: grey;
-                    font-weight: 350;
-                }
-            
-                &:focus {
-                    outline: none;
-                }
-            }
-        }
-    }
+}
+
+
+
+.titulo {
+    font-weight: 500;
+    padding: 5px;
+    font-size: 20px;
 }
 
 .users {
-    box-shadow: 0 0 10px #0E141D;
+    max-height: 65vh;
+    overflow-y: auto;
+    box-shadow: 0 0 10px #090d13;
     border-radius: 5px;
     padding: 20px 20px;
     padding-top: 5px;
-    .user {
-        &:hover {
-            cursor: pointer;
-        }
-        padding: 10px;
-    }
 }
 
-.aside-block {
-    box-shadow: 0 0 10px #0E141D;
 
-    .titulo {
-        font-family: 'Mandali', sans-serif;
-        font-weight: 500;
-        padding: 10px;
-        font-size: 20px;
-    }
+.sentRequests {
+    max-height: 29vh;
+    overflow-y: auto;
+    box-shadow: 0 0 10px #090d13;
+}
 
-    .contenido-block {
-        padding: 10px;
-    /*  background: linear-gradient( -60deg, #72663f 5%,#9e926b 95%);*/    
+.suggestedFriends {
+    max-height: 56vh;
+    overflow-y: auto;
+    mat-icon {
+        font-size: 50px;
+    }    
+}
+
+.user {
+    cursor: pointer;
+    &:hover {
+        background: #20242b;
     }
 }

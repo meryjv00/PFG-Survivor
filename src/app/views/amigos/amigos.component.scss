@@ -1,45 +1,65 @@
 //$fondo-chat: #275757;
 $fondo-chat: #21252e;
 $header-input: rgba(0,0,0,0.3);
-$scroll: #50667e;
 $mymsg:  #F5F5F5;
 $othermsg: #82ccdd;
 
+$online:#4caf50;
+$offline:#f44336;
 .mat-menu-item .mat-icon-no-color, .mat-menu-item-submenu-trigger::after {
     color: #a5a5a5;
 }
+.circulo {
+    height:10px;
+    width:10px;
+    border-radius:50px;
+}
 
-.search-box {
-    padding: 10px 13px;
-    .input-wrapper {
-        background: #fff;
-        border-radius: 40px;
-        padding: 7px;
-
-        i { 
-            color: grey;
-            vertical-align: middle;
-            margin-left: 7px;
-        }
-
-        input {
-            border: none;
-            border-radius: 40px;
-            width: 80%;
-            padding-left: 10px;
-            &::placeholder {
-                color: grey;
-                font-weight: 350;
-            }
-        
-            &:focus {
-                outline: none;
-            }
-        }
+.circuloChat {
+    padding-top: 25px;
+    padding-left: 25px;
+    height:100px;
+    width:100px;
+    border-radius:100px;
+    
+    mat-icon {
+        font-size: 50px;
     }
 }
 
+.noFriends {
+    height: 230px;
+    mat-icon {
+        font-size: 50px;
+    }
+}
+
+
+
+.green {
+    background: $online;
+}
+.border-green {
+    border: 2px solid $online;
+}
+.red {
+    background: $offline;
+}
+.border-red {
+    border: 2px solid $offline;
+}
+.menuOP:hover {
+    background: $fondo-chat;
+}
+
 .column-friends {
+    max-height: 77vh;
+    overflow-y: auto;
+
+    .friendSelected {
+        background: $fondo-chat;
+    }
+
     .friend-description {
         color: white;
         padding: 10px 15px;
@@ -60,10 +80,9 @@ $othermsg: #82ccdd;
                 font-size: 20px;
                 margin-left: 20px;
             }
-            p {
+            div span {
                 font-size: 14px;
                 color: rgba(255,255,255,0.6); 
-                margin-left: 20px;
             }
         
         }
@@ -171,21 +190,6 @@ $othermsg: #82ccdd;
                 }
             } 
         }
-    
-        &::-webkit-scrollbar {
-            width: 11px;
-        }
-        &::-webkit-scrollbar-track {
-            background: $fondo-chat;
-            border-radius: 20px;
-        }
-        &::-webkit-scrollbar-thumb {
-            background-color: $scroll;
-            border-radius: 20px;
-        }
-        &::-webkit-scrollbar-thumb:hover {
-            box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.2);
-        }
     }
 
     .card-footer {
@@ -261,4 +265,9 @@ img {
 }
 
 
- 
+@media only screen and (min-width:773px) {
+    .noneSearch100 {
+        display: none;
+    }
+
+}

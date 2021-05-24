@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 // Componentes
 import { MenuComponent } from './menu/menu.component';
@@ -61,6 +62,7 @@ import { ConfirmModalComponent } from './views/confirm-modal/confirm-modal.compo
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+    NgbModule,
     // Firebase
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireModule,
@@ -72,6 +74,7 @@ import { ConfirmModalComponent } from './views/confirm-modal/confirm-modal.compo
     BrowserAnimationsModule,
     ToastrModule.forRoot({
       timeOut: 3000,
+      positionClass: 'toast-bottom-right',
     }),
     // Material 
     DemoMaterialModule

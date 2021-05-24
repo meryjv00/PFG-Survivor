@@ -7,7 +7,7 @@ describe('Registro', () => {
 
     beforeEach(() => {
         // Abrimos la web
-        cy.visit('http://localhost:4200');
+        cy.visit('https://pfg-survivor.netlify.app');
         // Click botón registro
         cy.get('#btn-registro').click();
     });

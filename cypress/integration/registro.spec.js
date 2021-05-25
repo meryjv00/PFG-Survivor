@@ -1,6 +1,6 @@
 //Registro - María
-var nombre = 'Maria2';
-var email = 'maria2@gmail.com';
+var nombre = 'Maria3';
+var email = 'maria3@gmail.com';
 var pass = 'Chubaca2020';
 
 describe('Registro', () => {
@@ -58,10 +58,10 @@ describe('Registro', () => {
         cy.get('#name').type('Mar').should('have.value', 'Mar');
 
         // Contraseña
-        cy.get('#pass').type('Chubaca2020').should('have.value', 'Chubaca2020');
+        cy.get('#pass').type(pass).should('have.value', pass);
 
         // Confirmación contraseña
-        cy.get('#confirmPass').type('Chubaca2020').should('have.value', 'Chubaca2020');
+        cy.get('#confirmPass').type(pass).should('have.value', pass);
 
         // Submit del formulario
         cy.get('#registro').submit();

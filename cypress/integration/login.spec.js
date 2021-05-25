@@ -36,8 +36,8 @@ describe('Login', () => {
         // La url ahora debe contener /home
         cy.url().should('include', '/home');
 
-        // Espera 1s
-        cy.wait(1000);
+        // Espera 3s
+        cy.wait(3000);
 
         // Hacemos captura de pantalla
         cy.screenshot();

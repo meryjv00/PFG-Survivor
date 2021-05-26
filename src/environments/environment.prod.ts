@@ -10,4 +10,5 @@ export const environment = {
     measurementId: "G-914PZ017QM"
   },
   SESSION_KEY_USER_AUTH: 'AUTH_USER_123456789',
+  dirBack: 'https://survivorback.herokuapp.com/api/'
 };

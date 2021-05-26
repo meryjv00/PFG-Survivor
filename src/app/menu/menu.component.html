@@ -34,7 +34,7 @@
       </li>
 
       <!--CUENTA LOGEADA-->
-      <ng-container *ngIf="auth.userState | async as user">
+      <ng-container *ngIf="auth.user">
         <!--Comunidad-->
         <li class="nav-item">
           <a routerLink="comunidad" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
@@ -57,7 +57,7 @@
     <!--DERECHA-->
     <div class="my-2 my-lg-0">
       <!--CUENTA LOGEADA-->
-      <ng-container *ngIf="auth.userState | async as user;else login">
+      <ng-container *ngIf="auth.user;else login">
         <!--Alerta notificaciones mensajes-->
         <button mat-mini-fab class="btn-style" [matMenuTriggerFor]="notificationsMessages">
           <mat-icon>mail</mat-icon>

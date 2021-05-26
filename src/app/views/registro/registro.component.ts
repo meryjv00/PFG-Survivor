@@ -47,16 +47,17 @@ export class RegistroComponent implements OnInit {
     }
 
     this.auth.registro()
-      .then(user => {
-        this.auth.updateProfile()
-          .then(ok => {
-            this.toastr.success(this.auth.authUser.displayName, 'Bienvenido/a!');
-            this.activeModal.close();
-          })
-      })
-      .catch(error => {
-        console.log("Error al registrar con email y pass: ", error.code);
-        if (error.code === 'auth/email-already-in-use') {
+    .subscribe(
+      (response) => {
+        console.log('Login éxito');
+        var user = response['message'];
+        this.auth.prepareLogin(user);        
+        this.toastr.success(user.displayName, 'Bienvenido/a!');
+        this.activeModal.close();
+      },
+      (error) => {
+        var code = error['error']['message'].code;
+        if (code === 'auth/email-already-in-use') {
           this.msg = 'El correo electrónico introducido ya está registrado.'
         }
       });
@@ -67,13 +68,15 @@ export class RegistroComponent implements OnInit {
    */
   loginGoogle() {
     this.auth.loginGoogle()
-      .then(user => {
-        this.toastr.success(this.auth.authUser.displayName, 'Bienvenido/a!');
+      .then(response => {
+        var user = response.user;  
+        this.auth.prepareLogin(user);     
+        this.toastr.success(user.displayName, 'Bienvenido/a!');
         this.activeModal.close();
       })
       .catch(error => {
         console.log("Error al logear con Google: ", error);
-      });
+      }); 
   }
 
   /**
@@ -81,8 +84,10 @@ export class RegistroComponent implements OnInit {
    */
   loginFacebook() {
     this.auth.loginFacebook()
-      .then(user => {
-        this.toastr.success(this.auth.authUser.displayName, 'Bienvenido/a!');
+      .then(response => {
+        var user = response.user;  
+        this.auth.updateProfileFB(response);
+        this.toastr.success(user.displayName, 'Bienvenido/a!');
         this.activeModal.close();
       })
       .catch(error => {

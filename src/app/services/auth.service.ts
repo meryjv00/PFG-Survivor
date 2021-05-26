@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
 import { ChatService } from './chat.service';
 import { FriendsService } from './friends.service';
 import { RankingsService } from './rankings.service';
-import { ShopService } from './shop.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -24,12 +24,10 @@ export class AuthService {
   // Pass olvidada
   emailPass = '';
   // User
-  authUser = null;
   user = null;
   loginRecharge: boolean = true;
   userAuth: any | null;
   providerId: string = null;
-  listeningUser = [];
   itemsLogedUser = [];
   itemsUser = [];
 
@@ -37,22 +35,9 @@ export class AuthService {
     private router: Router,
     private chat: ChatService,
     private friends: FriendsService,
-    private rankings: RankingsService) { }
+    private rankings: RankingsService,
+    private http: HttpClient) { }
 
-
-  /**
-   * Información usuario logeado
-   */
-  userState = this.auth.authState.pipe(map(authState => {
-    if (authState) {
-      this.authUser = authState;
-      this.providerId = this.authUser.providerData[0].providerId;
-
-      return authState;
-    } else {
-      return null;
-    }
-  }))
 
   /**
    * Método que se llama desde los constructores de los componentes para en el caso de haber
@@ -85,32 +70,26 @@ export class AuthService {
   getItemsUser(type: number, uid?: string) {
     this.itemsLogedUser = [];
     this.itemsUser = [];
-    
-    var db = firebase.firestore();
+
     if (type == 1) {
       this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
       this.userAuth = JSON.parse(this.userAuth);
       uid = this.userAuth.uid;
     }
-    
-    return db.collection('users').doc(uid).collection('items').get().then((doc) => {
-      doc.forEach(item => {
-        const itemUsu = {
-          'id': item.id,
-          'name': item.data().name,
-          'description': item.data().description,
-          'img': item.data().img,
-          'price': item.data().price,
-          'obtainedDate': String(item.data().obtainedDate.toDate()).substring(4, 15)
-        }
-        if (type == 1) {
-          this.itemsLogedUser.push(itemUsu);
-        } else {
-          this.itemsUser.push(itemUsu);
-        }
-        
-      });
-    });
+
+    const url = environment.dirBack + "getItemsUser";
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.uid.refreshToken}` });
+    this.http.post(url, { 'uid': uid }, { headers: headers })
+      .subscribe(
+        (response) => {
+          var items = response['message'];
+
+          if (type == 1) {
+            this.itemsLogedUser = items;
+          } else {
+            this.itemsUser = items;
+          }
+        });
   }
 
   /**
@@ -118,83 +97,110 @@ export class AuthService {
   * @returns 
   */
   registro() {
-    return this.auth.createUserWithEmailAndPassword(this.emailRegistro, this.passRegistro)
-      .then(user => {
-        // console.log('Usuario registrado con email: ', user);
-        this.authUser = user.user;
-      })
+    const url = environment.dirBack + "registro";
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(url, { 'email': this.emailRegistro, 'pass': this.passRegistro, 'name': this.nombreRegistro }, { headers: headers });
   }
 
-  /**
-   * Establece el nombre que ha introducido y una foto por defecto a un usuario que acaba de realizar el registro
-   * @returns 
-   */
-  updateProfile() {
-    return this.authUser.updateProfile({
-      displayName: this.nombreRegistro,
-      photoURL: 'https://www.softzone.es/app/uploads/2018/04/guest.png'
-    }).then(ok => {
-      this.prepareLogin(this.authUser);
-    });
-  }
 
   /**
    * Login con email y contraseña
    * @returns 
    */
   login() {
-    return this.auth.signInWithEmailAndPassword(this.emailLogin, this.passLogin)
-      .then(user => {
-        // console.log("Usuario logeado con email: ", user);
-        this.authUser = user.user;
-        this.prepareLogin(user.user);
-      });
+    const url = environment.dirBack + "login";
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(url, { 'email': this.emailLogin, 'pass': this.passLogin }, { headers: headers });
   }
 
   /**
    * Login con cuenta de Google
    */
   loginGoogle() {
-    return this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-      .then(user => {
-        // console.log("Usuario logeado con Google: ", user);
-        this.authUser = user.user;
-        this.prepareLogin(user.user);
-      })
+    return this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
   }
 
   /**
    * Login con cuenta de Facebook
    */
   loginFacebook() {
-    return this.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider())
-      .then(user => {
-        //console.log("Usuario logeado con Facebook: ", user);
-        this.authUser = user.user;
-
-        // En el caso de tener la foto de facebook por defecto se le establece la que tenga el usuario en fb
-        if (user.user.photoURL.startsWith('https://graph.facebook.com/')) {
-          user.user.updateProfile({
-            photoURL: user.additionalUserInfo.profile['picture']['data']['url']
-          }).then(ok => {
-            this.prepareLogin(user.user);
-          });
-        } else {
-          this.prepareLogin(user.user);
-        }
-      })
+    return this.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider());
   }
 
   /**
-   * Cerrar sesión cuenta
+   * Añadir foto de Facebook al usuario cuando se logea por 1º vez
+   * @param user 
    */
+  updateProfileFB(user) {
+    if (user.user.photoURL.startsWith('https://graph.facebook.com/')) {
+      user.user.updateProfile({
+        photoURL: user.additionalUserInfo.profile['picture']['data']['url']
+      }).then(() => {
+        this.prepareLogin(user.user);
+      });
+    } else {
+      this.prepareLogin(user.user);
+    }
+  }
+
+  /**
+   * Guardar usuario en base de datos
+   * @param user 
+   */
+  updateUserData(user: any) {
+    const url = environment.dirBack + "updateUserLogin";
+    let headers = new HttpHeaders({ Authorization: `Bearer ${user.refreshToken}` });
+    this.http.post(url, { 'user': user }, { headers: headers })
+      .subscribe(
+        (response) => {
+          console.log('USER:', response);
+          this.getUser();
+        });
+  }
+
+  /**
+   * Obtener los datos del usuario logeado
+   */
+  getUser() {
+    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+    this.userAuth = JSON.parse(this.userAuth);
+
+    const url = environment.dirBack + "getUser";
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.uid.refreshToken}` });
+    this.http.post(url, { 'uid': this.userAuth.uid }, { headers: headers })
+      .subscribe(
+        (response) => {
+          this.user = {
+            'uid': response['message'].uid,
+            'status': response['message'].status,
+            'displayName': response['message'].displayName,
+            'photoURL': response['message'].photoURL,
+            'email': response['message'].email,
+            'coins': response['message'].coins,
+          }          
+        });
+  }
+
+
+  /**
+   * Envía correo al email introducido donde se le permite cambiar la contraseña de la cuenta.
+   */
+  sendPasswordResetEmail() {
+    const url = environment.dirBack + "sendPasswordResetEmail";
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(url, { 'email': this.emailPass }, { headers: headers });
+  }
+
+
+  /**
+  * Cerrar sesión cuenta
+  */
   logout() {
     this.user = null;
     this.auth.signOut();
     this.setRechargeFalse();
     this.rankings.stopListeningRankingsItems();
     this.chat.setStatusOnOff(2);
-    this.stopListeningUser();
     this.chat.stopListeningFriendMessages(false, 1);
     this.chat.stopListeningFriends();
     this.friends.stopListeningFriendsRequests();
@@ -211,90 +217,7 @@ export class AuthService {
   }
 
   /**
-   * Guardar usuario en base de datos
-   * @param user 
-   */
-  updateUserData(user: any) {
-    var db = firebase.firestore();
-
-    db.collection("users").doc(user.uid).get()
-      .then((doc) => {
-        // No está registrado
-        if (doc.data() == undefined) {
-          db.collection("users").doc(user.uid).set({
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            chatOpen: "",
-            status: 'online',
-            coins: 10,
-          }).then(() => {
-            // Poner en escucha al usuario
-            this.listenDataLogedUser();
-          });
-        }
-        // Si está registrado
-        else {
-          db.collection("users").doc(user.uid).update({
-            status: 'online'
-          }).then(() => {
-            // Poner en escucha al usuario
-            this.listenDataLogedUser();
-          });
-        }
-
-      });
-
-  }
-
-  /**
-   * Pone en escucha los datos del usuario, se llama al iniciar sesión y recargar página
-   */
-  listenDataLogedUser() {
-    var db = firebase.firestore();
-    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
-    this.userAuth = JSON.parse(this.userAuth);
-
-    var unsubscribe = db.collection("users").doc(this.userAuth.uid)
-      .onSnapshot({
-        includeMetadataChanges: true
-      }, (doc) => {
-        this.user = {
-          'uid': doc.id,
-          'status': doc.data().status,
-          'displayName': doc.data().displayName,
-          'photoURL': doc.data().photoURL,
-          'email': doc.data().email,
-          'coins': doc.data().coins,
-        }
-      });
-
-    this.listeningUser.push(unsubscribe);
-  }
-
-  /**
-   * Se para la escucha de los metadatos del usuario logeado
-   */
-  stopListeningUser() {
-    this.listeningUser.forEach(unsubscribe => {
-      // console.log('Desactivando USER...');
-      unsubscribe();
-    });
-  }
-
-  /**
-   * Envía correo al email introducido donde se le permite cambiar la contraseña de la cuenta.
-   */
-  sendPasswordResetEmail() {
-    return this.auth.sendPasswordResetEmail(this.emailPass)
-      .then(ok => {
-        console.log('Correo enviado');
-        this.emailPass = '';
-      });
-  }
-
-  /**
-   * Método que limpia los inputs de los formularios login y registro
+   * Método que limpia los inputs de los formularios login/registro/pass
    */
   limpiarFormularios() {
     this.emailLogin = '';

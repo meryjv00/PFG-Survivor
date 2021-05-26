@@ -34,20 +34,22 @@ export class PassComponent implements OnInit {
     }
 
     this.auth.sendPasswordResetEmail()
-    .then(ok => {
-      this.activeModal.close();
-      const modalRef = this.ngmodal.open(LoginComponent, { size: 'lg' });
-      modalRef.componentInstance.msgPassword = 'Se ha enviado un mensaje al correo electrónico para restablecer la contraseña.';
-    })
-    .catch(error => {
-      console.log('Ha ocurrido un error al enviar el correo', error);
-      
-      if (error.code === 'auth/too-many-requests') {
-        this.msg = 'Hemos bloqueado todas las solicitudes de este dispositivo debido a una actividad inusual. Vuelve a intentarlo más tarde.'
-      }else if(error.code === 'auth/user-not-found'){
-        this.msg = 'No hay ningún usuario registrado con el correo electrónico solicitado.';
-      }
-    });
+    .subscribe(
+      (response) => {
+        console.log('Correo enviado:', response['message']);
+        this.auth.emailPass = '';
+        this.activeModal.close();
+        const modalRef = this.ngmodal.open(LoginComponent, { size: 'lg' });
+        modalRef.componentInstance.msgPassword = 'Se ha enviado un mensaje al correo electrónico para restablecer la contraseña.';
+      },
+      (error) => {
+        var code = error['error']['message'].code;
+        if (code === 'auth/too-many-requests') {
+          this.msg = 'Hemos bloqueado todas las solicitudes de este dispositivo debido a una actividad inusual. Vuelve a intentarlo más tarde.'
+        }else if(code === 'auth/user-not-found'){
+          this.msg = 'No hay ningún usuario registrado con el correo electrónico solicitado.';
+        }
+      });
   }
 
   /**

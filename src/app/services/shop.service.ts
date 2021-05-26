@@ -48,7 +48,7 @@ export class ShopService {
               this.items.forEach(itemFor => {
                 if (itemFor.id == item.id) {
                   itemFor.owned = true;
-                  itemFor.obtainedDate = String(item.data().obtainedDate.toDate()).substring(4,15);
+                  itemFor.obtainedDate = String(item.data().obtainedDate.toDate()).substring(4, 15);
                 }
               });
             });
@@ -77,8 +77,11 @@ export class ShopService {
    */
   buyItem(item: any) {
     var db = firebase.firestore();
-    var query = db.collection('users').doc(this.auth.user.uid);
+    console.log(this.userAuth.uid);
+
+    var query = db.collection('users').doc(this.userAuth.uid);
     var coinsRestantes = this.auth.user.coins - item.price;
+
     // Obtener item
     query.collection('items').doc(item.id).set({
       obtainedDate: firebase.firestore.Timestamp.now(),
@@ -99,6 +102,7 @@ export class ShopService {
       query.update({
         coins: coinsRestantes
       });
+      this.auth.user.coins = coinsRestantes;
     });
 
   }

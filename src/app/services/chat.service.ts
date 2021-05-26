@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import * as _ from "lodash";
 import { AngularFireStorage } from '@angular/fire/storage';
 import { Subject } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -37,7 +38,8 @@ export class ChatService {
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   constructor(
     private router: Router,
-    public firestorage: AngularFireStorage) {
+    public firestorage: AngularFireStorage,
+    private http: HttpClient) {
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -798,7 +800,17 @@ export class ChatService {
    */
   getImagenesChat() {
     this.urlImgsChat = [];
-    var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected;
+
+    const url = environment.dirBack + "getImgsChat";
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.uid.refreshToken}` });
+    this.http.post(url, { 'uid': this.userAuth.uid, uidFriend: this.uidFriendSelected }, { headers: headers })
+    .subscribe(
+      (response) => {
+        console.log(response['message']);
+        this.urlImgsChat = response['message'];
+      });
+
+/*     var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected;
     const ref = firebase.storage().ref(path);
     return ref.listAll()
       .then(dir => {
@@ -807,7 +819,7 @@ export class ChatService {
             this.urlImgsChat.push(url);
           });
         });
-      });
+      }); */
   }
 
 

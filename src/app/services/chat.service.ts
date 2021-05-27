@@ -803,23 +803,8 @@ export class ChatService {
 
     const url = environment.dirBack + "getImgsChat";
     let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.uid.refreshToken}` });
-    this.http.post(url, { 'uid': this.userAuth.uid, uidFriend: this.uidFriendSelected }, { headers: headers })
-    .subscribe(
-      (response) => {
-        console.log(response['message']);
-        this.urlImgsChat = response['message'];
-      });
-
-/*     var path = 'images/' + this.userAuth.uid + '/' + this.uidFriendSelected;
-    const ref = firebase.storage().ref(path);
-    return ref.listAll()
-      .then(dir => {
-        dir.items.forEach(fileRef => {    
-          fileRef.getDownloadURL().then(url => {
-            this.urlImgsChat.push(url);
-          });
-        });
-      }); */
+    return this.http.post(url, { 'uid': this.userAuth.uid, uidFriend: this.uidFriendSelected }, { headers: headers });
+    
   }
 
 

@@ -111,14 +111,22 @@ export class AmigosComponent implements OnInit {
   }
 
   openProfileUser(user: any) {
-    this.chat.getImagenesChat();
-/*     this.chat.getImagenesChat().then(() => {
-      const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
-      modalRef.componentInstance.user = user;
-      modalRef.componentInstance.addUser = 'see';
-      modalRef.componentInstance.msgs = this.chat.messagesWithFriend.length;
-    }); */
-   
+    this.chat.getImagenesChat()
+      .subscribe(
+        (response) => {
+          console.log(response['message']);
+          this.chat.urlImgsChat = response['message'];
+          const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+          modalRef.componentInstance.user = user;
+          modalRef.componentInstance.addUser = 'see';
+          modalRef.componentInstance.msgs = this.chat.messagesWithFriend.length;
+
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+
   }
 
   openConfirmModal() {

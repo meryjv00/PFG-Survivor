@@ -68,17 +68,17 @@ export class AuthService {
   }
 
   getItemsUser(type: number, uid?: string) {
-    this.itemsLogedUser = [];
-    this.itemsUser = [];
-
     if (type == 1) {
+      this.itemsLogedUser = [];
       this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
       this.userAuth = JSON.parse(this.userAuth);
       uid = this.userAuth.uid;
+    }else{
+      this.itemsUser = [];
     }
 
     const url = environment.dirBack + "getItemsUser";
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.uid.refreshToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.uid.accessToken}` });
     this.http.post(url, { 'uid': uid }, { headers: headers })
       .subscribe(
         (response) => {
@@ -149,7 +149,7 @@ export class AuthService {
    */
   updateUserData(user: any) {
     const url = environment.dirBack + "updateUserLogin";
-    let headers = new HttpHeaders({ Authorization: `Bearer ${user.refreshToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${user.accessToken}` });
     this.http.post(url, { 'user': user }, { headers: headers })
       .subscribe(
         (response) => {
@@ -166,7 +166,7 @@ export class AuthService {
     this.userAuth = JSON.parse(this.userAuth);
 
     const url = environment.dirBack + "getUser";
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.uid.refreshToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
     this.http.post(url, { 'uid': this.userAuth.uid }, { headers: headers })
       .subscribe(
         (response) => {
@@ -177,7 +177,7 @@ export class AuthService {
             'photoURL': response['message'].photoURL,
             'email': response['message'].email,
             'coins': response['message'].coins,
-          }          
+          }
         });
   }
 

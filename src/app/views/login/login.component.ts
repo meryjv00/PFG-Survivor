@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
     this.login = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
-    });    
+    });
   }
 
   ngOnInit(): void {
@@ -47,23 +47,23 @@ export class LoginComponent implements OnInit {
     }
 
     this.auth.login()
-    .subscribe(
-      (response) => {
-        console.log('Login éxito');
-        var user = response['message'];
-        this.auth.prepareLogin(user);        
-        this.toastr.success(user.displayName, 'Bienvenido/a!');
-        this.activeModal.close();
-      },
-      (error) => {
-        var code = error['error']['message'].code;
-        if (code === 'auth/wrong-password' || code === 'auth/user-not-found') {
-          this.msg = 'No se ha podido iniciar sesión. Revise sus credenciales.';
-        }else if (code === 'auth/too-many-requests'){
-          this.msg = 'El acceso a esta cuenta se ha desactivado temporalmente debido a muchos intentos fallidos de inicio de sesión. \
+      .subscribe(
+        (response) => {
+          console.log('Login éxito');
+          var user = response['message'];
+          this.auth.prepareLogin(user);
+          this.toastr.success(user.displayName, 'Bienvenido/a!');
+          this.activeModal.close();
+        },
+        (error) => {
+          var code = error['error']['message'].code;
+          if (code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+            this.msg = 'No se ha podido iniciar sesión. Revise sus credenciales.';
+          } else if (code === 'auth/too-many-requests') {
+            this.msg = 'El acceso a esta cuenta se ha desactivado temporalmente debido a muchos intentos fallidos de inicio de sesión. \
           Intentalo más tarde o restaura tu contraseña.';
-        }
-      });
+          }
+        });
   }
 
   /**
@@ -72,14 +72,14 @@ export class LoginComponent implements OnInit {
   loginGoogle() {
     this.auth.loginGoogle()
       .then(response => {
-        var user = response.user;  
-        this.auth.prepareLogin(user);     
+        var user = response.user;
+        this.auth.prepareLogin(user);
         this.toastr.success(user.displayName, 'Bienvenido/a!');
         this.activeModal.close();
       })
       .catch(error => {
         console.log("Error al logear con Google: ", error.code);
-      }); 
+      });
   }
 
   /**
@@ -88,7 +88,7 @@ export class LoginComponent implements OnInit {
   loginFacebook() {
     this.auth.loginFacebook()
       .then(response => {
-        var user = response.user;  
+        var user = response.user;
         this.auth.updateProfileFB(response);
         this.toastr.success(user.displayName, 'Bienvenido/a!');
         this.activeModal.close();

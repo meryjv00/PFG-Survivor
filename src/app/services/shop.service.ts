@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import firebase from 'firebase/app';
 import { environment } from 'src/environments/environment';
 import { AuthService } from './auth.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -9,53 +9,32 @@ import { AuthService } from './auth.service';
 export class ShopService {
   items = [];
 
-  constructor(private auth: AuthService) { }
-  userAuth: any | null;
-
-  /**
-   * Obtiene el usuario almacenado en localStorage, el cual se almacena al iniciar sesión
-   */
-  getUser() {
-    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
-    this.userAuth = JSON.parse(this.userAuth);
-  }
-
+  constructor(private auth: AuthService,
+    private http: HttpClient) {}
 
   /**
    * Recupera los items disponibles en la tienda
    */
   getItems() {
-    this.items = [];
-    var db = firebase.firestore();
-    this.getUser();
-
-    db.collection('shop').get().then((doc) => {
-      doc.forEach(docu => {
-        const item = {
-          'id': docu.id,
-          'name': docu.data().name,
-          'description': docu.data().description,
-          'img': docu.data().img,
-          'price': docu.data().price,
-          'owned': false,
-          'obtainedDate': null
-        }
-        this.items.push(item);
-
-        if (this.userAuth) {
-          db.collection('users').doc(this.userAuth.uid).collection('items').get().then((doc) => {
-            doc.forEach(item => {
-              this.items.forEach(itemFor => {
-                if (itemFor.id == item.id) {
-                  itemFor.owned = true;
-                  itemFor.obtainedDate = String(item.data().obtainedDate.toDate()).substring(4, 15);
+    const url = environment.dirBack + "getItems";
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.get(url, { headers: headers })
+      .subscribe(
+        (response) => {
+          this.items = response['message'];
+          // Si el usuario está logeado obtenemos si tiene el arma comprada o no
+          if (this.auth.user) {
+            console.log('Items user', this.auth.itemsLogedUser);
+            this.items.forEach(itemShop => {
+              this.auth.itemsLogedUser.forEach(myitem => {
+                if (itemShop.id == myitem.id) {
+                  itemShop.owned = true;
+                  itemShop.obtainedDate = myitem.obtainedDate;
                 }
               });
             });
-          });
-        }
-      });
-    });
+          }
+        });
   }
 
   /**
@@ -76,35 +55,27 @@ export class ShopService {
    * @param item 
    */
   buyItem(item: any) {
-    var db = firebase.firestore();
-    console.log(this.userAuth.uid);
+    const url = environment.dirBack + "buyItem";
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.put(url, { 'user': this.auth.user, 'item': item }, { headers: headers })
+      .subscribe(
+        (response) => {
+          console.log(response['message']);
 
-    var query = db.collection('users').doc(this.userAuth.uid);
-    var coinsRestantes = this.auth.user.coins - item.price;
+          // Actualizar estado del item en la tienda
+          this.items.forEach(itemShop => {
+            if (itemShop.id == item.id) {
+              itemShop.owned = true;
+              itemShop.obtainedDate = 'Ahora mismo';
+            }
+          });
 
-    // Obtener item
-    query.collection('items').doc(item.id).set({
-      obtainedDate: firebase.firestore.Timestamp.now(),
-      description: item.description,
-      img: item.img,
-      name: item.name,
-      price: item.price
-    }).then(() => {
-      // Actualizar estado del item
-      this.items.forEach(itemFor => {
-        if (itemFor.id == item.id) {
-          itemFor.owned = true;
-          itemFor.obtainedDate = 'Ahora mismo';
-        }
-      });
-      this.auth.itemsLogedUser.push(item);
-      // Quitar monedas
-      query.update({
-        coins: coinsRestantes
-      });
-      this.auth.user.coins = coinsRestantes;
-    });
+          // Añadir item & restar monedas
+          this.auth.addItem(item);
+          var coinsRestantes = this.auth.user.coins - item.price;
+          this.auth.setCoins(coinsRestantes);
 
+        });
   }
 
 }

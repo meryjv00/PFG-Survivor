@@ -44,6 +44,8 @@ export class PerfilComponent implements OnInit {
       confirmPassword: ['', [Validators.required, Validators.pattern]]
     });
 
+    this.auth.getProviderID();
+
     // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
     if (this.auth.loginRecharge) {
       this.rankings.getPositionRankings();
@@ -87,15 +89,19 @@ export class PerfilComponent implements OnInit {
       return;
     }
     this.perfilService.updateEmail(this.email.value.email)
-      .then(ok => {
-        alert('Email modificado')
+    .subscribe(
+      (response) => {
+        console.log('RESPONSE', response);
+        this.toastr.success(`Correo electrónico actualizado`);
+        this.auth.setEmail(this.email.value.email);
         this.enableDisableUpdateEmail(2);
         this.email.reset();
-      })
-      .catch(error => {
-        if (error.code === 'auth/requires-recent-login') {
+      },
+      (error) => {
+        var code = error['error']['message'].code;
+        if (code === 'auth/requires-recent-login') {
           this.msg = 'Debes relogearte para poder cambiar el email.';
-        } else if (error.code === 'auth/email-already-in-use') {
+        } else if (code === 'auth/email-already-in-use') {
           this.msg = 'El email introducido ya está registrado';
         }
       });
@@ -111,14 +117,15 @@ export class PerfilComponent implements OnInit {
     }
 
     this.perfilService.updatePass(this.pass.value.password)
-      .then(ok => {
-        alert('Contraseña modificada');
+    .subscribe(
+      (response) => {
+        console.log('RESPONSE', response);
+        this.toastr.success(`Contraseña actualizada`);
         this.enableDisableUpdatePass(2);
         this.pass.reset();
-      })
-      .catch(error => {
-        console.log(error);
-
+      },
+      (error) => {
+        console.log('Ha ocurrido un error actualizando la contraseña', error);      
       });
   }
 

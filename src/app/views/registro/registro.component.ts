@@ -52,7 +52,7 @@ export class RegistroComponent implements OnInit {
         console.log('Login éxito');
         var user = response['message'];
         this.auth.prepareLogin(user);        
-        this.toastr.success(user.displayName, 'Bienvenido/a!');
+        this.toastr.success('Bienvenido/a!');
         this.activeModal.close();
       },
       (error) => {
@@ -71,7 +71,7 @@ export class RegistroComponent implements OnInit {
       .then(response => {
         var user = response.user;  
         this.auth.prepareLogin(user);     
-        this.toastr.success(user.displayName, 'Bienvenido/a!');
+        this.toastr.success('Bienvenido/a!');
         this.activeModal.close();
       })
       .catch(error => {
@@ -87,7 +87,7 @@ export class RegistroComponent implements OnInit {
       .then(response => {
         var user = response.user;  
         this.auth.updateProfileFB(response);
-        this.toastr.success(user.displayName, 'Bienvenido/a!');
+        this.toastr.success('Bienvenido/a!');
         this.activeModal.close();
       })
       .catch(error => {

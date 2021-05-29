@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { map } from 'rxjs/operators';
 import firebase from 'firebase/app';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
@@ -47,6 +46,29 @@ export class AuthService {
     this.loginRecharge = false;
   }
 
+  addItem(item) {
+    this.itemsLogedUser.push(item);
+  }
+  setCoins(coins) {
+    this.user.coins = coins;
+  }
+  setPhoto(photoURL) {
+    this.user.photoURL = photoURL;
+  }
+  setName(name) {
+    this.user.displayName = name;
+  }
+  setEmail(email) {
+    this.user.email = email;
+  }
+
+  getProviderID() {
+    this.providerId = null;
+    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+    this.userAuth = JSON.parse(this.userAuth);
+    this.providerId = this.userAuth.providerData[0].providerId;
+  }
+
   /**
    * Método que llama a todos los métodos necesarios para obtener todos los datos para iniciar sesión
    * Amigos, escuchar mensajes de amigos, peticiones de amistad...
@@ -73,12 +95,12 @@ export class AuthService {
       this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
       this.userAuth = JSON.parse(this.userAuth);
       uid = this.userAuth.uid;
-    }else{
+    } else {
       this.itemsUser = [];
     }
 
     const url = environment.dirBack + "getItemsUser";
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.uid.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
     this.http.post(url, { 'uid': uid }, { headers: headers })
       .subscribe(
         (response) => {
@@ -165,9 +187,9 @@ export class AuthService {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
 
-    const url = environment.dirBack + "getUser";
+    const url = `${environment.dirBack}getUser/${this.userAuth.uid}`;
     let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
-    this.http.post(url, { 'uid': this.userAuth.uid }, { headers: headers })
+    this.http.get(url, { headers: headers })
       .subscribe(
         (response) => {
           this.user = {
@@ -203,8 +225,7 @@ export class AuthService {
     this.chat.setStatusOnOff(2);
     this.chat.stopListeningFriendMessages(false, 1);
     this.chat.stopListeningFriends();
-    this.friends.stopListeningFriendsRequests();
-    this.friends.stopListeningSentFriendsRequests();
+    this.friends.stopListeningRequests();
     this.chat.closeChat();
     this.friends.resetSearchFriends();
     this.rankings.setGetRankingsTrue();

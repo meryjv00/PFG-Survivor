@@ -52,7 +52,7 @@ export class LoginComponent implements OnInit {
           console.log('Login éxito');
           var user = response['message'];
           this.auth.prepareLogin(user);
-          this.toastr.success(user.displayName, 'Bienvenido/a!');
+          this.toastr.success('Bienvenido/a!');
           this.activeModal.close();
         },
         (error) => {
@@ -74,7 +74,7 @@ export class LoginComponent implements OnInit {
       .then(response => {
         var user = response.user;
         this.auth.prepareLogin(user);
-        this.toastr.success(user.displayName, 'Bienvenido/a!');
+        this.toastr.success('Bienvenido/a!');
         this.activeModal.close();
       })
       .catch(error => {
@@ -87,10 +87,9 @@ export class LoginComponent implements OnInit {
    */
   loginFacebook() {
     this.auth.loginFacebook()
-      .then(response => {
-        var user = response.user;
-        this.auth.updateProfileFB(response);
-        this.toastr.success(user.displayName, 'Bienvenido/a!');
+      .then(user => {
+        this.auth.updateProfileFB(user);
+        this.toastr.success('Bienvenido/a!');
         this.activeModal.close();
       })
       .catch(error => {

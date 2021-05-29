@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
@@ -18,10 +19,10 @@ export class TiendaComponent implements OnInit {
     public friendService: FriendsService,
     public chat: ChatService,
     public shop: ShopService,
-    public rankings: RankingsService) {
+    public rankings: RankingsService,
+    public toastr: ToastrService) {
 
     this.getUser();
-    this.shop.getItems();
 
     if (this.auth.loginRecharge && this.userAuth != null) {
       this.rankings.getPositionRankings();
@@ -34,6 +35,8 @@ export class TiendaComponent implements OnInit {
       this.friendService.listenFriendsRequests();
       this.friendService.listenSentFriendsRequests();
     }
+
+    this.shop.getItems();
   }
 
   ngOnInit(): void {}
@@ -54,7 +57,7 @@ export class TiendaComponent implements OnInit {
       // Confirmación comprar
       this.shop.buyItem(item);
     } else {
-      alert('No tienes suficientes monedas para comprar este arma');
+      this.toastr.warning(`No tienes suficientes monedas para comprar ${item.name}`);
     }
   }
 }

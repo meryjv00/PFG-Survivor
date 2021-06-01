@@ -31,10 +31,10 @@ export class PerfilService {
    */
   updateDisplayName(name: string) {
     this.getUser();
-
+    
     const url = environment.dirBack + "updateName/" + this.userAuth.uid;
     let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
-    this.http.put(url, { 'user': this.userAuth }, { headers: headers })
+    this.http.put(url, { 'name': name }, { headers: headers })
       .subscribe(
         (response) => {
           console.log('RESPONSE', response);

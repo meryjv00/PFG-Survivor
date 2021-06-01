@@ -27,11 +27,13 @@ export class ChatService {
   urlImg: any; // Guarda la url de la imagen del chat para mostrarla en el modal
   suggestedFriends = []; // Sugerencias de amigos "Amigos de mis amigos"
   sentRequested = []; // Array que contiene los uid que el usuario mandó solicitud
-  msgsWithoutRead2 = []; // Mensajes sin leer para las notificaciones del chat
+  msgsWithoutReadNotif = []; // Mensajes sin leer para las notificaciones del chat
   urlImgsChat = []; // URL de las imágenes que el usuario ha compartido con cada chat
   // Avisa al componente de que se ha recibido/enviado un nuevo mensaje para que el scroll baje automáticamente
   private countdownEndSource = new Subject<void>();
   public countdownEnd$ = this.countdownEndSource.asObservable();
+  nFriends: number = 0;
+  tokenUser:string = '';
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CONSTRUCTOR~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,10 +52,20 @@ export class ChatService {
   getUser() {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
+    this.tokenUser = this.userAuth['stsTokenManager']['accessToken'];
   }
 
   /**
-   * Marca el usuario como conectado
+   * Vacía los mensajes al cerrar sesión 
+   */
+  cleanMessages() {
+    this.messagesWithoutRead = [];
+    this.msgsWithoutReadNotif = [];
+  }
+
+  /**
+   * Marcar como conectado/desconectado
+   * @param type 1: conectado / 2: desconectado
    */
   setStatusOnOff(type: number) {
     this.getUser();
@@ -66,7 +78,7 @@ export class ChatService {
     }
 
     const url = environment.dirBack + "updateStatus/" + this.userAuth.uid;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.uid.refreshToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.put(url, { 'user': this.userAuth, status: status }, { headers: headers })
       .subscribe(() => { });
 
@@ -122,12 +134,11 @@ export class ChatService {
 
     var unsubscribe = query.onSnapshot(snapshot => {
       snapshot.docChanges().forEach((change, index) => {
-        var cont = 0;
         // Obtener nº de amigos si se añade un nuevo amigo, no se pase a poner en esucucha a los mensajes hasta obtenerlos todos
         this.getFriendsData(this.userAuth.uid)
           .subscribe(
             (response) => {
-              cont = response['message'].length;
+              this.nFriends = response['message'].length;
 
               // Amigo borrado
               if (change.type === 'removed') {
@@ -164,9 +175,10 @@ export class ChatService {
                             // Pone en escucha la información del amigo
                             this.listenDataFriend(change.doc.id);
 
+                            var pos = this.friends.length - 1;
                             // Ultima pos del array -> se redirige a poner en escucha todos los mensajes de los amigos obtenidos
-                            if (cont == index + 1) {
-                              this.stopListeningFriendMessages(2);
+                            this.listenFriendMessages(friend, pos);
+                            if (this.nFriends == index + 1) {
                               this.getSuggestedFriends();
                             }
 
@@ -188,7 +200,7 @@ export class ChatService {
    */
   getFriendsData(userUID) {
     const url = `${environment.dirBack}getFriendsUID/${userUID}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     return this.http.get(url, { headers: headers });
   }
 
@@ -199,7 +211,7 @@ export class ChatService {
    */
   getUserData(userUID) {
     const url = `${environment.dirBack}getUser/${userUID}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     return this.http.get(url, { headers: headers });
   }
 
@@ -210,7 +222,7 @@ export class ChatService {
    */
   getFriendShipData(userUID) {
     const url = `${environment.dirBack}getDataFriendship/${this.userAuth.uid}/${userUID}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     return this.http.get(url, { headers: headers });
   }
 
@@ -332,9 +344,11 @@ export class ChatService {
    */
   getSentFriendsRequests() {
     const url = `${environment.dirBack}getSentFriendsRequests/${this.userAuth.uid}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     return this.http.get(url, { headers: headers });
   }
+
+
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~LISTEN FRIEND MESSAGES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -343,186 +357,197 @@ export class ChatService {
    * Pone en escucha los mensajes de todos los amigos
    * para recibir en tiempo real cualquier cambio
    */
-  listenFriendMessages() {
+  listenFriendMessages(friend, index) {
+    console.log('ESCUCHA AMIGOS');
+    console.log(index);
+
     var db = firebase.firestore();
     this.getUser();
     this.messagesFriends = [];
-    this.messagesWithoutRead = [];
-    this.msgsWithoutRead2 = [];
     var msgs = [];
     var msg: any;
-    var readMessage = true;
+    var read: boolean;
+    var query = db.collection('users').doc(this.userAuth.uid).collection('friends')
+      .doc(friend.uid).collection('messages')
+      .orderBy('timestamp', 'asc')
 
-    // Se recorren los amigos para poner todos los mensajes d
-    if (this.friends.length > 0) {
-      this.friends.forEach((friend, index) => {
-        msgs = [];
-
-        var query = db.collection('users').doc(this.userAuth.uid).collection('friends')
-          .doc(friend.uid).collection('messages')
-          .orderBy('timestamp', 'asc')
-
-        var unsubscribe = query.onSnapshot(snapshot => {
-          snapshot.docChanges().forEach(change => {
-            // Mensaje eliminado
-            if (change.type === 'removed') {
-              readMessage = false;
-              this.messagesFriends.forEach(user => {
-                if (user.uid == friend.uid) {
-                  user.messages.forEach((message, index) => {
-                    if (message.id == change.doc.id) {
-                      console.log('Mensaje borrado: ', message.id);
-                      user.messages.splice(index, 1);
-                      // Si todavía no está leido -> Descontarlo del contador de mensajes sin leer
-                      if (message.isRead == false && message.uid == friend.uid) {
-                        this.messagesWithoutRead.forEach(msg => {
-                          if (msg.uid == friend.uid) {
-                            var n = msg.messages - 1;
-                            msg.messages = n;
-                          }
-                        });
-                      }
-                    }
-                  });
-                }
-              });
-            }
-            // Mensaje actualizado (marcado como leído)
-            else if (change.type === 'modified') {
-              readMessage = false;
-              this.messagesFriends.forEach(user => {
-                if (user.uid == this.uidFriendSelected) {
-                  user.messages.forEach(message => {
-                    if (message.id == change.doc.id) {
-                      console.log('Mensaje actualizado: ', message.id);
-                      message.isRead = true;
-                    }
-                  });
-                }
-              });
-            }
-            // Mensaje añadido/recibido
-            else {
-              readMessage = true;
-              var h = String(change.doc.data().timestamp.toDate());
-              const message = {
-                'id': change.doc.id,
-                'uid': change.doc.data().uid,
-                'displayName': change.doc.data().displayName,
-                'text': change.doc.data().text,
-                'imageURL': change.doc.data().imageURL,
-                'isRead': change.doc.data().isRead,
-                'storageRef': change.doc.data().storageRef,
-                'timestamp': h.substring(16, 21),
-                'day': h.substring(8, 11) + h.substring(4, 7)
-              }
-              msgs.push(message);
-              msg = message;
-            }
-          });
-
-          // Sólo realizar cuando se leen los mensajes o se añade nuevo mensaje
-          if (readMessage) {
-            var encontrado = false;
-            if (this.messagesFriends.length > 0) {
-              this.messagesFriends.forEach(user => {
-                // Cargar un solo mensaje al enviar o recibir
-                if (user.uid == friend.uid || user.uid == this.userAuth.uid) {
-                  encontrado = true;
-                  // console.log(user.messages);
-                  user.messages[user.messages.length] = msg;
-                  // Recibes nuevo mensaje: evento para bajar scroll
-                  this.countdownEndSource.next();
-
-                  // Comprobar el chat que tengo abierto
-                  db.collection("users").doc(this.userAuth.uid).get()
-                    .then((doc) => {
-                      // En caso de no tener el chat abierto añadimos un mensaje más sin leer
-                      if (doc.data().chatOpen != friend.uid) {
-                        if (msg.uid == friend.uid && msg.isRead == false) { //!!!!
-                          this.messagesWithoutRead.forEach(msg => {
-                            if (msg.uid == friend.uid) {
-                              var n = msg.messages + 1;
-                              msg.messages = n;
-                            }
-                          });
-                          console.log('Mensajes sin leer:', this.messagesWithoutRead);
-                          this.sonidito(1);
-                        }
+    var unsubscribe = query.onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        // Mensaje eliminado
+        if (change.type === 'removed') {
+          read = false;
+          this.messagesFriends.forEach(user => {
+            if (user.uid == friend.uid) {
+              user.messages.forEach((message, index) => {
+                if (message.id == change.doc.id) {
+                  console.log('Mensaje borrado: ', message.id);
+                  user.messages.splice(index, 1);
+                  // Si todavía no está leido -> Descontarlo del contador de mensajes sin leer
+                  if (message.isRead == false && message.uid == friend.uid) {
+                    this.messagesWithoutRead.forEach(msg => {
+                      if (msg.uid == friend.uid) {
+                        var n = msg.messages - 1;
+                        msg.messages = n;
                       }
                     });
+                  }
                 }
               });
             }
-            // Cargar mensajes inicialmente
-            if (!encontrado) {
-              this.messagesFriends.push({
-                'uid': friend.uid,
-                'displayName': friend.displayName,
-                'photoURL': friend.photoURL,
-                'messages': msgs
-              });
-              // Recorro los mensajes en busca de aquellos que tengan mi nombre y que el atributo read sea false
-              var cont = 0;
-              msgs.forEach(msg => {
-                if (msg.uid == friend.uid && msg.isRead == false) { // !!!!!!!!!!!
-                  // console.log('mensaje sin leer: ', friend.uid, msg.id);
-                  cont++;
+          });
+        }
+        // Mensaje actualizado (marcado como leído)
+        else if (change.type === 'modified') {
+          read = false;
+          this.messagesFriends.forEach(user => {
+            if (user.uid == this.uidFriendSelected) {
+              user.messages.forEach(message => {
+                if (message.id == change.doc.id) {
+                  console.log('Mensaje actualizado: ', message.id);
+                  message.isRead = true;
                 }
               });
-              this.messagesWithoutRead.push({
-                'uid': friend.uid,
-                'displayName': friend.displayName,
-                'photoURL': friend.photoURL,
-                'messages': cont
-              });
             }
-            msgs = [];
+          });
+        }
+        // Mensaje añadido/recibido
+        else {
+          read = true;
+          var h = String(change.doc.data().timestamp.toDate());
+          const message = {
+            'id': change.doc.id,
+            'uid': change.doc.data().uid,
+            'displayName': change.doc.data().displayName,
+            'text': change.doc.data().text,
+            'imageURL': change.doc.data().imageURL,
+            'isRead': change.doc.data().isRead,
+            'storageRef': change.doc.data().storageRef,
+            'timestamp': h.substring(16, 21),
+            'day': h.substring(8, 11) + h.substring(4, 7)
           }
+          msgs.push(message);
+          msg = message;
+        }
+      });
 
-          //console.log(this.messagesWithoutRead[index].messages);
-          // console.log('Lista mensajes amigos', this.messagesFriends);
-          setTimeout(() => {
-            // console.log('MENSAJES', this.messagesWithoutRead[index].messages);
-            if (this.messagesWithoutRead[index].messages > 0) {
-              var enc = false;
-              //console.log('Hay mensajes sin leer', this.messagesWithoutRead[index].uid);
-              this.msgsWithoutRead2.forEach(msg => {
-                if (msg.uid == this.messagesWithoutRead[index].uid) {
-                  enc = true;
-                  var ms = this.messagesWithoutRead[index].messages;
-                  msg.messages = ms++;
+      if (read) {
+        this.addMessages(friend, msg, msgs);
+        msgs = [];
+      }
+
+      // Obtener nº mensajes sin leer panel de notificaciones
+      this.countMessagesWithoutRead(friend, index);
+
+      // Ha terminado de obtener los mensajes
+      if (this.nFriends == index + 1 && this.gotAllMessages == false) {
+        this.gotAllMessages = true;
+        console.log('Termine');
+      }
+
+    });
+
+    // Añadir al array para poder dejar de escuchar al cerrar sesión y q al volver a entrar no vuelva a escuchar y x lo tanto haya duplicidad de mensajes
+    this.listeningSnapsMessages.push(unsubscribe);
+
+  }
+
+
+  /**
+   * Añade un mensaje al array de mensajes totales y pendientes por leer
+   * @param friend 
+   * @param msg 
+   * @param msgs 
+   */
+  addMessages(friend, msg, msgs) {
+    var db = firebase.firestore();
+    var encontrado = false;
+
+    // Cargar nuevo mensaje
+    if (this.messagesFriends.length > 0) {
+      this.messagesFriends.forEach(user => {
+        // Cargar un solo mensaje al enviar o recibir
+        if (user.uid == friend.uid || user.uid == this.userAuth.uid) {
+          encontrado = true;
+          user.messages[user.messages.length] = msg;
+          // Recibes nuevo mensaje: evento para bajar scroll
+          this.countdownEndSource.next();
+
+          // Comprobar el chat que tengo abierto
+          db.collection("users").doc(this.userAuth.uid).get()
+            .then((doc) => {
+              // En caso de no tener el chat abierto añadimos un mensaje más sin leer
+              if (doc.data().chatOpen != friend.uid) {
+                if (msg.uid == friend.uid && msg.isRead == false) {
+                  this.messagesWithoutRead.forEach(msg => {
+                    if (msg.uid == friend.uid) {
+                      var n = msg.messages + 1;
+                      msg.messages = n;
+                    }
+                  });
+                  console.log('Mensajes sin leer:', this.messagesWithoutRead);
+                  this.sonidito(1);
                 }
-              });
-              if (!enc) {
-                this.msgsWithoutRead2.push({ 'uid': friend.uid, 'messages': this.messagesWithoutRead[index].messages });
               }
-            }
-            //Buscarlo y borrarlo
-            else {
-              this.msgsWithoutRead2.forEach((msg, index2) => {
-                if (msg.uid == this.messagesWithoutRead[index].uid) {
-                  this.msgsWithoutRead2.splice(index2, 1);
-                }
-              });
-            }
-          }, 500);
-
-          // Ha terminado de obtener los mensajes
-          if (this.friends.length - 1 == index && this.gotAllMessages == false) {
-            console.log(this.msgsWithoutRead2);
-            this.gotAllMessages = true;
-            console.log('Termine');
-          }
-
-        });
-
-        // Añadir al array para poder dejar de escuchar al cerrar sesión y q al volver a entrar no vuelva a escuchar y x lo tanto haya duplicidad de mensajes
-        this.listeningSnapsMessages.push(unsubscribe);
-
+            });
+        }
       });
     }
+    // Cargar mensajes inicialmente
+    if (!encontrado) {
+      this.messagesFriends.push({
+        'uid': friend.uid,
+        'displayName': friend.displayName,
+        'photoURL': friend.photoURL,
+        'messages': msgs
+      });
+      // Se suman aquellos mensajes sin leer y cuyo uid sea del amig
+      var cont = 0;
+      msgs.forEach(msg => {
+        if (msg.uid == friend.uid && msg.isRead == false) {
+          cont++;
+        }
+      });
+      this.messagesWithoutRead.push({
+        'uid': friend.uid,
+        'displayName': friend.displayName,
+        'photoURL': friend.photoURL,
+        'messages': cont
+      });
+    }
+  }
 
+  /**
+   * Array de mensajes lista de notificación
+   * @param friend 
+   * @param index 
+   */
+  countMessagesWithoutRead(friend, index) {
+    console.log('Hay mensajes sin leer', this.messagesWithoutRead);
+
+    setTimeout(() => {
+      if (this.messagesWithoutRead[index].messages > 0) {
+        var enc = false;
+        //console.log('Hay mensajes sin leer', this.messagesWithoutRead[index].uid);
+        this.msgsWithoutReadNotif.forEach(msg => {
+          if (msg.uid == this.messagesWithoutRead[index].uid) {
+            enc = true;
+            var ms = this.messagesWithoutRead[index].messages;
+            msg.messages = ms++;
+          }
+        });
+        if (!enc) {
+          this.msgsWithoutReadNotif.push({ 'uid': friend.uid, 'messages': this.messagesWithoutRead[index].messages });
+        }
+      }
+      //Buscarlo y borrarlo
+      else {
+        this.msgsWithoutReadNotif.forEach((msg, index2) => {
+          if (msg.uid == this.messagesWithoutRead[index].uid) {
+            this.msgsWithoutReadNotif.splice(index2, 1);
+          }
+        });
+      }
+    }, 500);
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -534,9 +559,9 @@ export class ChatService {
    * @param friend amigo seleccionado
    */
   chatWith(friend: any) {
-    if (friend.uid == this.uidFriendSelected) {
-      return;
-    }
+    /*     if (friend.uid == this.uidFriendSelected) {
+          return;
+        } */
     this.messagesWithFriend = [];
     this.uidFriendSelected = friend.uid;
     this.friendSelected = friend;
@@ -552,6 +577,8 @@ export class ChatService {
         // Poner en leído los mensajes del chat correspondiente
         this.messagesWithFriend.forEach(msg => {
           if (msg.uid != this.userAuth.uid && msg.isRead == false) {
+            console.log('AAAAAAAAAAAA', msg.id);
+            
             this.setMessagesRead(user.uid, msg.id);
             msg.isRead = true;
           }
@@ -575,7 +602,7 @@ export class ChatService {
    */
   setChatOpen(uidFriend) {
     const url = `${environment.dirBack}setChatOpen/${this.userAuth.uid}/${uidFriend}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.put(url, { headers: headers })
       .subscribe(() => { });
   }
@@ -587,7 +614,7 @@ export class ChatService {
    */
   setMessagesRead(uidFriend, idMsg) {
     const url = `${environment.dirBack}setMessagesRead/${this.userAuth.uid}/${uidFriend}/${idMsg}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.put(url, { headers: headers })
       .subscribe(() => { });
   }
@@ -603,7 +630,7 @@ export class ChatService {
     this.msgEnviar = '';
 
     const url = `${environment.dirBack}sendMessage/${this.userAuth.uid}/${this.uidFriendSelected}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.put(url, { 'user': this.userAuth, 'message': msg }, { headers: headers })
       .subscribe(
         (response) => {
@@ -620,7 +647,7 @@ export class ChatService {
    */
   checkUserChat(msgid: any) {
     const url = `${environment.dirBack}checkUserChat/${this.userAuth.uid}/${this.uidFriendSelected}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.get(url, { headers: headers })
       .subscribe(
         (response) => {
@@ -681,7 +708,7 @@ export class ChatService {
    */
   sendImgFriend(emisor: any, receptorUID: any, urlPhoto: string, namePhoto: any) {
     const url = `${environment.dirBack}sendImgFriend/${emisor.uid}/${receptorUID}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     return this.http.put(url, { 'user': emisor, 'urlPhoto': urlPhoto, 'namePhoto': namePhoto }, { headers: headers });
   }
 
@@ -696,7 +723,7 @@ export class ChatService {
    */
   sendImgWithId(id: string, emisor: any, receptorUID: any, urlPhoto: string, namePhoto: any) {
     const url = `${environment.dirBack}sendImgFriendId/${emisor.uid}/${receptorUID}/${id}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     return this.http.put(url, { 'user': emisor, 'urlPhoto': urlPhoto, 'namePhoto': namePhoto }, { headers: headers });
   }
 
@@ -734,7 +761,7 @@ export class ChatService {
     }
 
     const url = `${environment.dirBack}deleteMessage/${uidEmisor}/${uidReceptor}/${message.id}/${photoName}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.delete(url, { headers: headers })
       .subscribe(() => { });
   }
@@ -752,7 +779,7 @@ export class ChatService {
     var uidFriend = 'none';
 
     const url = `${environment.dirBack}setChatOpen/${this.userAuth.uid}/${uidFriend}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.put(url, { headers: headers })
       .subscribe(
         (response) => {
@@ -767,13 +794,10 @@ export class ChatService {
   * Parar escucha de los mensajes del amigo. Este método se llama al cerrar sesión y 
   * a la hora de cargar los amigos, así en caso de que se añada una nuevo, se reiniciará la escucha
   */
-  stopListeningFriendMessages(type: number) {
+  stopListeningFriendMessages() {
     this.listeningSnapsMessages.forEach(unsubscribe => {
       unsubscribe();
     });
-    if (type == 2) {
-      this.listenFriendMessages();
-    }
   }
 
   /**
@@ -794,7 +818,7 @@ export class ChatService {
    */
   deleteChat(deleteImg: boolean) {
     const url = `${environment.dirBack}deleteChat/${this.userAuth.uid}/${this.uidFriendSelected}/${deleteImg}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.delete(url, { headers: headers })
       .subscribe(
         (response) => {
@@ -814,7 +838,7 @@ export class ChatService {
     this.urlImgsChat = [];
 
     const url = environment.dirBack + "getImgsChat";
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.uid.refreshToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     return this.http.post(url, { 'uid': this.userAuth.uid, uidFriend: this.uidFriendSelected }, { headers: headers });
 
   }

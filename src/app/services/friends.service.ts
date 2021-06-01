@@ -16,7 +16,8 @@ export class FriendsService {
   friendsRequests = [];
   sentFriendsRequests = [];
   listeningItems = [];
-  newFriendInfo: any = 'hola';
+  newFriendInfo: any = '';
+  tokenUser:string = '';
   private newFriend = new Subject<void>();
   public newFriend$ = this.newFriend.asObservable();
 
@@ -30,6 +31,7 @@ export class FriendsService {
   getUser() {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
+    this.tokenUser = this.userAuth['stsTokenManager']['accessToken'];
   }
 
   /**
@@ -49,7 +51,7 @@ export class FriendsService {
 
     if (value.length >= 1) {
       const url = environment.dirBack + "getUsers/" + value + "/" + this.userAuth.uid;
-      let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+      let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
       this.http.get(url, { headers: headers })
         .subscribe(
           (response) => {
@@ -81,9 +83,9 @@ export class FriendsService {
    */
   sendFriendRequest(uid: string) {
     this.getUser();
-
+    
     const url = `${environment.dirBack}sendFriendRequest/${this.userAuth.uid}/${uid}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.put(url, { headers: headers })
       .subscribe(
         (response) => {
@@ -112,7 +114,7 @@ export class FriendsService {
     this.getUser();
 
     const url = `${environment.dirBack}deleteFriend/${this.userAuth.uid}/${uid}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.delete(url, { headers: headers })
       .subscribe(
         (response) => {
@@ -128,7 +130,7 @@ export class FriendsService {
     this.getUser();
 
     const url = `${environment.dirBack}acceptFriendRequest/${this.userAuth.uid}/${uid}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.put(url, { headers: headers })
       .subscribe(
         (response) => {
@@ -151,7 +153,7 @@ export class FriendsService {
     this.getUser();
 
     const url = `${environment.dirBack}deleteFriendRequest/${this.userAuth.uid}/${uid}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.delete(url, { headers: headers })
       .subscribe(
         (response) => {
@@ -170,7 +172,7 @@ export class FriendsService {
    */
   cancelFriendRequest(uid: string) {
     const url = `${environment.dirBack}deleteFriendRequest/${uid}/${this.userAuth.uid}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.delete(url, { headers: headers })
       .subscribe(
         (response) => {
@@ -262,7 +264,7 @@ export class FriendsService {
     var encontrado = false;
 
     const url = `${environment.dirBack}getFriendsUID/${this.userAuth.uid}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.get(url, { headers: headers })
       .subscribe(
         (response) => {
@@ -278,7 +280,7 @@ export class FriendsService {
           // Evento de nuevo amigo
           if (encontrado) {
             const url = `${environment.dirBack}getUser/${this.newFriendInfo}`;
-            let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+            let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
             this.http.get(url, { headers: headers })
               .subscribe(
                 (response) => {
@@ -307,7 +309,7 @@ export class FriendsService {
    */
   loadFriendRequest(change: any, type: number) {
     const url = `${environment.dirBack}getUser/${change.doc.id}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.get(url, { headers: headers })
       .subscribe(
         (response) => {

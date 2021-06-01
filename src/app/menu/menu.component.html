@@ -61,10 +61,10 @@
         <!--Alerta notificaciones mensajes-->
         <button mat-mini-fab class="btn-style" [matMenuTriggerFor]="notificationsMessages">
           <mat-icon>mail</mat-icon>
-          <span *ngIf="chat.msgsWithoutRead2.length > 0" class="badge">{{chat.msgsWithoutRead2.length}}</span>
+          <span *ngIf="chat.msgsWithoutReadNotif.length > 0" class="badge">{{chat.msgsWithoutReadNotif.length}}</span>
         </button>
         <mat-menu #notificationsMessages="matMenu" xPosition="before" class="bg-dark gris mt-2">
-          <ng-container *ngIf="chat.msgsWithoutRead2.length > 0; else noNotifsMessages">
+          <ng-container *ngIf="chat.msgsWithoutReadNotif.length > 0; else noNotifsMessages">
             <ng-container *ngFor="let userMessage of chat.messagesWithoutRead">
               <div *ngIf="userMessage.messages > 0" class="d-flex align-items-center px-2 py-2 notific_item"
                 routerLink="amigos">

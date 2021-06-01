@@ -90,6 +90,8 @@ export class AuthService {
   }
 
   getItemsUser(type: number, uid?: string) {
+    var token = this.userAuth['stsTokenManager']['accessToken'];
+
     if (type == 1) {
       this.itemsLogedUser = [];
       this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
@@ -100,7 +102,7 @@ export class AuthService {
     }
 
     const url = environment.dirBack + "getItemsUser";
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
     this.http.post(url, { 'uid': uid }, { headers: headers })
       .subscribe(
         (response) => {
@@ -171,7 +173,8 @@ export class AuthService {
    */
   updateUserData(user: any) {
     const url = environment.dirBack + "updateUserLogin";
-    let headers = new HttpHeaders({ Authorization: `Bearer ${user.accessToken}` });
+    var token = user['stsTokenManager']['accessToken'];
+    let headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
     this.http.post(url, { 'user': user }, { headers: headers })
       .subscribe(
         (response) => {
@@ -186,9 +189,10 @@ export class AuthService {
   getUser() {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
-
+    var token = this.userAuth['stsTokenManager']['accessToken'];
+    
     const url = `${environment.dirBack}getUser/${this.userAuth.uid}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
     this.http.get(url, { headers: headers })
       .subscribe(
         (response) => {
@@ -223,12 +227,13 @@ export class AuthService {
     this.setRechargeFalse();
     this.rankings.stopListeningRankingsItems();
     this.chat.setStatusOnOff(2);
-    this.chat.stopListeningFriendMessages(1);
+    this.chat.stopListeningFriendMessages();
     this.chat.stopListeningFriends();
     this.friends.stopListeningRequests();
     this.chat.closeChat();
     this.friends.resetSearchFriends();
     this.rankings.setGetRankingsTrue();
+    this.chat.cleanMessages();
     this.limpiarFormularios();
 
     setTimeout(() => {

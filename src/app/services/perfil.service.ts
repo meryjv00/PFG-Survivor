@@ -10,6 +10,8 @@ import { environment } from 'src/environments/environment';
 })
 export class PerfilService {
   userAuth: any | null; // Usuario guardado en session storage para obtener bien los datos al recargar la pagina
+  tokenUser:string = '';
+
   constructor(public firestorage: AngularFireStorage,
     public auth: AuthService,
     public router: Router,
@@ -23,6 +25,7 @@ export class PerfilService {
   getUser() {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
+    this.tokenUser = this.userAuth['stsTokenManager']['accessToken'];
   }
 
   /**
@@ -33,7 +36,7 @@ export class PerfilService {
     this.getUser();
     
     const url = environment.dirBack + "updateName/" + this.userAuth.uid;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.put(url, { 'name': name }, { headers: headers })
       .subscribe(
         (response) => {
@@ -59,7 +62,7 @@ export class PerfilService {
           .then(photoURL => {
             // Actualizar imágen a el usuario
             const url = environment.dirBack + "updateProfilePhoto/" + this.userAuth.uid;
-            let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+            let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
             this.http.post(url, { 'user': this.userAuth, 'photoURL': photoURL }, { headers: headers });
 
             this.auth.setPhoto(photoURL);
@@ -91,7 +94,7 @@ export class PerfilService {
     this.getUser();
 
     const url = environment.dirBack + "updateEmail/" + this.userAuth.uid;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     return this.http.put(url, { 'email': email }, { headers: headers });
   }
 
@@ -104,7 +107,7 @@ export class PerfilService {
     this.getUser();
 
     const url = environment.dirBack + "updatePass/" + this.userAuth.uid;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     return this.http.put(url, { 'pass': pass }, { headers: headers });
   }
 

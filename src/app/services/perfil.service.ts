@@ -1,17 +1,31 @@
 import { Injectable } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { AuthService } from './auth.service';
-import firebase from 'firebase/app';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PerfilService {
+  userAuth: any | null; // Usuario guardado en session storage para obtener bien los datos al recargar la pagina
+  tokenUser:string = '';
 
   constructor(public firestorage: AngularFireStorage,
     public auth: AuthService,
-    public router: Router) {
+    public router: Router,
+    private http: HttpClient) {
+  }
+
+
+  /**
+ * Obtiene el usuario almacenado en localStorage, el cual se almacena al iniciar sesión
+ */
+  getUser() {
+    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+    this.userAuth = JSON.parse(this.userAuth);
+    this.tokenUser = this.userAuth['stsTokenManager']['accessToken'];
   }
 
   /**
@@ -19,10 +33,17 @@ export class PerfilService {
    * @param name 
    */
   updateDisplayName(name: string) {
-    firebase.firestore()
-      .collection("users").doc(firebase.auth().currentUser.uid).update({
-        displayName: name,
-      });
+    this.getUser();
+    
+    const url = environment.dirBack + "updateName/" + this.userAuth.uid;
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
+    this.http.put(url, { 'name': name }, { headers: headers })
+      .subscribe(
+        (response) => {
+          console.log('RESPONSE', response);
+          this.auth.setName(name);
+        });
+
   }
 
   /**
@@ -30,19 +51,36 @@ export class PerfilService {
    * @param event 
    */
   updateProfileImage(event) {
+    this.getUser();
+
     if (event.target.files[0]) {
-      var user = firebase.auth().currentUser;
+      var file = event.target.files[0];
+
       // Subir imágen a storage
-      this.firestorage.ref('profileImages/' + user.uid).put(event.target.files[0]).then(fileSnapshot => {
+      this.firestorage.ref('profileImages/' + this.userAuth.uid).put(file).then(fileSnapshot => {
         return fileSnapshot.ref.getDownloadURL()
-          .then(url => {
+          .then(photoURL => {
             // Actualizar imágen a el usuario
-            firebase.firestore()
-              .collection("users").doc(user.uid).update({
-                photoURL: url,
-              });
+            const url = environment.dirBack + "updateProfilePhoto/" + this.userAuth.uid;
+            let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
+            this.http.post(url, { 'user': this.userAuth, 'photoURL': photoURL }, { headers: headers });
+
+            this.auth.setPhoto(photoURL);
+
           });
       });
+
+      /*       const fd = new FormData;
+            fd.append('img', file, file.name);
+      
+            const url = environment.dirBack + "updateProfilePhoto/" + this.userAuth.uid;
+            let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+            this.http.post(url, fd, { headers: headers })
+              .subscribe(
+                (response) => {
+                  console.log('RESSPONSEEEEEEEEEE', response);
+                });
+       */
     }
 
   }
@@ -53,15 +91,11 @@ export class PerfilService {
    * @returns 
    */
   updateEmail(email: string) {
-    var user = firebase.auth().currentUser;
-    // Comprobar que el email introducido no existe
-    return user.updateEmail(email).then(function () {
-      firebase.firestore()
-        .collection("users").doc(user.uid).update({
-          email: email,
-        });
+    this.getUser();
 
-    });
+    const url = environment.dirBack + "updateEmail/" + this.userAuth.uid;
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
+    return this.http.put(url, { 'email': email }, { headers: headers });
   }
 
   /**
@@ -70,9 +104,11 @@ export class PerfilService {
    * @returns 
    */
   updatePass(pass: string) {
-    var user = firebase.auth().currentUser;
-    return user.updatePassword(pass).then(function () {
-    });
+    this.getUser();
+
+    const url = environment.dirBack + "updatePass/" + this.userAuth.uid;
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
+    return this.http.put(url, { 'pass': pass }, { headers: headers });
   }
 
 

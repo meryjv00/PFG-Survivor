@@ -11,19 +11,21 @@ export class ConfirmModalComponent implements OnInit {
   @Output() confirm: EventEmitter<any> = new EventEmitter();
 
   constructor(public ngmodal: NgbModal,
-    public activeModal: NgbActiveModal) { }
+    public activeModal: NgbActiveModal) {
+  }
 
   ngOnInit(): void {
 
   }
 
   accept() {
-    this.confirm.emit(true);
+    const del = document.getElementById("deleteAll") as HTMLInputElement;
+    this.confirm.emit(del.checked);
     this.activeModal.close();
   }
 
+
   cancel() {
-    this.confirm.emit(false);
     this.activeModal.close();
   }
 

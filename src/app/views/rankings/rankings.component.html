@@ -7,8 +7,8 @@
             {{user.displayName}} - {{user.coins}} monedas
         </li>
     </ul>
-    <div *ngIf="auth.user && rankings.posRankingCoins != 0" class="text-dark bg-secondary">
-        Tu posición en el ranking {{rankings.posRankingCoins}} - {{auth.user.coins}} monedas
+    <div *ngIf="auth.user && rankings.logedUserRankingCoins[0] != 0" class="text-dark bg-secondary">
+        Tu posición en el ranking {{rankings.logedUserRankingCoins[0]}} - {{rankings.logedUserRankingCoins[1]}} monedas
     </div>
 
     <ng-container *ngFor="let ranking of rankings.lvlRankings; index as i">

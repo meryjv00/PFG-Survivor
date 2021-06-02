@@ -18,8 +18,8 @@ export class MenuComponent implements OnInit {
     public ngmodal: NgbModal,
     public friendService: FriendsService,
     public chat: ChatService) {
-      
-    }
+
+  }
 
   ngOnInit(): void {
   }
@@ -33,10 +33,9 @@ export class MenuComponent implements OnInit {
   }
 
   openProfileUser(user: any) {
-    this.auth.getItemsUser(2, user.uid).then(() => {
-      const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
-      modalRef.componentInstance.user = user;
-      modalRef.componentInstance.addUser = 'add';
-    });
+    this.auth.getItemsUser(2, user.uid);
+    const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+    modalRef.componentInstance.user = user;
+    modalRef.componentInstance.addUser = 'add';
   }
 }

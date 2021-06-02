@@ -64,8 +64,8 @@
                 </div>
 
                 <!--Chat cerrado-->
-                <div class="col-md-9 col-10 60-vh d-flex flex-column justify-content-center align-items-center"
-                    *ngIf="chat.chatEnabled == false">
+                <div class="col-md-9 col-10 h-70 d-flex flex-column justify-content-center align-items-center"
+                    *ngIf="chat.chatEnabled == false && chat.friends.length > 0">
                     <div class="circuloChat bg-primary">
                         <mat-icon class="text-white">question_answer</mat-icon>
                     </div>
@@ -111,7 +111,7 @@
                             <div class="col-12 col-md-10 mx-auto">
                                 <div class="row" *ngFor="let message of chat.messagesWithFriend; index as i">
                                     <!--Mis mensajes-->
-                                    <div *ngIf="message.uid == auth.authUser.uid; else msgAjeno"
+                                    <div *ngIf="message.uid == auth.user.uid; else msgAjeno"
                                         class="col-md-9 col-12 ml-auto">
                                         <div class="d-flex mb-4">
                                             <div class="chat-bubble chat-bubble--right ml-auto"

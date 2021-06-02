@@ -37,10 +37,10 @@ export class AmigosComponent implements OnInit {
 
     // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
     if (this.auth.loginRecharge) {
+      this.auth.getUser();
       this.rankings.getPositionRankings();
       this.rankings.getPositionRankingCoins();
       this.auth.setRechargeFalse();
-      this.auth.listenDataLogedUser();
       this.auth.getItemsUser(1);
       this.chat.getFriends();
       this.chat.closeChat();
@@ -111,18 +111,27 @@ export class AmigosComponent implements OnInit {
   }
 
   openProfileUser(user: any) {
-    this.chat.getImagenesChat().then(() => {
-      const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
-      modalRef.componentInstance.user = user;
-      modalRef.componentInstance.addUser = 'see';
-      modalRef.componentInstance.msgs = this.chat.messagesWithFriend.length;
-    });
-   
+    this.chat.getImagenesChat()
+      .subscribe(
+        (response) => {
+          console.log(response['message']);
+          this.chat.urlImgsChat = response['message'];
+          const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+          modalRef.componentInstance.user = user;
+          modalRef.componentInstance.addUser = 'see';
+          modalRef.componentInstance.msgs = this.chat.messagesWithFriend.length;
+
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+
   }
 
   openConfirmModal() {
     const modalRef = this.ngmodal.open(ConfirmModalComponent, { size: 'xs' });
-    modalRef.componentInstance.msg = `¿Quieres borrar también el contenido multimedia compartido con ${this.chat.friendSelected.displayName} ?`;
+    modalRef.componentInstance.msg = `Eliminar archivos multimedia con ${this.chat.friendSelected.displayName}`;
     modalRef.componentInstance["confirm"].subscribe((event: any) => {
       this.chat.deleteChat(event);
     });

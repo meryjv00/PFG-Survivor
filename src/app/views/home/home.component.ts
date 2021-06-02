@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit {
     console.log('CONSTRUCTOR HOME');
     if (this.auth.loginRecharge && this.userAuth != null) {
       this.chat.closeChat();
-      this.auth.listenDataLogedUser();
+      this.auth.getUser();
     }
 
   }

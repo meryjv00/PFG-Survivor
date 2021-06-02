@@ -5,7 +5,6 @@ import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { FriendsService } from 'src/app/services/friends.service';
 import { RankingsService } from 'src/app/services/rankings.service';
-import { environment } from 'src/environments/environment';
 import { UserComponent } from '../user/user.component';
 
 @Component({
@@ -28,7 +27,7 @@ export class ComunidadComponent implements OnInit {
       this.auth.setRechargeFalse();
       this.rankings.getPositionRankings();
       this.rankings.getPositionRankingCoins();
-      this.auth.listenDataLogedUser();
+      this.auth.getUser();
       this.auth.getItemsUser(1);
       this.chat.getFriends();
       this.chat.closeChat();
@@ -51,11 +50,10 @@ export class ComunidadComponent implements OnInit {
   }
 
   openProfileUser(user: any) {
-    this.auth.getItemsUser(2, user.uid).then(() => {
-      const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
-      modalRef.componentInstance.user = user;
-      modalRef.componentInstance.addUser = 'search';
-    });
+    this.auth.getItemsUser(2, user.uid);
+    const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+    modalRef.componentInstance.user = user;
+    modalRef.componentInstance.addUser = 'search';
   }
 
 }

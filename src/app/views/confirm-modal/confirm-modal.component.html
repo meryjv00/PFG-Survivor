@@ -2,16 +2,37 @@
 <div class="modal-body bg-dark gris">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-12 mb-2">
+            <div class="col-12 mb-3">
                 <button type="button" class="close" aria-label="Close" (click)="activeModal.close('Cross click')">
                     <i class="fas fa-times fa-sm gris"></i>
                 </button>
-                <!--Mensaje-->
-                <p class="mt-4">
-                    {{msg}}
-                </p>
-                <button type="button" class="btn btn-outline-primary" (click)="cancel()">Cancelar</button>
-                <button type="button" class="btn btn-primary ml-2" (click)="accept()">Aceptar</button>
+
+                <div class="mt-4">
+
+                    <div class="circulo m-auto">
+                        <mat-icon class="text-white">close</mat-icon>
+                    </div>
+
+                    <!--Mensaje-->
+                    <h3 class="text-white text-center mt-3">¿Estás seguro?</h3>
+
+                    <!-- <div class="text-center mt-3">
+                        <mat-checkbox color="warn" name="deleteAll">{{msg}}</mat-checkbox>
+                    </div> -->
+
+                    <div class="text-center mt-3 form-check">
+                        <input class="form-check-input" class="text-danger" type="checkbox" id="deleteAll">
+                        <label class="form-check-label ml-2" for="flexCheckDefault">
+                            {{msg}}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-block text-center mt-4">
+                    <button type="button" class="btn btn-outline-danger" (click)="cancel()">Cancelar</button>
+                    <button type="button" class="btn btn-danger ml-2" (click)="accept()">Aceptar</button>
+                </div>
+
             </div>
         </div>
     </div>

@@ -90,8 +90,6 @@ export class AuthService {
   }
 
   getItemsUser(type: number, uid?: string) {
-    var token = this.userAuth['stsTokenManager']['accessToken'];
-
     if (type == 1) {
       this.itemsLogedUser = [];
       this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
@@ -102,7 +100,7 @@ export class AuthService {
     }
 
     const url = environment.dirBack + "getItemsUser";
-    let headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     this.http.post(url, { 'uid': uid }, { headers: headers })
       .subscribe(
         (response) => {
@@ -173,8 +171,7 @@ export class AuthService {
    */
   updateUserData(user: any) {
     const url = environment.dirBack + "updateUserLogin";
-    var token = user['stsTokenManager']['accessToken'];
-    let headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     this.http.post(url, { 'user': user }, { headers: headers })
       .subscribe(
         (response) => {

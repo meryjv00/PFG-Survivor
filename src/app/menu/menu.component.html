@@ -79,7 +79,7 @@
           </ng-container>
           <!--Mensajes leidos-->
           <ng-template #noNotifsMessages>
-            <div class="px-2 py-2">
+            <div class="px-3 py-2">
               <p class="text-light">¡No tienes ningún mensaje sin leer!</p>
             </div>
           </ng-template>
@@ -94,23 +94,23 @@
         <mat-menu #notifications="matMenu" xPosition="before" class="bg-dark gris mt-2">
           <ng-container *ngIf="friendService.friendsRequests.length > 0; else noNotifs">
             <div *ngFor="let userFriend of friendService.friendsRequests"
-              class="d-flex align-items-center px-2 py-2 notific_item" (click)="openProfileUser(userFriend)">
-              <img src="{{userFriend.photoURL}}" alt="profile_pic" width="50px" height="50px"
+              class="d-flex align-items-center px-2 py-2 notific_item">
+              <img src="{{userFriend.photoURL}}" alt="profile_pic" width="50px" height="50px" (click)="openProfileUser(userFriend)"
                 class="rounded-circle m-0">
               <div class="pl-3">
                 <p class="mb-1">
                   <span>{{userFriend.displayName}}</span> te ha enviado una solicitud de amistad
                 </p>
-                <button class="btn btn-primary"
+                <button class="btn btn-primary btn-sm"
                   (click)="friendService.acceptFriendRequest(userFriend.uid)">Aceptar</button>
-                <button class="btn btn-outline-primary ml-2"
+                <button class="btn btn-outline-primary ml-2 btn-sm"
                   (click)="friendService.deleteFriendRequest(userFriend.uid)">Rechazar</button>
               </div>
             </div>
           </ng-container>
           <!--No notificaciones-->
           <ng-template #noNotifs>
-            <div class="px-2 py-2">
+            <div class="px-3 py-2">
               <span>¡No tienes ninguna notificación nueva!</span>
             </div>
           </ng-template>

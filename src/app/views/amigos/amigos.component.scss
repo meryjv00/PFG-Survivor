@@ -6,6 +6,11 @@ $othermsg: #82ccdd;
 
 $online:#4caf50;
 $offline:#f44336;
+
+.h-70 {
+    height: 70vh;
+}
+
 .mat-menu-item .mat-icon-no-color, .mat-menu-item-submenu-trigger::after {
     color: #a5a5a5;
 }
@@ -33,8 +38,6 @@ $offline:#f44336;
         font-size: 50px;
     }
 }
-
-
 
 .green {
     background: $online;

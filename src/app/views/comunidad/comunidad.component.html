@@ -40,9 +40,9 @@
                 </div>
                 <ul class="p-2">
                     <li *ngFor="let userRequested of friendService.sentFriendsRequests"
-                        class="mt-2 align-items-center user" (click)="openProfileUser(userRequested)">
+                        class="mt-2 align-items-center">
                         <img src="{{userRequested.photoURL}}" alt="foto_{{userRequested.displayName}}" width="60px"
-                            height="60px" class="rounded-circle ml-3">
+                            height="60px" class="rounded-circle ml-3 cursor-pointer" (click)="openProfileUser(userRequested)">
                         <span class="text-white ml-3">{{userRequested.displayName}}</span>
                         <button class="btn btn-primary float-right mt-2 mr-5"
                             (click)="friendService.cancelFriendRequest(userRequested.uid)">
@@ -58,10 +58,9 @@
                         amistad</span>
                 </div>
                 <ul class="p-2" *ngIf="chat.suggestedFriends.length > 0">
-                    <li class="align-items-center mt-2 user" *ngFor="let userSuggested of chat.suggestedFriends"
-                        (click)="openProfileUser(userSuggested)">
+                    <li class="align-items-center mt-2" *ngFor="let userSuggested of chat.suggestedFriends">
                         <img src="{{userSuggested.photoURL}}" alt="foto_{{userSuggested.displayName}}" width="60px"
-                            height="60px" class="rounded-circle ml-3">
+                            height="60px" class="rounded-circle ml-3 cursor-pointer" (click)="openProfileUser(userSuggested)">
                         <span class="text-white ml-3">{{userSuggested.displayName}}</span>
                         <button *ngIf="userSuggested.relation == 'unknown'"
                             class="btn btn-primary float-right mt-2 mr-5"

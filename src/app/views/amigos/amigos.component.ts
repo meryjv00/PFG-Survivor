@@ -131,7 +131,7 @@ export class AmigosComponent implements OnInit {
 
   openConfirmModal() {
     const modalRef = this.ngmodal.open(ConfirmModalComponent, { size: 'xs' });
-    modalRef.componentInstance.msg = `¿Quieres borrar también el contenido multimedia compartido con ${this.chat.friendSelected.displayName} ?`;
+    modalRef.componentInstance.msg = `Eliminar archivos multimedia con ${this.chat.friendSelected.displayName}`;
     modalRef.componentInstance["confirm"].subscribe((event: any) => {
       this.chat.deleteChat(event);
     });

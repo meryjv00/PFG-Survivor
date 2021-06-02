@@ -25,12 +25,12 @@ $gris:#b8b6b4;
 }
 
 img {
+    cursor: pointer;
     margin-right: 100px;
     border-radius: 30px;
 }
 
 .notific_item {
-    cursor: pointer;
     &:hover {
         background-color: #15171d;
     }

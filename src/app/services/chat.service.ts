@@ -176,8 +176,9 @@ export class ChatService {
                             this.listenDataFriend(change.doc.id);
 
                             var pos = this.friends.length - 1;
-                            // Ultima pos del array -> se redirige a poner en escucha todos los mensajes de los amigos obtenidos
                             this.listenFriendMessages(friend, pos);
+
+                            // Ultima pos del array -> obtiene los amigos sugeridos
                             if (this.nFriends == index + 1) {
                               this.getSuggestedFriends();
                             }
@@ -523,31 +524,33 @@ export class ChatService {
    */
   countMessagesWithoutRead(friend, index) {
     console.log('Hay mensajes sin leer', this.messagesWithoutRead);
-
-    setTimeout(() => {
-      if (this.messagesWithoutRead[index].messages > 0) {
-        var enc = false;
-        //console.log('Hay mensajes sin leer', this.messagesWithoutRead[index].uid);
-        this.msgsWithoutReadNotif.forEach(msg => {
-          if (msg.uid == this.messagesWithoutRead[index].uid) {
-            enc = true;
-            var ms = this.messagesWithoutRead[index].messages;
-            msg.messages = ms++;
+    if (this.messagesWithoutRead[index]) {
+      setTimeout(() => {
+        if (this.messagesWithoutRead[index].messages > 0) {
+          var enc = false;
+          //console.log('Hay mensajes sin leer', this.messagesWithoutRead[index].uid);
+          this.msgsWithoutReadNotif.forEach(msg => {
+            if (msg.uid == this.messagesWithoutRead[index].uid) {
+              enc = true;
+              var ms = this.messagesWithoutRead[index].messages;
+              msg.messages = ms++;
+            }
+          });
+          if (!enc) {
+            this.msgsWithoutReadNotif.push({ 'uid': friend.uid, 'messages': this.messagesWithoutRead[index].messages });
           }
-        });
-        if (!enc) {
-          this.msgsWithoutReadNotif.push({ 'uid': friend.uid, 'messages': this.messagesWithoutRead[index].messages });
         }
-      }
-      //Buscarlo y borrarlo
-      else {
-        this.msgsWithoutReadNotif.forEach((msg, index2) => {
-          if (msg.uid == this.messagesWithoutRead[index].uid) {
-            this.msgsWithoutReadNotif.splice(index2, 1);
-          }
-        });
-      }
-    }, 500);
+        //Buscarlo y borrarlo
+        else {
+          this.msgsWithoutReadNotif.forEach((msg, index2) => {
+            if (msg.uid == this.messagesWithoutRead[index].uid) {
+              this.msgsWithoutReadNotif.splice(index2, 1);
+            }
+          });
+        }
+      }, 500);
+    }
+
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -17,7 +17,7 @@ export class FriendsService {
   sentFriendsRequests = [];
   listeningItems = [];
   newFriendInfo: any = '';
-  tokenUser:string = '';
+  tokenUser: string = '';
   private newFriend = new Subject<void>();
   public newFriend$ = this.newFriend.asObservable();
 
@@ -83,7 +83,7 @@ export class FriendsService {
    */
   sendFriendRequest(uid: string) {
     this.getUser();
-    
+
     const url = `${environment.dirBack}sendFriendRequest/${this.userAuth.uid}/${uid}`;
     let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
     this.http.put(url, { headers: headers })
@@ -270,7 +270,7 @@ export class FriendsService {
         (response) => {
           var friendsUID = response['message'];
           // Buscamos si el usuario está entre los amigos del usuario          
-          friendsUID.forEach(user => {            
+          friendsUID.forEach(user => {
             if (user.uid == change.doc.id) {
               encontrado = true;
               this.newFriendInfo = user.uid;

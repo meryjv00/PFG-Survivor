@@ -1,5 +1,6 @@
 <nav class="navbar navbar-expand-lg nav-style">
-  <a class="navbar-brand text-light">Survivor</a>
+  <img routerLink="home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" 
+  src="{{pathLogo}}" alt="" class="navbar-brand m-0" width="280px">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <mat-icon class="gris">reorder</mat-icon>
@@ -8,14 +9,6 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <!--IZQUIERDA-->
     <ul class="navbar-nav mr-auto">
-      <!--Inicio-->
-      <li class="nav-item">
-        <a routerLink="home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-          class="nav-link text-light d-flex">
-          <!-- <mat-icon class="my-auto">home</mat-icon> -->
-          <span>Inicio</span>
-        </a>
-      </li>
       <!--Tienda-->
       <li class="nav-item">
         <a routerLink="tienda" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"

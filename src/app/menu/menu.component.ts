@@ -13,6 +13,7 @@ import { UserComponent } from '../views/user/user.component';
   styleUrls: ['./menu.component.scss']
 })
 export class MenuComponent implements OnInit {
+  pathLogo: string = '../../../assets/imgs/logo.png';
 
   constructor(public auth: AuthService,
     public ngmodal: NgbModal,

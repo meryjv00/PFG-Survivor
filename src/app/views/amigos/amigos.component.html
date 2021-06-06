@@ -39,7 +39,8 @@
                                     <div class="circulo ml-3"
                                         [ngClass]="{'green': friend.status === 'online', 'red' : friend.status === 'offline' }">
                                     </div>
-                                    <span class="ml-1">{{friend.status}}</span>
+                                    <span *ngIf="friend.status == 'online'" class="ml-1">Conectado</span>
+                                    <span *ngIf="friend.status == 'offline'" class="ml-1">Desconectado</span>
                                 </div>
                             </div>
                             <!--Mensajes sin leer-->

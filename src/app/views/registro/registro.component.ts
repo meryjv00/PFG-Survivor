@@ -45,6 +45,8 @@ export class RegistroComponent implements OnInit {
     if (this.registro.invalid) {
       return;
     }
+    var btnregistro = document.getElementById("btnregistro") as HTMLInputElement;
+    btnregistro.disabled = true;
 
     this.auth.registro()
     .subscribe(

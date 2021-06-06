@@ -33,7 +33,7 @@ export class ChatService {
   private countdownEndSource = new Subject<void>();
   public countdownEnd$ = this.countdownEndSource.asObservable();
   nFriends: number = 0;
-  tokenUser:string = '';
+  tokenUser: string = '';
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CONSTRUCTOR~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -359,8 +359,7 @@ export class ChatService {
    * para recibir en tiempo real cualquier cambio
    */
   listenFriendMessages(friend, index) {
-    console.log('ESCUCHA AMIGOS');
-    console.log(index);
+    console.log(index,friend.uid);
 
     var db = firebase.firestore();
     this.getUser();
@@ -432,6 +431,7 @@ export class ChatService {
       });
 
       if (read) {
+        console.log('VOY A AÑADIR MENSAJES');
         this.addMessages(friend, msg, msgs);
         msgs = [];
       }
@@ -495,12 +495,17 @@ export class ChatService {
     }
     // Cargar mensajes inicialmente
     if (!encontrado) {
+      console.log('CARGAR MENSAJES INICIALES', friend.uid);
+      //console.log(friend.uid, msgs);
+      
       this.messagesFriends.push({
         'uid': friend.uid,
         'displayName': friend.displayName,
         'photoURL': friend.photoURL,
         'messages': msgs
       });
+      console.log(this.messagesFriends);
+      
       // Se suman aquellos mensajes sin leer y cuyo uid sea del amig
       var cont = 0;
       msgs.forEach(msg => {
@@ -514,6 +519,9 @@ export class ChatService {
         'photoURL': friend.photoURL,
         'messages': cont
       });
+
+      // console.log('MENSAJES SIN LEER', this.messagesWithoutRead.length);
+
     }
   }
 
@@ -523,7 +531,7 @@ export class ChatService {
    * @param index 
    */
   countMessagesWithoutRead(friend, index) {
-    console.log('Hay mensajes sin leer', this.messagesWithoutRead);
+    //console.log('Hay mensajes sin leer', this.messagesWithoutRead);
     if (this.messagesWithoutRead[index]) {
       setTimeout(() => {
         if (this.messagesWithoutRead[index].messages > 0) {
@@ -568,6 +576,7 @@ export class ChatService {
     this.messagesWithFriend = [];
     this.uidFriendSelected = friend.uid;
     this.friendSelected = friend;
+    console.log('MENSAJES AMIGOS', this.messagesFriends);
 
     this.messagesFriends.forEach(user => {
       if (user.uid == friend.uid) {
@@ -581,7 +590,7 @@ export class ChatService {
         this.messagesWithFriend.forEach(msg => {
           if (msg.uid != this.userAuth.uid && msg.isRead == false) {
             console.log('AAAAAAAAAAAA', msg.id);
-            
+
             this.setMessagesRead(user.uid, msg.id);
             msg.isRead = true;
           }

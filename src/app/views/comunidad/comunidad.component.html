@@ -1,7 +1,7 @@
 <div class="container gris margin-header">
     <div class="row">
         <!--Busqueda amigos-->
-        <div class="col-lg-7 col-12">
+        <div class="col-lg-6 col-12">
             <!--Bloque buscador-->
             <div class="search-friend bg-success mt-3">
                 <span class="pl-3 titulo text-white">Búsqueda amigo</span>
@@ -32,7 +32,7 @@
             </div>
         </div>
         <!--Aside-->
-        <div class="col-lg-5 col-12 mx-auto mt-3">
+        <div class="col-lg-6 col-12 mx-auto mt-3">
             <!--Peticiones de amistad enviadas-->
             <div class="rounded sentRequests scroll mb-3" *ngIf="friendService.sentFriendsRequests.length > 0">
                 <div class="titulo">
@@ -54,8 +54,9 @@
             <!--Sugerencias de amistad-->
             <div class="bg-success shadow-lg suggestedFriends scroll rounded">
                 <div class="titulo">
-                    <span *ngIf="chat.suggestedFriends.length > 0" class="d-block text-center text-white">Sugerencias de
-                        amistad</span>
+                    <span *ngIf="chat.suggestedFriends.length > 0" class="d-block text-center text-white">
+                        Sugerencias de amistad
+                    </span>
                 </div>
                 <ul class="p-2" *ngIf="chat.suggestedFriends.length > 0">
                     <li class="align-items-center mt-2" *ngFor="let userSuggested of chat.suggestedFriends">

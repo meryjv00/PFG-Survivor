@@ -12,6 +12,9 @@ import { environment } from 'src/environments/environment';
 })
 export class RankingsComponent implements OnInit {
   userAuth: any | null;
+  rankingMonedas: boolean = true;
+  stats: number = 0;
+  ranking: any;
 
   constructor(public auth: AuthService,
     public perfilService: PerfilService,
@@ -21,14 +24,14 @@ export class RankingsComponent implements OnInit {
 
     this.getUser();
 
-    if(this.rankings.getRankings == true) {
+    if (this.rankings.getRankings == true) {
       this.rankings.setGetRankingsFalse();
       this.rankings.getRankingCoins();
       this.rankings.getRankingsLevels();
     }
-   
+
     if (this.auth.loginRecharge && this.userAuth != null) {
-      this.rankings.getPositionRankings(); 
+      this.rankings.getPositionRankings();
       this.rankings.getPositionRankingCoins();
       this.auth.setRechargeFalse();
       this.auth.getUser();
@@ -40,10 +43,37 @@ export class RankingsComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   getUser() {
     this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
     this.userAuth = JSON.parse(this.userAuth);
   }
+
+
+
+  onChange(value: any) {
+    if (value == 0) {
+      this.rankingMonedas = true;
+    } else {
+      this.rankingMonedas = false;
+    }
+
+    this.rankings.lvlRankings.forEach(ranking => {
+      if (value == ranking.Nivel) {
+        this.ranking = ranking;
+      }
+    });
+  }
+
+  onChangeStats(value: any) {
+    if (value == 0) {
+      this.stats = 0;
+    } else if (value == 1) {
+      this.stats = 1;
+    } else {
+      this.stats = 2;
+    }
+  }
+
 }

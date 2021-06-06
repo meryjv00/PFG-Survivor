@@ -8,8 +8,8 @@ describe('Login', () => {
     beforeEach(() => {
         // Abrimos la web
         cy.visit('https://pfg-survivor.netlify.app');
-        // Click botón registro
-        cy.get('#btn-login').click();
+        // Click botón login
+        cy.get('#btnlogin').click();
     });
 
     it('Validación correcta', () => {

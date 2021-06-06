@@ -135,6 +135,12 @@ export class FriendsService {
       .subscribe(
         (response) => {
           console.log('Response:', response);
+
+          this.sentFriendsRequests.forEach(sentFriend => {
+            if (sentFriend.uid == uid) {
+              this.deleteRequests(uid,this.userAuth.uid).subscribe(() => {});
+            }
+          });
           // Eliminar de amigos sugeridos
           this.chat.suggestedFriends.forEach((friendSuggested, index) => {
             if (friendSuggested.uid == uid) {
@@ -151,10 +157,7 @@ export class FriendsService {
    */
   deleteFriendRequest(uid: string) {
     this.getUser();
-
-    const url = `${environment.dirBack}deleteFriendRequest/${this.userAuth.uid}/${uid}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
-    this.http.delete(url, { headers: headers })
+    this.deleteRequests(this.userAuth.uid,uid)
       .subscribe(
         (response) => {
           console.log('Response:', response);
@@ -166,14 +169,19 @@ export class FriendsService {
         });
   }
 
+
+  deleteRequests(uidUser, uidFriend) {
+    const url = `${environment.dirBack}deleteFriendRequest/${uidUser}/${uidFriend}`;
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
+    return this.http.delete(url, { headers: headers })
+  }
+
   /**
    * Cancelar envío de la solicitud de amistad
    * @param uid 
    */
   cancelFriendRequest(uid: string) {
-    const url = `${environment.dirBack}deleteFriendRequest/${uid}/${this.userAuth.uid}`;
-    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
-    this.http.delete(url, { headers: headers })
+    this.deleteRequests(uid, this.userAuth.uid)
       .subscribe(
         (response) => {
           console.log('Response:', response);

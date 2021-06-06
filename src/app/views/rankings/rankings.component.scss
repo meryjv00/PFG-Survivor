@@ -1,0 +1,26 @@
+$light:#b8b6b4;
+$dark: rgb(15, 18, 20);
+
+.borderless td, .borderless th {
+    border: none;
+}
+select {
+    background-color: $dark !important;
+    color: $light !important;
+    border: 2px solid $dark !important;
+}
+
+.basic {
+    color: #ffffff;
+}
+.gold {
+    color: rgb(209, 149, 71);
+}
+
+.silver {
+    color: rgb(143, 142, 142);
+}
+
+.bronce {
+    color: #946b41;
+}

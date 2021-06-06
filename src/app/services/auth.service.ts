@@ -224,7 +224,7 @@ export class AuthService {
     this.setRechargeFalse();
     this.rankings.stopListeningRankingsItems();
     this.chat.setStatusOnOff(2);
-    this.chat.stopListeningFriendMessages();
+    this.chat.stopListeningReListenFM(1);
     this.chat.stopListeningFriends();
     this.friends.stopListeningRequests();
     this.chat.closeChat();

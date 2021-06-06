@@ -9,7 +9,7 @@ describe('Registro', () => {
         // Abrimos la web
         cy.visit('https://pfg-survivor.netlify.app');
         // Click botón registro
-        cy.get('#btn-registro').click();
+        cy.get('#btnregistro').click();
     });
 
 

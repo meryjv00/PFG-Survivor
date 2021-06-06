@@ -8,7 +8,7 @@ describe('Contraseña olvidada', () => {
         // Abrimos la web
         cy.visit('https://pfg-survivor.netlify.app');
         // Click botón registro
-        cy.get('#btn-login').click();
+        cy.get('#btnlogin').click();
         // Click he olvidado la contraseña
         cy.get('#forgotPass').click();
     });

@@ -14,7 +14,7 @@ export class RankingsService {
   unsubscribeListeners = [];
   userAuth: any | null;
   logedUserRankingCoins = [];
-  top = 2;
+  top = 7;
 
   constructor(private http: HttpClient) { }
 

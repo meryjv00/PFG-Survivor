@@ -175,12 +175,14 @@ export class ChatService {
                             // Pone en escucha la información del amigo
                             this.listenDataFriend(change.doc.id);
 
-                            var pos = this.friends.length - 1;
-                            this.listenFriendMessages(friend, pos);
+                            // var pos = this.friends.length - 1;
+                            // this.listenFriendMessages(friend, pos);
 
                             // Ultima pos del array -> obtiene los amigos sugeridos
                             if (this.nFriends == index + 1) {
                               this.getSuggestedFriends();
+                              this.stopListeningReListenFM(2);
+                              //this.listenFriendMessages();
                             }
 
                           });
@@ -259,6 +261,7 @@ export class ChatService {
    */
   getSuggestedFriends() {
     this.suggestedFriends = [];
+    if (this.friends.length == 0) { return };
 
     // Obtener peticiones de amistad enviadas
     this.getSentFriendsRequests()
@@ -350,7 +353,6 @@ export class ChatService {
   }
 
 
-
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~LISTEN FRIEND MESSAGES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -358,100 +360,111 @@ export class ChatService {
    * Pone en escucha los mensajes de todos los amigos
    * para recibir en tiempo real cualquier cambio
    */
-  listenFriendMessages(friend, index) {
-    console.log(index,friend.uid);
-
+  listenFriendMessages() {
     var db = firebase.firestore();
     this.getUser();
     this.messagesFriends = [];
+    this.messagesWithoutRead = [];
+    this.msgsWithoutReadNotif = [];
     var msgs = [];
     var msg: any;
-    var read: boolean;
-    var query = db.collection('users').doc(this.userAuth.uid).collection('friends')
-      .doc(friend.uid).collection('messages')
-      .orderBy('timestamp', 'asc')
+    var read = true;
 
-    var unsubscribe = query.onSnapshot(snapshot => {
-      snapshot.docChanges().forEach(change => {
-        // Mensaje eliminado
-        if (change.type === 'removed') {
-          read = false;
-          this.messagesFriends.forEach(user => {
-            if (user.uid == friend.uid) {
-              user.messages.forEach((message, index) => {
-                if (message.id == change.doc.id) {
-                  console.log('Mensaje borrado: ', message.id);
-                  user.messages.splice(index, 1);
-                  // Si todavía no está leido -> Descontarlo del contador de mensajes sin leer
-                  if (message.isRead == false && message.uid == friend.uid) {
-                    this.messagesWithoutRead.forEach(msg => {
-                      if (msg.uid == friend.uid) {
-                        var n = msg.messages - 1;
-                        msg.messages = n;
-                      }
-                    });
-                  }
-                }
-              });
-            }
-          });
-        }
-        // Mensaje actualizado (marcado como leído)
-        else if (change.type === 'modified') {
-          read = false;
-          this.messagesFriends.forEach(user => {
-            if (user.uid == this.uidFriendSelected) {
-              user.messages.forEach(message => {
-                if (message.id == change.doc.id) {
-                  console.log('Mensaje actualizado: ', message.id);
-                  message.isRead = true;
-                }
-              });
-            }
-          });
-        }
-        // Mensaje añadido/recibido
-        else {
-          read = true;
-          var h = String(change.doc.data().timestamp.toDate());
-          const message = {
-            'id': change.doc.id,
-            'uid': change.doc.data().uid,
-            'displayName': change.doc.data().displayName,
-            'text': change.doc.data().text,
-            'imageURL': change.doc.data().imageURL,
-            'isRead': change.doc.data().isRead,
-            'storageRef': change.doc.data().storageRef,
-            'timestamp': h.substring(16, 21),
-            'day': h.substring(8, 11) + h.substring(4, 7)
-          }
-          msgs.push(message);
-          msg = message;
-        }
-      });
-
-      if (read) {
-        console.log('VOY A AÑADIR MENSAJES');
-        this.addMessages(friend, msg, msgs);
+    if (this.friends.length > 0) {
+      this.friends.forEach((friend, index) => {
         msgs = [];
-      }
 
-      // Obtener nº mensajes sin leer panel de notificaciones
-      this.countMessagesWithoutRead(friend, index);
+        var query = db.collection('users').doc(this.userAuth.uid).collection('friends')
+          .doc(friend.uid).collection('messages')
+          .orderBy('timestamp', 'asc')
 
-      // Ha terminado de obtener los mensajes
-      if (this.nFriends == index + 1 && this.gotAllMessages == false) {
-        this.gotAllMessages = true;
-        console.log('Termine');
-      }
+        var unsubscribe = query.onSnapshot(snapshot => {
+          snapshot.docChanges().forEach(change => {
+            // Mensaje eliminado
+            if (change.type === 'removed') {
+              read = false;
+              this.messagesFriends.forEach(user => {
+                if (user.uid == friend.uid) {
+                  user.messages.forEach((message, index) => {
+                    if (message.id == change.doc.id) {
+                      console.log('Mensaje borrado: ', message.id);
+                      user.messages.splice(index, 1);
+                      // Si todavía no está leido -> Descontar uno del contador de mensajes sin leer
+                      if (message.isRead == false && message.uid == friend.uid) { // !!!
+                        this.messagesWithoutRead.forEach(msg => {
+                          if (msg.uid == friend.uid) {
+                            var n = msg.messages - 1;
+                            msg.messages = n;
+                          }
+                        });
+                      }
+                    }
+                  });
+                }
+              });
+            }
+            // Mensaje actualizado (marcado como leído)
+            else if (change.type === 'modified') {
+              read = false;
+              this.messagesFriends.forEach(user => {
+                if (user.uid == this.uidFriendSelected) {
+                  user.messages.forEach(message => {
+                    if (message.id == change.doc.id) {
+                      console.log('Mensaje actualizado: ', message.id);
+                      message.isRead = true;
+                    }
+                  });
+                }
+              });
+            }
+            // Mensaje añadido/recibido
+            else {
+              read = true;
+              var h = '';
+              h += change.doc.data().timestamp.toDate();
+              // var year = h.substring(11, 15);
 
-    });
+              const message = {
+                'id': change.doc.id,
+                'uid': change.doc.data().uid,
+                'displayName': change.doc.data().displayName,
+                'text': change.doc.data().text,
+                'imageURL': change.doc.data().imageURL,
+                'isRead': change.doc.data().isRead,
+                'storageRef': change.doc.data().storageRef,
+                'timestamp': h.substring(16, 21),
+                'day': h.substring(8, 11) + h.substring(4, 7)
+              }
+              msgs.push(message);
+              msg = message;
+            }
+          });
 
-    // Añadir al array para poder dejar de escuchar al cerrar sesión y q al volver a entrar no vuelva a escuchar y x lo tanto haya duplicidad de mensajes
-    this.listeningSnapsMessages.push(unsubscribe);
+          if (read) {
+            this.addMessages(friend, msg, msgs);
+            msgs = [];
+          }
+
+          // Obtener nº mensajes sin leer panel de notificaciones
+          this.countMessagesWithoutRead(friend, index);
+
+          // Ha terminado de obtener los mensajes
+          if (this.friends.length - 1 == index && this.gotAllMessages == false) {
+            console.log(this.msgsWithoutReadNotif);
+            this.gotAllMessages = true;
+            console.log('Termine');
+          }
+
+        });
+
+        // Añadir al array para poder dejar de escuchar al cerrar sesión y q al volver a entrar no vuelva a escuchar y x lo tanto haya duplicidad de mensajes
+        this.listeningSnapsMessages.push(unsubscribe);
+
+
+      });
+    }
 
   }
-
 
   /**
    * Añade un mensaje al array de mensajes totales y pendientes por leer
@@ -495,9 +508,9 @@ export class ChatService {
     }
     // Cargar mensajes inicialmente
     if (!encontrado) {
-      console.log('CARGAR MENSAJES INICIALES', friend.uid);
+      //console.log('CARGAR MENSAJES INICIALES', friend.uid);
       //console.log(friend.uid, msgs);
-      
+
       this.messagesFriends.push({
         'uid': friend.uid,
         'displayName': friend.displayName,
@@ -505,7 +518,7 @@ export class ChatService {
         'messages': msgs
       });
       console.log(this.messagesFriends);
-      
+
       // Se suman aquellos mensajes sin leer y cuyo uid sea del amig
       var cont = 0;
       msgs.forEach(msg => {
@@ -589,8 +602,6 @@ export class ChatService {
         // Poner en leído los mensajes del chat correspondiente
         this.messagesWithFriend.forEach(msg => {
           if (msg.uid != this.userAuth.uid && msg.isRead == false) {
-            console.log('AAAAAAAAAAAA', msg.id);
-
             this.setMessagesRead(user.uid, msg.id);
             msg.isRead = true;
           }
@@ -806,10 +817,14 @@ export class ChatService {
   * Parar escucha de los mensajes del amigo. Este método se llama al cerrar sesión y 
   * a la hora de cargar los amigos, así en caso de que se añada una nuevo, se reiniciará la escucha
   */
-  stopListeningFriendMessages() {
+  stopListeningReListenFM(type: number) {
     this.listeningSnapsMessages.forEach(unsubscribe => {
       unsubscribe();
     });
+
+    if(type == 2) {
+      this.listenFriendMessages();
+    }
   }
 
   /**

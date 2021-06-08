@@ -12,7 +12,7 @@
             <div class="card mt-4 w-100 bg-success text-white" style="width: 18rem; ">
                 <!--Imagen arma-->
                 <div class="img-hover-zoom">
-                    <img class="card-img-top" src="{{item.img}}" alt="{{item.name}}">
+                    <img class="h-100 card-img-top" src="{{item.img}}" alt="{{item.name}}">
                 </div>
                 <div class="card-body">
                     <!--Información arma-->
@@ -20,7 +20,8 @@
                         {{item.name}} 
                         <div class="card-text ml-2 ">
                             - {{item.price}}
-                            <img class="" src="../../../assets/imgs/coin.png" alt="" width="15px" height="15px">
+                            <img *ngIf="item.available" class="" src="../../../assets/imgs/coin.png" alt="" width="15px" height="15px">
+                            <span *ngIf="!item.available">€</span>
                         </div>
                     </h5>
 
@@ -29,12 +30,17 @@
                     <ng-container *ngIf="auth.user">
                         <!--Comprar arma o arma ya obtenida-->
                         <div class="float-right">
-                            <div *ngIf="item.owned" class="mt-2 text-light">
-                                En propiedad
+                            <ng-container *ngIf="item.available">
+                                <div *ngIf="item.owned" class="mt-2 enpropiedad">
+                                    En propiedad
+                                </div>
+                                <button *ngIf="!item.owned" (click)="buyItem(item)" class="btn btn-primary">
+                                    Comprar
+                                </button>
+                            </ng-container>
+                            <div *ngIf="!item.available" class="mt-2 text-white">
+                                Próximamente...
                             </div>
-                            <button *ngIf="!item.owned" (click)="buyItem(item)" class="btn btn-primary">
-                                Comprar
-                            </button>
                         </div>
                     </ng-container>
                 </div>

@@ -32,6 +32,7 @@ img {
 
 .notific_item {
     &:hover {
+        cursor: pointer;
         background-color: #15171d;
     }
 }

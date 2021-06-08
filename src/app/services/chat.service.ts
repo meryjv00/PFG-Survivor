@@ -108,26 +108,26 @@ export class ChatService {
   getFriends() {
     this.friends = [];
     this.getUser();
-
+    var contAmigos;
     // Obtener nº de amigos -> Si obtiene 0 vuelve a la vista si no pone en escucha los mensajes
     this.getFriendsData(this.userAuth.uid)
       .subscribe(
         (response) => {
-          var contAmigos = response['message'].length;
+          contAmigos = response['message'].length;
           if (contAmigos == 0) {
             this.gotAllMessages = true;
             return;
           }
         });
 
-    this.listenFriends();
+    this.listenFriends(contAmigos);
 
   }
 
   /**
    * Pone en escucha la lista de amigos
    */
-  listenFriends() {
+  listenFriends(contAmigos) {
     this.getUser();
     var db = firebase.firestore();
     var query = db.collection('users').doc(this.userAuth.uid).collection('friends')
@@ -179,10 +179,16 @@ export class ChatService {
                             // this.listenFriendMessages(friend, pos);
 
                             // Ultima pos del array -> obtiene los amigos sugeridos
-                            if (this.nFriends == index + 1) {
+                            if (this.nFriends == index + 1) {                              
                               this.getSuggestedFriends();
                               this.stopListeningReListenFM(2);
                               //this.listenFriendMessages();
+                            }else {
+                              // Se ha añadido un nuevo amigo
+                              if (contAmigos != this.nFriends) {                                
+                                this.getSuggestedFriends();
+                                this.stopListeningReListenFM(2);
+                              }
                             }
 
                           });

@@ -11,7 +11,7 @@ echo '********************APP READY*****************************'
 echo '*******************LOCALHOST:4200*************************'
 echo '**********************************************************'
 
-# En caso de error: error checking context: 'can't stat '/home/maria/Escritorio/frontmaria/.config''.
+# En caso de error: error checking context: 'can't stat directorio. EJ: '/home/maria/Escritorio/frontmaria/.config''.
 # Ejecutar:
 # sudo rm -rf .config
 # sudo rm -rf .npm

@@ -589,9 +589,6 @@ export class ChatService {
    * @param friend amigo seleccionado
    */
   chatWith(friend: any) {
-    /*     if (friend.uid == this.uidFriendSelected) {
-          return;
-        } */
     this.messagesWithFriend = [];
     this.uidFriendSelected = friend.uid;
     this.friendSelected = friend;

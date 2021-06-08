@@ -180,6 +180,8 @@ export class ChatService {
 
                             // Ultima pos del array -> obtiene los amigos sugeridos
                             if (this.nFriends == index + 1) {
+                              console.log('ENTRO AQUI');
+                              
                               this.getSuggestedFriends();
                               this.stopListeningReListenFM(2);
                               //this.listenFriendMessages();

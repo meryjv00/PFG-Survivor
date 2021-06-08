@@ -24,3 +24,24 @@ select {
 .bronce {
     color: #946b41;
 }
+
+.gold-b {
+    background-color: rgb(209, 149, 71);
+}
+
+.silver-b {
+    background-color: rgb(146, 146, 146);
+}
+
+.bronce-b {
+    background-color: #865829;
+}
+
+tr:hover {
+    cursor: pointer;
+    color: white !important;
+}
+
+tr {
+    border: 2px solid #1e212b;
+}

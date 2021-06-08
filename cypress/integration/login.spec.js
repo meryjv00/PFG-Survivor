@@ -4,12 +4,12 @@ var emailValido = 'pepe@gmail.com';
 var emailInvalido = 'pepito@gmail.com';
 
 describe('Login', () => {
-    
+
     beforeEach(() => {
         // Abrimos la web
         cy.visit('https://pfg-survivor.netlify.app');
         // Click botón login
-        cy.get('#btnlogin').click();
+        cy.get('#btn-login').click();
     });
 
     it('Validación correcta', () => {
@@ -33,6 +33,9 @@ describe('Login', () => {
         // Submit del formulario
         cy.get('#login').submit();
 
+        // Espera 3s
+        cy.wait(3000);
+        
         // La url ahora debe contener /home
         cy.url().should('include', '/home');
 

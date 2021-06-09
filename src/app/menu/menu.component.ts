@@ -26,11 +26,11 @@ export class MenuComponent implements OnInit {
   }
 
   openLogin() {
-    this.ngmodal.open(LoginComponent, { size: 'lg' });
+    this.ngmodal.open(LoginComponent, { size: 'md' });
   }
 
   openRegistro() {
-    this.ngmodal.open(RegistroComponent, { size: 'lg' });
+    this.ngmodal.open(RegistroComponent, { size: 'md' });
   }
 
   openProfileUser(user: any) {

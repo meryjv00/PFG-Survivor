@@ -39,7 +39,7 @@ export class PassComponent implements OnInit {
         console.log('Correo enviado:', response['message']);
         this.auth.emailPass = '';
         this.activeModal.close();
-        const modalRef = this.ngmodal.open(LoginComponent, { size: 'lg' });
+        const modalRef = this.ngmodal.open(LoginComponent, { size: 'md' });
         modalRef.componentInstance.msgPassword = 'Se ha enviado un mensaje al correo electrónico para restablecer la contraseña.';
       },
       (error) => {
@@ -57,7 +57,7 @@ export class PassComponent implements OnInit {
    */
   backLogin(){
     this.activeModal.close();
-    this.ngmodal.open(LoginComponent, { size: 'lg' });
+    this.ngmodal.open(LoginComponent, { size: 'md' });
   }
 
 }

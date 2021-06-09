@@ -1,16 +1,16 @@
 <!--Modal Registro-->
-<div class="modal-body">
+<div class="modal-body bg-dark gris">
     <div class="container-fluid">
         <div class="row">
             <!--1º Parte imágen-->
-            <div class="col-lg-5 col-0 p-0 bg-secondary">
+            <div class="col-lg-5 col-0 p-0 bg-success">
             </div>
             <!--2º Parte Login-->
             <div class="col-lg-7 col-12 px-3">
                 <button type="button" class="close" aria-label="Close" (click)="activeModal.close('Cross click')">
-                    <i class="fas fa-times fa-sm"></i>
+                    <i class="fas fa-times fa-sm gris"></i>
                 </button>
-                <h1 class="text-center text-primary mt-3">Registrarse</h1>
+                <h1 class="text-center text-white mt-3">Registrarse</h1>
                 <!--Mensaje registro-->
                 <div *ngIf="msg" class="alert alert-danger" role="alert">
                     {{ msg }}
@@ -19,8 +19,8 @@
                 <form id="registro" [formGroup]="registro" (ngSubmit)="onSubmit()" class="mt-3">
                     <!--Email-->
                     <mat-form-field appearance="outline" class="w-100">
-                        <mat-label>Introduce tu correo electrónico</mat-label>
-                        <input matInput formControlName="email" [(ngModel)]="auth.emailRegistro">
+                        <mat-label class="gris">Introduce tu correo electrónico</mat-label>
+                        <input id="email" matInput formControlName="email" [(ngModel)]="auth.emailRegistro">
                         <mat-icon matSuffix>mail</mat-icon>
                         <!--Validación email-->
                         <mat-error *ngIf="formRegistro.email.errors && formRegistro.email.errors.required">
@@ -32,8 +32,8 @@
                     </mat-form-field>
                     <!--Nombre-->
                     <mat-form-field appearance="outline" class="w-100">
-                        <mat-label>Introduce tu nombre</mat-label>
-                        <input matInput formControlName="nombre" [(ngModel)]="auth.nombreRegistro">
+                        <mat-label class="gris">Introduce tu nombre</mat-label>
+                        <input id="name" matInput formControlName="nombre" [(ngModel)]="auth.nombreRegistro">
                         <mat-icon matSuffix>person</mat-icon>
                         <!--Validación email-->
                         <mat-error *ngIf="formRegistro.nombre.errors && formRegistro.nombre.errors.required">
@@ -46,8 +46,8 @@
                     </mat-form-field>
                     <!--Password-->
                     <mat-form-field appearance="outline" class="w-50 pr-1">
-                        <mat-label>Crea una contraseña</mat-label>
-                        <input matInput [type]="hide1 ? 'password' : 'text'" formControlName="password"
+                        <mat-label class="gris">Crea una contraseña</mat-label>
+                        <input id="pass" matInput [type]="hide1 ? 'password' : 'text'" formControlName="password"
                             [(ngModel)]="auth.passRegistro">
                         <button type="button" mat-icon-button matSuffix (click)="hide1 = !hide1"
                             [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide1">
@@ -64,8 +64,8 @@
                     </mat-form-field>
                     <!--Confirmación Password-->
                     <mat-form-field appearance="outline" class="w-50 pl-1">
-                        <mat-label>Repite la contraseña</mat-label>
-                        <input matInput [type]="hide2 ? 'password' : 'text'" formControlName="confirmPassword" pattern="{{auth.passRegistro}}">
+                        <mat-label class="gris">Repite la contraseña</mat-label>
+                        <input id="confirmPass" matInput [type]="hide2 ? 'password' : 'text'" formControlName="confirmPassword" pattern="{{auth.passRegistro}}">
                         <button type="button" mat-icon-button matSuffix (click)="hide2 = !hide2"
                             [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide2">
                             <mat-icon>{{hide2 ? 'visibility_off' : 'visibility'}}</mat-icon>
@@ -79,7 +79,7 @@
                         </mat-error>
                     </mat-form-field>
                     <!--Submit registro email y pass-->
-                    <button type="submit" mat-raised-button class="btn btn-primary w-100 py-1 mt-3">Regístrate</button>
+                    <button id="btnregistro" type="submit" mat-raised-button class="btn btn-primary w-100 py-1 mt-3">Regístrate</button>
                 </form>
                 <!--Botones login redes sociales-->
                 <div class="row mt-4 py-4 px-3">
@@ -101,9 +101,9 @@
                 <!--Ir a login-->
                 <div class="mt-3 py-2 text-center mx-auto">
                     <div class="w-100">
-                        <a id="enlaceRegistro" class="cursor-pointer" (click)="openLogin()">Inicia sesión aquí</a>
+                        <a id="enlaceRegistro" class="cursor-pointer text-secondary" (click)="openLogin()">Inicia sesión aquí</a>
                     </div>
-                    <span>si ya tienes una cuenta</span>
+                    <span>Si ya tienes una cuenta</span>
                 </div>
             </div>
         </div>

@@ -1,59 +1,118 @@
-<div class="contenedor-principal">
+<div class="container-fluid margin-header">
     <h1 *ngIf="chat.gotAllMessages == false; else gotFriendsMessages">
         <mat-spinner></mat-spinner>
     </h1>
 
     <ng-template #gotFriendsMessages>
         <div class="container-fluid">
+            <!--Buscador para móvil/tablet-->
+            <div class="row">
+                <div class="search-box noneSearch100 w-100">
+                    <div class="input-wrapper">
+                        <i class="material-icons">search</i>
+                        <input type="text" placeholder="Buscar aquí" [(ngModel)]="filtroAmigo" name="filtroAmigo">
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <!--Lista amigos-->
-                <div class="col-md-3 col-2 p-0">
+                <div *ngIf="chat.friends.length > 0" class="col-md-3 col-2 p-0">
+                    <!--Buscador-->
                     <div class="search-box display-none mt-2 mb-4">
                         <div class="input-wrapper">
                             <i class="material-icons">search</i>
-                            <input type="text" placeholder="Buscar aquí">
+                            <input type="text" placeholder="Buscar aquí" [(ngModel)]="filtroAmigo" name="filtroAmigo">
                         </div>
                     </div>
-
-                    <div *ngFor="let friend of chat.friends; index as i" class="friend-description"
-                        (click)="chatWith(friend)">
-                        <img src="{{friend.photoURL}}" alt="Foto {{friend.displayName}}" width="100px" class="centrado">
-                        <div class="text display-none">
-                            <span>{{friend.displayName}}</span>
+                    <!--Lista amigos-->
+                    <div class="column-friends scroll">
+                        <div *ngFor="let friend of chat.friends | filtroAmigos:filtroAmigo; index as i"
+                            class="friend-description" (click)="chatWith(friend)"
+                            [ngClass]="{'friendSelected': friend.uid === chat.uidFriendSelected}">
+                            <!--Foto perfil-->
+                            <img src="{{friend.photoURL}}" alt="Foto {{friend.displayName}}" width="100px"
+                                class="centrado">
+                            <!--Infor-->
+                            <div class="text display-none">
+                                <span>{{friend.displayName}}</span>
+                                <div class="d-flex align-items-center">
+                                    <div class="circulo ml-3"
+                                        [ngClass]="{'green': friend.status === 'online', 'red' : friend.status === 'offline' }">
+                                    </div>
+                                    <span *ngIf="friend.status == 'online'" class="ml-1">Conectado</span>
+                                    <span *ngIf="friend.status == 'offline'" class="ml-1">Desconectado</span>
+                                </div>
+                            </div>
+                            <!--Mensajes sin leer-->
+                            <ng-container *ngIf="chat.messagesWithoutRead[i]">
+                                <span class="badge" *ngIf="chat.messagesWithoutRead[i].messages > 0">
+                                    {{chat.messagesWithoutRead[i].messages}}
+                                </span>
+                            </ng-container>
                         </div>
-                        <span *ngIf="chat.messagesWithoutRead[i].messages > 0">
-                            {{chat.messagesWithoutRead[i].messages}}
-                        </span>
                     </div>
                 </div>
-                <!--Chat-->
-                <div class="col-md-9 col-10 card p-0" *ngIf="chat.chatEnabled == true">
+
+                <!--Si no tienes amigos-->
+                <div class="col-lg-5 col-md-8 col-11 mx-auto p-0 bg-dark mt-5" *ngIf="chat.friends.length == 0">
+                    <div
+                        class="mx-auto bg-success rounded shadow-md noFriends d-flex px-3 flex-column align-items-center justify-content-center">
+                        <h1 class="text-white">¡Todavía no tienes amigos!</h1>
+                        <p class="text-light">Agrega alguno desde la sección <a routerLink="/comunidad"
+                                routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Comunidad</a></p>
+                        <mat-icon class="gris">sentiment_dissatisfied</mat-icon>
+                    </div>
+                </div>
+
+                <!--Chat cerrado-->
+                <div class="col-md-9 col-10 h-70 d-flex flex-column justify-content-center align-items-center"
+                    *ngIf="chat.chatEnabled == false && chat.friends.length > 0">
+                    <div class="circuloChat bg-primary">
+                        <mat-icon class="text-white">question_answer</mat-icon>
+                    </div>
+                </div>
+
+                <!--Chat abierto-->
+                <div class="col-md-9 col-10 card p-0 bg-success" *ngIf="chat.chatEnabled == true">
                     <!--Información amigo chat abierto-->
                     <div class="card-header">
-                        <div class="d-flex justify-content-between bd-highlight">
+                        <div class="d-flex justify-content-between">
+                            <!--Información chat usuario-->
                             <div class="d-flex">
-                                <img src="{{chat.friendSelected.photoURL}}" class="rounded-circle user_img">
+                                <img src="{{chat.friendSelected.photoURL}}" class="rounded-circle user_img"
+                                    (click)="openProfileUser(chat.friendSelected)"
+                                    [ngClass]="{'border-green': chat.friendSelected.status === 'online', 'border-red' : chat.friendSelected.status === 'offline' }">
                                 <div class="user_info">
                                     <span>{{chat.friendSelected.displayName}}</span>
                                     <p>{{chat.messagesWithFriend.length}} mensajes</p>
                                 </div>
                             </div>
+                            <!--Opciones chat-->
                             <div class="align-self-center">
-                                <button (click)="chat.deleteChat()" class="btn btn-light">
-                                    <mat-icon>delete_forever</mat-icon>
+                                <button mat-icon-button aria-label="Opciones chat" [matMenuTriggerFor]="optionsChat">
+                                    <mat-icon class="gris">more_vert</mat-icon>
                                 </button>
-                                <button (click)="chat.closeChat()" class="btn btn-light ml-2">
-                                    <mat-icon>clear</mat-icon>
-                                </button>
+                                <mat-menu id="optionsMenu" #optionsChat="matMenu" xPosition="before"
+                                    class="bg-dark mt-2" aria-colcount="menu">
+                                    <button mat-menu-item class="gris menuOP" (click)="openConfirmModal()">
+                                        <mat-icon>delete_forever</mat-icon>
+                                        <span>Vaciar chat</span>
+                                    </button>
+                                    <button mat-menu-item class="gris menuOP" (click)="chat.closeChat()">
+                                        <mat-icon>clear</mat-icon>
+                                        <span>Cerrar chat</span>
+                                    </button>
+                                </mat-menu>
                             </div>
                         </div>
                     </div>
-                    <div #scrollMe id="messages-chat" class="card-body" (scroll)="onScroll()">
+                    <!--Mensajes chat-->
+                    <div #scrollMe id="messages-chat" class="card-body scroll" (scroll)="onScroll()">
                         <div class="row">
                             <div class="col-12 col-md-10 mx-auto">
                                 <div class="row" *ngFor="let message of chat.messagesWithFriend; index as i">
                                     <!--Mis mensajes-->
-                                    <div *ngIf="message.displayName == auth.authUser.displayName; else msgAjeno"
+                                    <div *ngIf="message.uid == auth.user.uid; else msgAjeno"
                                         class="col-md-9 col-12 ml-auto">
                                         <div class="d-flex mb-4">
                                             <div class="chat-bubble chat-bubble--right ml-auto"
@@ -71,8 +130,9 @@
                                                     </ng-template>
                                                 </span>
                                             </div>
-                                            <mat-menu #menu="matMenu">
-                                                <button *ngIf="message.imageURL" mat-menu-item data-toggle="modal" data-target="#exampleModal"
+                                            <mat-menu #menu="matMenu" class="mt-1">
+                                                <button *ngIf="message.imageURL" mat-menu-item data-toggle="modal"
+                                                    data-target="#exampleModal"
                                                     (click)="saveImgModal(message.imageURL)">
                                                     <mat-icon>visibility</mat-icon>
                                                     <span>Ver ampliada</span>
@@ -86,7 +146,7 @@
                                                     <span>Eliminar para todos</span>
                                                 </button>
                                             </mat-menu>
-                                            <img src="{{message.photoURL}}" alt="" width="50px" height="50px"
+                                            <img src="{{auth.user.photoURL}}" alt="" width="50px" height="50px"
                                                 class="rounded-circle display-none">
                                         </div>
                                     </div>
@@ -94,7 +154,7 @@
                                     <ng-template #msgAjeno>
                                         <div class="col-md-9 col-12">
                                             <div class="d-flex mb-4">
-                                                <img src="{{message.photoURL}}" alt="" width="50px" height="50px"
+                                                <img src="{{chat.friendSelected.photoURL}}" alt="" width="50px" height="50px"
                                                     class="rounded-circle display-none">
                                                 <div class="chat-bubble chat-bubble--left mr-auto"
                                                     [class.img-class]="message.imageURL">
@@ -111,7 +171,7 @@
                                     <!-- Modal visualizar imágen en grande -->
                                     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
                                         aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg  modal-dialog-centered" role="document">
+                                        <div class="modal-dialog modal-xs  modal-dialog-centered" role="document">
                                             <div class="modal-content">
                                                 <div class="modal-body p-0">
                                                     <img src="{{urlImg}}" width="100%" />
@@ -123,20 +183,23 @@
                             </div>
                         </div>
                     </div>
+                    <!--Inputs-->
                     <div class="card-footer">
                         <form id="chatFriends" [formGroup]="chatFriends" (ngSubmit)="onSubmit()">
                             <div class="input-group">
                                 <div class="input-group-append">
                                     <input id="file" style="display: none;" type="file" (change)="chat.sendImg($event)"
                                         accept=".png,.jpg" />
-                                    <span (click)="openFileSelection()" class="input-group-text attach_btn"><i
-                                            class="fas fa-paperclip"></i></span>
+                                    <span (click)="openFileSelection()" class="input-group-text attach_btn">
+                                        <i class="fas fa-paperclip"></i>
+                                    </span>
                                 </div>
                                 <input type="text" [(ngModel)]="chat.msgEnviar" formControlName="text"
                                     class="form-control type_msg" (click)="enableScollDown()">
                                 <div class="input-group-append">
-                                    <button type="submit" class="input-group-text send_btn"><i
-                                            class="fas fa-location-arrow"></i></button>
+                                    <button type="submit" class="input-group-text send_btn">
+                                        <i class="fas fa-location-arrow"></i>
+                                    </button>
                                 </div>
                             </div>
                         </form>

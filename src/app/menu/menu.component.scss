@@ -1,4 +1,48 @@
-img {
-    border-radius: 25px;
-    border: 1px solid #32465A;
+$gris:#b8b6b4; 
+
+.nav-style {
+    position: fixed;
+    top: 0; 
+    width: 100%;
+    z-index: 999;
+    padding-left: 70px;
+    padding-right: 30px;
+    // background-color: rgba(17, 17, 17, 0.75);
+    background: #0b0c0f;
+    box-shadow: 0 3px 7px 0 rgb(0 0 0 / 35%);
 }
+.mat-menu-item .mat-icon-no-color, .mat-menu-item-submenu-trigger::after {
+    color: #a5a5a5;
+}
+.badge {
+    position: absolute;
+    font-size: 12px;
+    border-radius: 25px;
+    padding: 4px 6px;
+    top: 22px;
+    left: 27px;
+    background-color: #ac3027;
+}
+
+img {
+    cursor: pointer;
+    margin-right: 100px;
+    border-radius: 30px;
+}
+
+.notific_item {
+    &:hover {
+        cursor: pointer;
+        background-color: #15171d;
+    }
+}
+
+
+a {
+    text-decoration: none;
+    &.active {
+        color: #fff !important;
+    }
+    
+}
+

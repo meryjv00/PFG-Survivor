@@ -1,0 +1,47 @@
+$light:#b8b6b4;
+$dark: rgb(15, 18, 20);
+
+.borderless td, .borderless th {
+    border: none;
+}
+select {
+    background-color: $dark !important;
+    color: $light !important;
+    border: 2px solid $dark !important;
+}
+
+.basic {
+    color: #ffffff;
+}
+.gold {
+    color: rgb(209, 149, 71);
+}
+
+.silver {
+    color: rgb(143, 142, 142);
+}
+
+.bronce {
+    color: #946b41;
+}
+
+.gold-b {
+    background-color: rgb(209, 149, 71);
+}
+
+.silver-b {
+    background-color: rgb(146, 146, 146);
+}
+
+.bronce-b {
+    background-color: #865829;
+}
+
+tr:hover {
+    cursor: pointer;
+    color: white !important;
+}
+
+tr {
+    border: 2px solid #1e212b;
+}

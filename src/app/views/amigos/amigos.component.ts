@@ -1,7 +1,13 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatService } from 'src/app/services/chat.service';
+import { FriendsService } from 'src/app/services/friends.service';
+import { RankingsService } from 'src/app/services/rankings.service';
+import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
+import { UserComponent } from '../user/user.component';
 
 @Component({
   selector: 'app-amigos',
@@ -11,26 +17,50 @@ import { ChatService } from 'src/app/services/chat.service';
 export class AmigosComponent implements OnInit {
   chatFriends: FormGroup;
   @ViewChild('scrollMe') private myScrollContainer: ElementRef;
-  disableScrollDown = false
+  disableScrollDown = false;
   urlImg = '';
+  filtroAmigo = '';
+  // En esucha si se envian nuevos mensajes para que el scroll baje automáticamente
+  @Output() onComplete = new EventEmitter();
+  countdownEndRef: Subscription = null;
 
   constructor(public chat: ChatService,
     private formBuilder: FormBuilder,
-    public auth: AuthService) {
+    public auth: AuthService,
+    public friends: FriendsService,
+    public rankings: RankingsService,
+    public ngmodal: NgbModal) {
 
     this.chatFriends = this.formBuilder.group({
       text: ['', [Validators.required]],
     });
 
-    // Has recargado... cargar de nuevo amigos y mensajes asociados
-    if (this.chat.friends.length == 0) {
-      this.chat.getFriends(false);
+    // Has recargado... cargar de nuevo amigos y mensajes asociados, peticiones de amistad
+    if (this.auth.loginRecharge) {
+      this.auth.getUser();
+      this.rankings.getPositionRankings();
+      this.rankings.getPositionRankingCoins();
+      this.auth.setRechargeFalse();
+      this.auth.getItemsUser(1);
+      this.chat.getFriends();
+      this.chat.closeChat();
+      this.friends.listenFriendsRequests();
+      this.friends.listenSentFriendsRequests();
     }
+
   }
 
   get formChat() { return this.chatFriends.controls; }
 
   ngOnInit(): void {
+    this.countdownEndRef = this.chat.countdownEnd$.subscribe(() => {
+      this.onComplete.emit();
+      this.disableScrollDown = false;
+    });
+  }
+
+  ngOnDestroy() {
+    this.chat.urlImgsChat = [];
   }
 
   ngAfterViewChecked() {
@@ -45,7 +75,6 @@ export class AmigosComponent implements OnInit {
     } else {
       this.disableScrollDown = true
     }
-
   }
 
   scrollToBottom(): void {
@@ -61,7 +90,6 @@ export class AmigosComponent implements OnInit {
     if (this.chatFriends.invalid) {
       return;
     }
-
     this.chat.sendMessageFriend();
   }
 
@@ -78,7 +106,36 @@ export class AmigosComponent implements OnInit {
     this.disableScrollDown = false;
   }
 
-  saveImgModal (urlImg: string){
+  saveImgModal(urlImg: string) {
     this.urlImg = urlImg;
   }
+
+  openProfileUser(user: any) {
+    this.chat.getImagenesChat()
+      .subscribe(
+        (response) => {
+          console.log(response['message']);
+          this.chat.urlImgsChat = response['message'];
+          const modalRef = this.ngmodal.open(UserComponent, { size: 'lg' });
+          modalRef.componentInstance.user = user;
+          modalRef.componentInstance.addUser = 'see';
+          modalRef.componentInstance.msgs = this.chat.messagesWithFriend.length;
+
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+
+  }
+
+  openConfirmModal() {
+    const modalRef = this.ngmodal.open(ConfirmModalComponent, { size: 'xs' });
+    modalRef.componentInstance.msg = `Eliminar archivos multimedia con ${this.chat.friendSelected.displayName}`;
+    modalRef.componentInstance["confirm"].subscribe((event: any) => {
+      this.chat.deleteChat(event);
+    });
+  }
+
+
 }

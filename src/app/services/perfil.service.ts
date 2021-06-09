@@ -1,82 +1,115 @@
 import { Injectable } from '@angular/core';
-import { AngularFireDatabase } from '@angular/fire/database';
-import { AngularFireStorage, AngularFireUploadTask } from '@angular/fire/storage';
-import { Observable, of } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { AngularFireStorage } from '@angular/fire/storage';
 import { AuthService } from './auth.service';
-import firebase from 'firebase/app';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PerfilService {
-  // Variables
-  path = 'images/';
-  task: AngularFireUploadTask = null;
-  downloadURL = of('');
+  userAuth: any | null; // Usuario guardado en session storage para obtener bien los datos al recargar la pagina
+  tokenUser:string = '';
 
   constructor(public firestorage: AngularFireStorage,
     public auth: AuthService,
-    public db: AngularFireDatabase,
-    public router: Router) {
+    public router: Router,
+    private http: HttpClient) {
   }
 
-  updatePerfil() {
-    var user = firebase.auth().currentUser;
-    user.updateProfile({
-      displayName: "Nombre actualizado",
-      photoURL: "https://blog.hotmart.com/blog/2017/01/post_url_940x606-670x432.png"
-    }).then(function () {
-      // Update successful.
-    }).catch(function (error) {
-      // An error happened.
-    });
+
+  /**
+ * Obtiene el usuario almacenado en localStorage, el cual se almacena al iniciar sesión
+ */
+  getUser() {
+    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+    this.userAuth = JSON.parse(this.userAuth);
+    this.tokenUser = this.userAuth['stsTokenManager']['accessToken'];
   }
 
-  updatePass() {
-    // Cambiar contraseña por input
-    var user = firebase.auth().currentUser;
-    user.updatePassword('Chubaca2020').then(function () {
-    }).catch(function (error) {
-    });
+  /**
+   * Cambiar nombre
+   * @param name 
+   */
+  updateDisplayName(name: string) {
+    this.getUser();
+    
+    const url = environment.dirBack + "updateName/" + this.userAuth.uid;
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
+    this.http.put(url, { 'name': name }, { headers: headers })
+      .subscribe(
+        (response) => {
+          console.log('RESPONSE', response);
+          this.auth.setName(name);
+        });
+
   }
 
-  upload(event) {
-    console.log('event: ', event);
+  /**
+   * Cambiar foto de perfil
+   * @param event 
+   */
+  updateProfileImage(event) {
+    this.getUser();
 
-    // Pulsamos cancelar al subir foto
-    if (event.target.files.length == 0) {
-      return
+    if (event.target.files[0]) {
+      var file = event.target.files[0];
+
+      // Subir imágen a storage
+      this.firestorage.ref('profileImages/' + this.userAuth.uid).put(file).then(fileSnapshot => {
+        return fileSnapshot.ref.getDownloadURL()
+          .then(photoURL => {
+            // Actualizar imágen a el usuario
+            const url = environment.dirBack + "updateProfilePhoto/" + this.userAuth.uid;
+            let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
+            this.http.post(url, { 'user': this.userAuth, 'photoURL': photoURL }, { headers: headers });
+
+            this.auth.setPhoto(photoURL);
+
+          });
+      });
+
+      /*       const fd = new FormData;
+            fd.append('img', file, file.name);
+      
+            const url = environment.dirBack + "updateProfilePhoto/" + this.userAuth.uid;
+            let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
+            this.http.post(url, fd, { headers: headers })
+              .subscribe(
+                (response) => {
+                  console.log('RESSPONSEEEEEEEEEE', response);
+                });
+       */
     }
-    // Extensión imagen
-    let ext = '.jpg';
-    if (event.target.files[0].type === 'image/png') {
-      ext = '.png';
-    }
 
-    // Subir imagen obteniendo task -> url download y progreso subida
-    const path = this.path + this.auth.authUser.uid + ext;
-    const ref = this.firestorage.ref(path);
-
-    this.task = this.firestorage.upload(path, event.target.files[0]);
-
-    this.task.snapshotChanges().pipe(finalize(() => {
-      this.downloadURL = ref.getDownloadURL();
-      console.log('Download URL: ', this.downloadURL);
-    })).subscribe();
   }
 
-  uploadImgBD(url_img: any) {
-    const path2 = 'users/' + this.auth.authUser.uid;
-    const u = {
-      foto: url_img
-    }
+  /**
+   * Cambiar email de inicio de sesión
+   * @param email 
+   * @returns 
+   */
+  updateEmail(email: string) {
+    this.getUser();
 
-    this.downloadURL = of('');
-
-    return this.db.object(path2).update(u)
-      .catch(error => console.log(error))
+    const url = environment.dirBack + "updateEmail/" + this.userAuth.uid;
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
+    return this.http.put(url, { 'email': email }, { headers: headers });
   }
+
+  /**
+   * Cambiar contraseña de inicio de sesión
+   * @param pass 
+   * @returns 
+   */
+  updatePass(pass: string) {
+    this.getUser();
+
+    const url = environment.dirBack + "updatePass/" + this.userAuth.uid;
+    let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
+    return this.http.put(url, { 'pass': pass }, { headers: headers });
+  }
+
 
 }

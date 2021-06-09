@@ -1,1 +1,305 @@
-<h1>Rankings</h1>
+<div class="container gris margin-header">
+
+    <!--Filtros-->
+    <div class="row pl-3">
+        <select aria-label="niveles" #selectNiveles id="selectNiveles" class="form-control col-lg-4 col-5"
+            (change)="onChange(selectNiveles.value)">
+            <option [value]="0">Ranking monedas</option>
+            <option *ngFor="let ranking of rankings.lvlRankings" [value]="ranking.Nivel">
+                Ranking nivel {{ranking.Nivel}}
+            </option>
+        </select>
+
+        <select *ngIf="!rankingMonedas" aria-label="stats" #selectStats id="selectStats"
+            class="form-control col-lg-4 col-5 ml-2" (change)="onChangeStats(selectStats.value)">
+            <option [value]="0">Ranking enemigos</option>
+            <option [value]="1">Ranking puntuación</option>
+            <option [value]="2">Ranking tiempo</option>
+        </select>
+
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 col-12 mx-auto">
+            <!--Ranking monedas-->
+            <ng-container *ngIf="rankingMonedas">
+                <h1 class="text-center text-white">Ranking monedas</h1>
+                <table class="table text-light borderless mb-0 table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Pos</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Estadísticas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let user of rankings.rankingCoins; index as i"
+                            [ngClass]="{'bg-success': user.me === true}">
+                            <th class="d-flex" scope="row">
+                                <mat-icon class="mt-2 basic"
+                                    [ngClass]="{'gold': i == 0, 'silver': i == 1, 'bronce': i == 2}">
+                                    emoji_events</mat-icon>
+                                <p class="mt-2 ml-2">{{i + 1}}</p>
+                            </th>
+                            <td>
+                                <img src="{{user.photoURL}}" alt="" width="40px" height="40px"
+                                    class="rounded-circle mr-2">
+                                {{user.displayName}}
+                            </td>
+                            <td>{{user.coins}} monedas</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ng-container *ngIf="auth.user && rankings.logedUserRankingCoins[0] > 7  ">
+                    <h3 class="text-white text-center">Posición Ranking</h3>
+
+                    <div class="text-light bg-primary">
+                        <table class="table text-light borderless table-hover">
+                            <tbody>
+                                <tr>
+                                    <th class="d-flex" scope="row">
+                                        <mat-icon class="mt-2 basic" [ngClass]="{'gold': rankings.logedUserRankingCoins[0] == 1, 'silver': rankings.logedUserRankingCoins[0] == 2, 
+                                'bronce': rankings.logedUserRankingCoins[0] == 3}">
+                                            emoji_events</mat-icon>
+                                        <p class="mt-2 ml-2">{{rankings.logedUserRankingCoins[0]}}</p>
+                                    </th>
+                                    <td>
+                                        <img src="{{auth.user.photoURL}}" alt="" width="40px" height="40px"
+                                            class="rounded-circle mr-2">
+                                        {{auth.user.displayName}}
+                                    </td>
+                                    <td>{{rankings.logedUserRankingCoins[1]}} monedas</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </ng-container>
+
+            </ng-container>
+
+            <!--Ranking niveles-->
+            <ng-container *ngIf="!rankingMonedas">
+                <!--Ranking Nivel x-->
+                <h1 class="text-white mt-4 text-center">Ranking Nivel {{ranking.Nivel}}</h1>
+
+                <!--Ranking enemigos-->
+                <div *ngIf="stats == 0">
+                    <h2 class="text-white text-center">Enemigos matados</h2>
+                    <table *ngIf="ranking" class="table text-light borderless table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Pos</th>
+                                <th scope="col">Nombre</th>
+                                <th scope="col">Estadísticas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let user of ranking.RankingEnemigos; index as i"
+                                [ngClass]="{'bg-success': user.me === true}">
+                                <th class="d-flex" scope="row">
+                                    <mat-icon class="mt-2 basic"
+                                        [ngClass]="{'gold': i == 0, 'silver': i == 1, 'bronce': i == 2}">emoji_events
+                                    </mat-icon>
+                                    <p class="mt-2 ml-2">{{i + 1}}</p>
+                                </th>
+                                <td>
+                                    <img src="{{user.photoURL}}" alt="" width="40px" height="40px"
+                                        class="rounded-circle">
+                                    {{user.displayName}}
+                                </td>
+                                <td>{{user.enemiesKilled}} enemigos</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ng-container *ngIf="rankings.logedUserRankings.length > 0 && auth.user">
+                        <div class="bg-primary text-white py-3"
+                            *ngIf="rankings.logedUserRankings[ranking.Nivel - 1].RankingEnemigos.length == 0; else lvlJugado">
+                            <h4 class="text-center">¡No has jugado este nivel todavía!</h4>
+                        </div>
+                        <ng-template #lvlJugado>
+                            <div *ngIf="rankings.logedUserRankings[ranking.Nivel - 1].RankingEnemigos[0] > 7">
+                                <h3 class="text-white text-center">Posición Ranking</h3>
+                                <div class="bg-primary">
+                                    <table class="table text-light borderless table-hover">
+                                        <tbody>
+                                            <tr>
+                                                <th class="d-flex" scope="row">
+                                                    <mat-icon class="mt-2 basic"
+                                                        [ngClass]="{'gold': rankings.logedUserRankings[ranking.Nivel - 1].RankingEnemigos[0] == 1, 
+                                            'silver': rankings.logedUserRankings[ranking.Nivel - 1].RankingEnemigos[0] == 2, 
+                                            'bronce': rankings.logedUserRankings[ranking.Nivel - 1].RankingEnemigos[0] == 3}">
+                                                        emoji_events
+                                                    </mat-icon>
+                                                    <p class="mt-2 ml-2">
+                                                        {{rankings.logedUserRankings[ranking.Nivel -
+                                                        1].RankingEnemigos[0]}}
+                                                    </p>
+                                                </th>
+                                                <td>
+                                                    <img src="{{auth.user.photoURL}}" alt="" width="40px" height="40px"
+                                                        class="rounded-circle mr-2">
+                                                    {{auth.user.displayName}}
+                                                </td>
+                                                <td>{{rankings.logedUserRankings[ranking.Nivel - 1].RankingEnemigos[1]}}
+                                                    enemigos
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </ng-container>
+                </div>
+
+                <!--Ranking puntuacion-->
+                <div *ngIf="stats == 1">
+                    <h2 class="text-white text-center">Puntuación obtenida</h2>
+                    <table *ngIf="ranking" class="table text-light borderless table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Pos</th>
+                                <th scope="col">Nombre</th>
+                                <th scope="col">Estadísticas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let user of ranking.RankingPuntuacion; index as i"
+                                [ngClass]="{'bg-success': user.me === true}">
+                                <th class="d-flex" scope="row">
+                                    <mat-icon class="mt-2 basic"
+                                        [ngClass]="{'gold': i == 0, 'silver': i == 1, 'bronce': i == 2}">emoji_events
+                                    </mat-icon>
+                                    <p class="mt-2 ml-2">{{i + 1}}</p>
+                                </th>
+                                <td>
+                                    <img src="{{user.photoURL}}" alt="" width="40px" height="40px"
+                                        class="rounded-circle">
+                                    {{user.displayName}}
+                                </td>
+                                <td>{{user.punctuation}} puntos</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ng-container *ngIf="rankings.logedUserRankings.length > 0 && auth.user">
+                        <div class="bg-primary text-white py-3"
+                            *ngIf="rankings.logedUserRankings[ranking.Nivel - 1].RankingPuntuacion.length == 0; else lvlJugado">
+                            <h4 class="text-center">¡No has jugado este nivel todavía!</h4>
+                        </div>
+                        <ng-template #lvlJugado>
+                            <div *ngIf="rankings.logedUserRankings[ranking.Nivel - 1].RankingPuntuacion[0] > 7">
+                                <h3 class="text-white text-center">Posición Ranking</h3>
+                                <div class="bg-primary">
+                                    <table class="table text-light borderless table-hover">
+                                        <tbody>
+                                            <tr>
+                                                <th class="d-flex" scope="row">
+                                                    <mat-icon class="mt-2 basic"
+                                                        [ngClass]="{'gold': rankings.logedUserRankings[ranking.Nivel - 1].RankingPuntuacion[0] == 1, 
+                                            'silver': rankings.logedUserRankings[ranking.Nivel - 1].RankingPuntuacion[0] == 2, 
+                                            'bronce': rankings.logedUserRankings[ranking.Nivel - 1].RankingPuntuacion[0] == 3}">
+                                                        emoji_events
+                                                    </mat-icon>
+                                                    <p class="mt-2 ml-2">
+                                                        {{rankings.logedUserRankings[ranking.Nivel -
+                                                        1].RankingPuntuacion[0]}}
+                                                    </p>
+                                                </th>
+                                                <td>
+                                                    <img src="{{auth.user.photoURL}}" alt="" width="40px" height="40px"
+                                                        class="rounded-circle mr-2">
+                                                    {{auth.user.displayName}}
+                                                </td>
+                                                <td>
+                                                    {{rankings.logedUserRankings[ranking.Nivel -
+                                                    1].RankingPuntuacion[1]}}
+                                                    puntuacion
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </ng-template>
+                    </ng-container>
+                </div>
+
+                <!--Ranking tiempo-->
+                <div *ngIf="stats == 2">
+                    <h2 class="text-white text-center">Tiempo sobrevivido</h2>
+                    <table *ngIf="ranking" class="table text-light borderless table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Pos</th>
+                                <th scope="col">Nombre</th>
+                                <th scope="col">Estadísticas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let user of ranking.RankingTiempo; index as i"
+                                [ngClass]="{'bg-success': user.me === true }">
+                                <th class="d-flex" scope="row">
+                                    <mat-icon class="mt-2 basic"
+                                        [ngClass]="{'gold': i == 0, 'silver': i == 1, 'bronce': i == 2}">emoji_events
+                                    </mat-icon>
+                                    <p class="mt-2 ml-2">{{i + 1}}</p>
+                                </th>
+                                <td>
+                                    <img src="{{user.photoURL}}" alt="" width="40px" height="40px"
+                                        class="rounded-circle">
+                                    {{user.displayName}}
+                                </td>
+                                <td>{{user.time}} tiempo</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ng-container *ngIf="rankings.logedUserRankings.length > 0 && auth.user">
+                        <div class="bg-primary text-white py-3"
+                            *ngIf="rankings.logedUserRankings[ranking.Nivel - 1].RankingTiempo.length == 0; else lvlJugado">
+                            <h4 class="text-center">¡No has jugado este nivel todavía!</h4>
+                        </div>
+                        <ng-template #lvlJugado>
+                            <div *ngIf="rankings.logedUserRankings[ranking.Nivel - 1].RankingTiempo[0] > 7">
+                                <h3 class="text-white text-center">Posición Ranking</h3>
+                                <div class="bg-primary">
+                                    <table class="table text-light borderless table-hover">
+                                        <tbody>
+                                            <tr>
+                                                <th class="d-flex" scope="row">
+                                                    <mat-icon class="mt-2 basic"
+                                                        [ngClass]="{'gold': rankings.logedUserRankings[ranking.Nivel - 1].RankingTiempo[0] == 1, 
+                                            'silver': rankings.logedUserRankings[ranking.Nivel - 1].RankingTiempo[0] == 2, 
+                                            'bronce': rankings.logedUserRankings[ranking.Nivel - 1].RankingTiempo[0] == 3}">
+                                                        emoji_events
+                                                    </mat-icon>
+                                                    <p class="mt-2 ml-2">
+                                                        {{rankings.logedUserRankings[ranking.Nivel -
+                                                        1].RankingTiempo[0]}}
+                                                    </p>
+                                                </th>
+                                                <td>
+                                                    <img src="{{auth.user.photoURL}}" alt="" width="40px" height="40px"
+                                                        class="rounded-circle mr-2">
+                                                    {{auth.user.displayName}}
+                                                </td>
+                                                <td>
+                                                    {{rankings.logedUserRankings[ranking.Nivel - 1].RankingTiempo[1]}}
+                                                    tiempo
+                                                    aguantado
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </ng-container>
+                </div>
+
+            </ng-container>
+
+        </div>
+    </div>
+
+</div>

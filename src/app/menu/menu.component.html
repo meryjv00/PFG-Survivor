@@ -1,34 +1,149 @@
-<!--Menú navegación-->
-<nav class="bg-light py-2 px-3">
-  <!--Home-->
-  <button mat-button routerLink="home">Home</button>
-  <!--Tienda-->
-  <button mat-button routerLink="tienda">Tienda</button>
-  <!--Rankings-->
-  <button mat-button routerLink="rankings">Rankings</button>
+<nav class="navbar navbar-expand-lg nav-style">
+  <img routerLink="home" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" 
+  src="{{pathLogo}}" alt="" class="navbar-brand m-0" width="280px">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <mat-icon class="gris">reorder</mat-icon>
+  </button>
 
-  <!--Cuenta logeada-->
-  <span  *ngIf="auth.userState | async as user; else login">
-    <button class="btn btn-sm btn-primary mr-2" routerLink="amigos">
-      <mat-icon class="pt-1">chat</mat-icon>
-    </button>
-    <img [matMenuTriggerFor]="beforeMenu" src="{{auth.authUser.photoURL}}" alt="" width="50px">
-    <mat-menu #beforeMenu="matMenu" xPosition="before">
-      <!--Perfil-->
-      <button mat-menu-item routerLink="perfil">
-        <span class="ml-3">Perfil</span>
-      </button>
-      <!--Salir-->
-      <button mat-menu-item (click)="auth.logout()">
-        <span class="ml-3">Salir</span>
-        <mat-icon class="m-1">logout</mat-icon>
-      </button>
-    </mat-menu>
-  </span>
-  
-  <!--Cuenta sin logear-->
-  <ng-template #login>
-    <button mat-raised-button (click)="openLogin()" class="btn-primary mr-1">Entrar</button>
-    <button mat-raised-button (click)="openRegistro()" class="btn-primary">Registrarse</button>
-  </ng-template>
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <!--IZQUIERDA-->
+    <ul class="navbar-nav mr-auto">
+      <!--Tienda-->
+      <li class="nav-item">
+        <a routerLink="tienda" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+          class="nav-link text-light d-flex">
+          <mat-icon class="my-auto">shopping_cart</mat-icon>
+          <span class="ml-1">Tienda</span>
+        </a>
+      </li>
+      <!--Rankings-->
+      <li class="nav-item">
+        <a routerLink="rankings" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+          class="nav-link text-light d-flex">
+          <mat-icon class="my-auto">star</mat-icon>
+          <span class="ml-1">Rankings</span>
+        </a>
+      </li>
+
+      <!--CUENTA LOGEADA-->
+      <ng-container *ngIf="auth.user">
+        <!--Comunidad-->
+        <li class="nav-item">
+          <a routerLink="comunidad" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+            class="nav-link text-light d-flex">
+            <mat-icon class="my-auto">people_alt</mat-icon>
+            <span class="ml-1">Comunidad</span>
+          </a>
+        </li>
+        <!--Amigos-->
+        <li class="nav-item">
+          <a routerLink="amigos" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+            class="nav-link text-light d-flex">
+            <mat-icon class="my-auto">people_alt</mat-icon>
+            <span class="ml-1"> Amigos</span>
+          </a>
+        </li>
+      </ng-container>
+    </ul>
+
+    <!--DERECHA-->
+    <div class="my-2 my-lg-0">
+      <!--CUENTA LOGEADA-->
+      <ng-container *ngIf="auth.user;else login">
+        <!--Alerta notificaciones mensajes-->
+        <button mat-mini-fab class="btn-style" [matMenuTriggerFor]="notificationsMessages">
+          <mat-icon>mail</mat-icon>
+          <span *ngIf="chat.msgsWithoutReadNotif.length > 0" class="badge">{{chat.msgsWithoutReadNotif.length}}</span>
+        </button>
+        <mat-menu #notificationsMessages="matMenu" xPosition="before" class="bg-dark gris mt-2">
+          <ng-container *ngIf="chat.msgsWithoutReadNotif.length > 0; else noNotifsMessages">
+            <ng-container *ngFor="let userMessage of chat.messagesWithoutRead">
+              <div *ngIf="userMessage.messages > 0" class="d-flex align-items-center px-2 py-2 notific_item"
+                routerLink="amigos">
+                <img src="{{userMessage.photoURL}}" alt="profile_pic" width="50px" height="50px"
+                  class="rounded-circle m-0">
+                <p class="ml-3">
+                  Tienes <span>{{userMessage.messages}}</span> mensajes sin leer de
+                  <span>{{userMessage.displayName}}</span>
+                </p>
+              </div>
+            </ng-container>
+          </ng-container>
+          <!--Mensajes leidos-->
+          <ng-template #noNotifsMessages>
+            <div class="px-3 py-2">
+              <p class="text-light">¡No tienes ningún mensaje sin leer!</p>
+            </div>
+          </ng-template>
+        </mat-menu>
+
+        <!--Alerta notificaciones amigos-->
+        <button mat-mini-fab class="ml-2 btn-style" [matMenuTriggerFor]="notifications">
+          <mat-icon>notifications</mat-icon>
+          <span *ngIf="friendService.friendsRequests.length > 0"
+            class="badge">{{friendService.friendsRequests.length}}</span>
+        </button>
+        <mat-menu #notifications="matMenu" xPosition="before" class="bg-dark gris mt-2">
+          <ng-container *ngIf="friendService.friendsRequests.length > 0; else noNotifs">
+            <div *ngFor="let userFriend of friendService.friendsRequests"
+              class="d-flex align-items-center px-2 py-2 notific_item">
+              <img src="{{userFriend.photoURL}}" alt="profile_pic" width="50px" height="50px" (click)="openProfileUser(userFriend)"
+                class="rounded-circle m-0">
+              <div class="pl-3">
+                <p class="mb-1">
+                  <span>{{userFriend.displayName}}</span> te ha enviado una solicitud de amistad
+                </p>
+                <button class="btn btn-primary btn-sm"
+                  (click)="friendService.acceptFriendRequest(userFriend.uid)">Aceptar</button>
+                <button class="btn btn-outline-primary ml-2 btn-sm"
+                  (click)="friendService.deleteFriendRequest(userFriend.uid)">Rechazar</button>
+              </div>
+            </div>
+          </ng-container>
+          <!--No notificaciones-->
+          <ng-template #noNotifs>
+            <div class="px-3 py-2">
+              <span>¡No tienes ninguna notificación nueva!</span>
+            </div>
+          </ng-template>
+        </mat-menu>
+
+        <!--Imágen perfil-->
+        <img *ngIf="auth.user" [matMenuTriggerFor]="perfilMenu" src="{{auth.user.photoURL}}" alt="" width="50px"
+          height="50px" class="rounded-circle ml-3">
+        <mat-menu #perfilMenu="matMenu" xPosition="before" class="bg-dark mt-2">
+          <!--Ver perfil-->
+          <button mat-menu-item routerLink="perfil" class="text-light">
+            <mat-icon>person</mat-icon>
+            <span>Mi Perfil</span>
+          </button>
+          <!--Idioma-->
+          <button mat-menu-item class="text-light" [matMenuTriggerFor]="idiomas">
+            <mat-icon>public</mat-icon>
+            <span>Idiomas</span>
+          </button>
+          <!--Menu idiomas-->
+          <mat-menu #idiomas="matMenu" xPosition="after" class="bg-dark">
+            <button mat-menu-item class="text-light">Castellano</button>
+            <button mat-menu-item class="text-light">Inglés</button>
+            <button mat-menu-item class="text-light">Francés</button>
+          </mat-menu>
+          <!--Salir-->
+          <button mat-menu-item (click)="auth.logout()" class="text-light">
+            <mat-icon>logout</mat-icon>
+            <span>Cerrar sesión</span>
+          </button>
+        </mat-menu>
+
+      </ng-container>
+
+      <!--CUENTA SIN LOGEAR-->
+      <ng-template #login>
+        <button id="btn-login" mat-raised-button (click)="openLogin()" class="btn-style mr-3">Inicia sesión</button>
+        <button id="btn-registro" mat-raised-button (click)="openRegistro()" class="btn-style">Registrate</button>
+      </ng-template>
+
+    </div>
+  </div>
 </nav>

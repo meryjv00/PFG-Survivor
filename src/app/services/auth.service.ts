@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { map } from 'rxjs/operators';
 import firebase from 'firebase/app';
 import { Router } from '@angular/router';
-import { AngularFireDatabase } from '@angular/fire/database';
 import { environment } from 'src/environments/environment';
 import { ChatService } from './chat.service';
+import { FriendsService } from './friends.service';
+import { RankingsService } from './rankings.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -22,44 +23,95 @@ export class AuthService {
   // Pass olvidada
   emailPass = '';
   // User
-  authUser = null;
   user = null;
+  loginRecharge: boolean = true;
+  userAuth: any | null;
+  providerId: string = null;
+  itemsLogedUser = [];
+  itemsUser = [];
 
   constructor(public auth: AngularFireAuth,
     private router: Router,
-    private db: AngularFireDatabase,
-    private chat: ChatService) { }
+    private chat: ChatService,
+    private friends: FriendsService,
+    private rankings: RankingsService,
+    private http: HttpClient) { }
 
-  limpiarFormularios() {
-    this.emailLogin = '';
-    this.nombreRegistro = '';
-    this.passLogin = '';
-    this.emailRegistro = '';
-    this.passRegistro = '';
+
+  /**
+   * Método que se llama desde los constructores de los componentes para en el caso de haber
+   * recargado volver a establecer esta variable a false
+   */
+  setRechargeFalse() {
+    this.loginRecharge = false;
+  }
+
+  addItem(item) {
+    this.itemsLogedUser.push(item);
+  }
+  setCoins(coins) {
+    this.user.coins = coins;
+  }
+  setPhoto(photoURL) {
+    this.user.photoURL = photoURL;
+  }
+  setName(name) {
+    this.user.displayName = name;
+  }
+  setEmail(email) {
+    this.user.email = email;
+  }
+
+  getProviderID() {
+    this.providerId = null;
+    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+    this.userAuth = JSON.parse(this.userAuth);
+    this.providerId = this.userAuth.providerData[0].providerId;
   }
 
   /**
-   * Información usuario logeado
+   * Método que llama a todos los métodos necesarios para obtener todos los datos para iniciar sesión
+   * Amigos, escuchar mensajes de amigos, peticiones de amistad...
+   * @param user 
    */
-  userState = this.auth.authState.pipe(map(authState => {
-    if (authState) {
-      this.authUser = authState;
-      return authState;
-    } else {
-      return null;
-    }
-  }))
+  prepareLogin(user: any) {
+    localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user));
+    this.updateUserData(user);
+    this.loginRecharge = false;
+    this.getItemsUser(1);
+    this.friends.listenFriendsRequests();
+    this.friends.listenSentFriendsRequests();
+    this.chat.getFriends();
+    this.rankings.stopListeningRankingsItems();
+    this.rankings.setGetRankingsTrue();
+    this.rankings.getPositionRankings();
+    this.rankings.getPositionRankingCoins();
+    this.router.navigate(['home']);
+  }
 
-  getUser() {
-    setTimeout(() => {
-      if (this.authUser.uid) {
-        var userbd = firebase.database().ref('users/' + this.authUser.uid);
-        userbd.on('value', (snapshot) => {
-          this.user = snapshot.val();
-          // console.log('Usuario logeado: ', this.user);
+  getItemsUser(type: number, uid?: string) {
+    if (type == 1) {
+      this.itemsLogedUser = [];
+      this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+      this.userAuth = JSON.parse(this.userAuth);
+      uid = this.userAuth.uid;
+    } else {
+      this.itemsUser = [];
+    }
+
+    const url = environment.dirBack + "getItemsUser";
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    this.http.post(url, { 'uid': uid }, { headers: headers })
+      .subscribe(
+        (response) => {
+          var items = response['message'];
+
+          if (type == 1) {
+            this.itemsLogedUser = items;
+          } else {
+            this.itemsUser = items;
+          }
         });
-      }
-    }, 1000);
   }
 
   /**
@@ -67,106 +119,50 @@ export class AuthService {
   * @returns 
   */
   registro() {
-    return this.auth.createUserWithEmailAndPassword(this.emailRegistro, this.passRegistro)
-      .then(user => {
-        // console.log('Usuario registrado con email: ', user);
-        this.authUser = user.user;
-      })
+    const url = environment.dirBack + "registro";
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(url, { 'email': this.emailRegistro, 'pass': this.passRegistro, 'name': this.nombreRegistro }, { headers: headers });
   }
 
-  /**
-   * Establece el nombre que ha introducido y una foto por defecto a 
-   * un usuario que acaba de realizar el registro
-   * @returns 
-   */
-  updateProfile() {
-    return this.authUser.updateProfile({
-      displayName: this.nombreRegistro,
-      photoURL: 'https://image.freepik.com/vector-gratis/vector-alfabeto-mayuscula-floral-l_53876-87377.jpg'
-    }).then(ok => {
-      //this.limpiarFormularios();
-
-      this.updateUserData(this.authUser);
-      this.router.navigate(['perfil']);
-
-    }).catch(function (error) {
-      console.log(error);
-    });
-  }
 
   /**
    * Login con email y contraseña
    * @returns 
    */
   login() {
-    return this.auth.signInWithEmailAndPassword(this.emailLogin, this.passLogin)
-      .then(user => {
-        // console.log("Usuario logeado con email: ", user);
-        this.authUser = user.user;
-        
-        // this.limpiarFormularios();
-        this.updateUserData(user.user);
-        localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
-        this.chat.getFriends(true);
-      })
+    const url = environment.dirBack + "login";
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(url, { 'email': this.emailLogin, 'pass': this.passLogin }, { headers: headers });
   }
 
   /**
    * Login con cuenta de Google
    */
   loginGoogle() {
-    return this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-      .then(user => {
-        // console.log("Usuario logeado con Google: ", user);
-        this.authUser = user.user;
-
-        //this.limpiarFormularios();
-        this.updateUserData(user.user);
-        localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
-        this.chat.getFriends(true);
-      })
+    return this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
   }
 
   /**
    * Login con cuenta de Facebook
    */
   loginFacebook() {
-    return this.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider())
-      .then(user => {
-        //console.log("Usuario logeado con Facebook: ", user);
-        this.authUser = user.user;
-
-        //this.limpiarFormularios();
-        // En el caso de tener la foto de facebook por defecto se le establece la que tenga el usuario en fb
-        if (user.user.photoURL.startsWith('https://graph.facebook.com/')) {
-          user.user.updateProfile({
-            photoURL: user.additionalUserInfo.profile['picture']['data']['url']
-          }).then(ok => {
-            this.updateUserData(user.user);
-            localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
-            this.chat.getFriends(true);
-
-          }).catch(function (error) {
-            console.log(error);
-          });
-        } else {
-          this.updateUserData(user.user);
-          localStorage.setItem(environment.SESSION_KEY_USER_AUTH, JSON.stringify(user.user));
-          this.chat.getFriends(true);
-        }
-      })
+    return this.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider());
   }
 
   /**
-   * Cerrar sesión cuenta
+   * Añadir foto de Facebook al usuario cuando se logea por 1º vez
+   * @param user 
    */
-  logout() {
-    this.auth.signOut();
-    this.limpiarFormularios();
-    this.chat.stopListenFriendMessages();
-    this.chat.closeChat();
-    localStorage.removeItem(environment.SESSION_KEY_USER_AUTH);
-    this.router.navigate(['home']);
+  updateProfileFB(user) {
+    if (user.user.photoURL.startsWith('https://graph.facebook.com/')) {
+      user.user.updateProfile({
+        photoURL: user.additionalUserInfo.profile['picture']['data']['url']
+      }).then(() => {
+        this.prepareLogin(user.user);
+      });
+    } else {
+      this.prepareLogin(user.user);
+    }
   }
 
   /**
@@ -174,39 +170,84 @@ export class AuthService {
    * @param user 
    */
   updateUserData(user: any) {
-    var db = firebase.firestore();
-
-    db.collection("users").doc(user.uid).set({
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL
-    })
-      .then(() => {
-        // console.log("Document successfully written!");
-      })
-      .catch((error) => {
-        console.error("Error writing document: ", error);
-      });
-
-    /*  const path = 'users/' + user.uid;
-     const u = {
-       email: user.email,
-       displayName: user.displayName,
-       photoURL: user.photoURL
-     }
-     this.db.object(path).update(u)
-       .catch(error => console.log(error)); */
+    const url = environment.dirBack + "updateUserLogin";
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    this.http.post(url, { 'user': user }, { headers: headers })
+      .subscribe(
+        (response) => {
+          console.log('USER:', response);
+          this.getUser();
+        });
   }
+
+  /**
+   * Obtener los datos del usuario logeado
+   */
+  getUser() {
+    this.userAuth = localStorage.getItem(environment.SESSION_KEY_USER_AUTH);
+    this.userAuth = JSON.parse(this.userAuth);
+    var token = this.userAuth['stsTokenManager']['accessToken'];
+    
+    const url = `${environment.dirBack}getUser/${this.userAuth.uid}`;
+    let headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    this.http.get(url, { headers: headers })
+      .subscribe(
+        (response) => {
+          this.user = {
+            'uid': response['message'].uid,
+            'status': response['message'].status,
+            'displayName': response['message'].displayName,
+            'photoURL': response['message'].photoURL,
+            'email': response['message'].email,
+            'coins': response['message'].coins,
+          }
+        });
+  }
+
 
   /**
    * Envía correo al email introducido donde se le permite cambiar la contraseña de la cuenta.
    */
   sendPasswordResetEmail() {
-    return this.auth.sendPasswordResetEmail(this.emailPass)
-      .then(ok => {
-        console.log('Correo enviado');
-        this.emailPass = '';
-      });
+    const url = environment.dirBack + "sendPasswordResetEmail";
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post(url, { 'email': this.emailPass }, { headers: headers });
+  }
+
+
+  /**
+  * Cerrar sesión cuenta
+  */
+  logout() {
+    this.user = null;
+    this.auth.signOut();
+    this.setRechargeFalse();
+    this.rankings.stopListeningRankingsItems();
+    this.chat.setStatusOnOff(2);
+    this.chat.stopListeningReListenFM(1);
+    this.chat.stopListeningFriends();
+    this.friends.stopListeningRequests();
+    this.chat.closeChat();
+    this.friends.resetSearchFriends();
+    this.rankings.setGetRankingsTrue();
+    this.chat.cleanMessages();
+    this.limpiarFormularios();
+
+    setTimeout(() => {
+      localStorage.removeItem(environment.SESSION_KEY_USER_AUTH)
+    }, 500);
+    this.router.navigate(['home']);
+  }
+
+  /**
+   * Método que limpia los inputs de los formularios login/registro/pass
+   */
+  limpiarFormularios() {
+    this.emailLogin = '';
+    this.nombreRegistro = '';
+    this.passLogin = '';
+    this.emailRegistro = '';
+    this.passRegistro = '';
   }
 
 }

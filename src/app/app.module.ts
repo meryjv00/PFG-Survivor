@@ -3,6 +3,8 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { HttpClientModule } from '@angular/common/http';
 
 // Componentes
 import { MenuComponent } from './menu/menu.component';
@@ -14,6 +16,7 @@ import { PerfilComponent } from './views/perfil/perfil.component';
 import { RankingsComponent } from './views/rankings/rankings.component';
 import { RegistroComponent } from './views/registro/registro.component';
 import { TiendaComponent } from './views/tienda/tienda.component';
+import { ComunidadComponent } from './views/comunidad/comunidad.component';
 
 // Environment
 import { environment } from 'src/environments/environment';
@@ -34,6 +37,9 @@ import { ToastrModule} from 'ngx-toastr';
 
 // Material 
 import {DemoMaterialModule} from './material-module';
+import { FiltroAmigosPipe } from './pipes/filtro-amigos.pipe';
+import { UserComponent } from './views/user/user.component';
+import { ConfirmModalComponent } from './views/confirm-modal/confirm-modal.component';
 
 @NgModule({
   declarations: [
@@ -46,13 +52,19 @@ import {DemoMaterialModule} from './material-module';
     PassComponent,
     AmigosComponent,
     RankingsComponent,
-    TiendaComponent
+    TiendaComponent,
+    FiltroAmigosPipe,
+    ComunidadComponent,
+    UserComponent,
+    ConfirmModalComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
+    NgbModule,
+    HttpClientModule,
     // Firebase
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireModule,
@@ -64,6 +76,7 @@ import {DemoMaterialModule} from './material-module';
     BrowserAnimationsModule,
     ToastrModule.forRoot({
       timeOut: 3000,
+      positionClass: 'toast-bottom-right',
     }),
     // Material 
     DemoMaterialModule

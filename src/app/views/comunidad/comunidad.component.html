@@ -1,0 +1,82 @@
+<div class="container gris margin-header">
+    <div class="row">
+        <!--Busqueda amigos-->
+        <div class="col-lg-6 col-12">
+            <!--Bloque buscador-->
+            <div class="search-friend bg-info mt-3">
+                <span class="pl-3 titulo text-white">Búsqueda amigo</span>
+                <span class="pl-3 subtitulo text-white">Escribe aquí el nombre del amigo a buscar</span>
+                <!--Buscador-->
+                <div class="search-box display-none">
+                    <div class="input-wrapper">
+                        <i class="material-icons">search</i>
+                        <input id="buscarAmigoAgregar" type="text" placeholder="Buscar aquí" name="name">
+                    </div>
+                </div>
+            </div>
+            <!--Lista usuarios busqueda-->
+            <div class="users scroll mt-2" *ngIf="friendService.users.length > 0">
+                <ul class="p-2">
+                    <li class="align-items-center mt-2" *ngFor="let user of friendService.users">
+                        <img src="{{user.photoURL}}" alt="foto_{{user.displayName}}" width="60px" height="60px"
+                            class="rounded-circle ml-3">
+                        <span class="text-white ml-3">{{user.displayName}}</span>
+                        <button (click)="openProfileUser(user)" class="btn btn-primary float-right mt-2 mr-5">
+                            Ver perfil
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="users mt-2" *ngIf="friendService.users.length == 0 && palabraBuscar.length >= 1">
+                <span>No se han encontrado usuarios con el nombre introducido</span>
+            </div>
+        </div>
+        <!--Aside-->
+        <div class="col-lg-6 col-12 mx-auto mt-3">
+            <!--Peticiones de amistad enviadas-->
+            <div class="rounded sentRequests scroll mb-3" *ngIf="friendService.sentFriendsRequests.length > 0">
+                <div class="titulo">
+                    <span class="d-block text-center text-white">Peticiones de amistad enviadas</span>
+                </div>
+                <ul class="p-2">
+                    <li *ngFor="let userRequested of friendService.sentFriendsRequests"
+                        class="mt-2 align-items-center">
+                        <img src="{{userRequested.photoURL}}" alt="foto_{{userRequested.displayName}}" width="60px"
+                            height="60px" class="rounded-circle ml-3 cursor-pointer" (click)="openProfileUser(userRequested)">
+                        <span class="text-white ml-3">{{userRequested.displayName}}</span>
+                        <button class="btn btn-primary float-right mt-2 mr-5"
+                            (click)="friendService.cancelFriendRequest(userRequested.uid)">
+                            Cancelar envio
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <!--Sugerencias de amistad-->
+            <div class="bg-success shadow-lg suggestedFriends scroll rounded">
+                <div class="titulo">
+                    <span *ngIf="chat.suggestedFriends.length > 0" class="d-block text-center text-white">
+                        Sugerencias de amistad
+                    </span>
+                </div>
+                <ul class="p-2" *ngIf="chat.suggestedFriends.length > 0">
+                    <li class="align-items-center mt-2" *ngFor="let userSuggested of chat.suggestedFriends">
+                        <img src="{{userSuggested.photoURL}}" alt="foto_{{userSuggested.displayName}}" width="60px"
+                            height="60px" class="rounded-circle ml-3 cursor-pointer" (click)="openProfileUser(userSuggested)">
+                        <span class="text-white ml-3">{{userSuggested.displayName}}</span>
+                        <button *ngIf="userSuggested.relation == 'unknown'"
+                            class="btn btn-primary float-right mt-2 mr-5"
+                            (click)="friendService.sendFriendRequest(userSuggested.uid)">
+                            Enviar solicitud
+                        </button>
+                    </li>
+                </ul>
+
+                <div *ngIf="chat.suggestedFriends.length == 0" class="text-center py-3">
+                    <h5 class="text-white"> ¡No tienes ninguna sugerencia de amistad!</h5>
+                    <p> Agrega algún amigo desde el buscador</p>
+                    <mat-icon>sentiment_dissatisfied</mat-icon>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

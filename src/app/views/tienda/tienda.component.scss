@@ -1,0 +1,19 @@
+.img-hover-zoom {
+    height: 140px; 
+    overflow: hidden; 
+}
+  
+.img-hover-zoom img {    
+    transition: transform .5s ease;
+}
+  
+.img-hover-zoom:hover img {
+    transform: scale(1.1);
+}
+
+.enpropiedad {
+    color: #68b368;
+}
+
+
+

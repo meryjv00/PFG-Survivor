@@ -59,28 +59,15 @@ export class PerfilService {
       // Subir imágen a storage
       this.firestorage.ref('profileImages/' + this.userAuth.uid).put(file).then(fileSnapshot => {
         return fileSnapshot.ref.getDownloadURL()
-          .then(photoURL => {
+          .then(photoURL => {            
             // Actualizar imágen a el usuario
             const url = environment.dirBack + "updateProfilePhoto/" + this.userAuth.uid;
             let headers = new HttpHeaders({ Authorization: `Bearer ${this.tokenUser}` });
-            this.http.post(url, { 'user': this.userAuth, 'photoURL': photoURL }, { headers: headers });
-
-            this.auth.setPhoto(photoURL);
-
+            this.http.post(url, { 'user': this.userAuth, 'photoURL': photoURL }, { headers: headers }).subscribe(()=>{
+              this.auth.setPhoto(photoURL);
+            });
           });
       });
-
-      /*       const fd = new FormData;
-            fd.append('img', file, file.name);
-      
-            const url = environment.dirBack + "updateProfilePhoto/" + this.userAuth.uid;
-            let headers = new HttpHeaders({ Authorization: `Bearer ${this.userAuth.accessToken}` });
-            this.http.post(url, fd, { headers: headers })
-              .subscribe(
-                (response) => {
-                  console.log('RESSPONSEEEEEEEEEE', response);
-                });
-       */
     }
 
   }

@@ -24,10 +24,12 @@ El proyecto consta de tres repositorios:
 - [VIDEOGAME SURVIVOR](https://github.com/DiegoS3/Survivor) - (Unity)
 
 
-### Requisitos ⚙
-Docker y docker compose
 
 ### Despliegue docker 🧱
+
+Requisitos:
+- Docker y docker compose
+
 Para desplegar el entorno de producción siempre y cuando cumplas los requisitos, solo tendrás que ejecutar los scripts (iniciar.sh) de los correspondientes repositorios.
 En el repositorio del front hay dos scripts con diferentes alternativas, puedes ejecutar el de tu preferencia.
 

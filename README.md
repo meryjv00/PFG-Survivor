@@ -17,9 +17,9 @@ https://pfg-survivor.netlify.app
 https://survivorback.herokuapp.com
 ```
 
-### Documentación 🤓
-- KANBAN: https://github.com/meryjv00/PFG-Survivor/projects/1 ⏱
-- WIKI: https://github.com/meryjv00/PFG-Survivor/wiki 📰
+### Documentación 📰
+- KANBAN: https://github.com/meryjv00/PFG-Survivor/projects/1 
+- WIKI: https://github.com/meryjv00/PFG-Survivor/wiki 
 
 ### Repositorios 📦
 El proyecto consta de tres repositorios:

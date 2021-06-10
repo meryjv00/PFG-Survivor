@@ -17,12 +17,15 @@ https://pfg-survivor.netlify.app
 https://survivorback.herokuapp.com
 ```
 
+### Documentación 🤓
+- KANBAN: https://github.com/meryjv00/PFG-Survivor/projects/1 ⏱
+- WIKI: https://github.com/meryjv00/PFG-Survivor/wiki 📰
+
 ### Repositorios 📦
 El proyecto consta de tres repositorios:
 - [FRONTEND SURVIVOR](https://github.com/meryjv00/PFG-Survivor) - (Angular y SASS)
 - [BACKEND SURVIVOR](https://github.com/meryjv00/PFG-Survivor-Back) - (NodeJS y Firebase)
 - [VIDEOGAME SURVIVOR](https://github.com/DiegoS3/Survivor) - (Unity)
-
 
 
 ### Despliegue docker 🧱

@@ -1,6 +1,14 @@
-# WEB SURVIVOR - FRONTEND ANGULAR 🅰🎮
-## Proyecto Fin de Grado - DAW & DAM
-Nuestro proyecto se compone de un videojuego de supervivencia con diferentes niveles y retos que superar, este tiene su propia aplicación web con diferentes funcionalidades. Así como conocer gente nueva, chatear con amigos, comprar items para poder utilizar en el videojuego con monedas, rankings y mucho más.
+# Proyecto Fin de Grado - DAW & DAM
+
+- Juega nuestros diferentes niveles 🎮
+- Supera tus records 💯
+- Sobrevive a los enemigos 👽
+- Consigue monedas 💰
+- Conoce gente nueva 👬
+- Chatea con amigos ⌨️
+- Recibe notificaciones 🚨
+- Compra objetos 🔫
+- Y mucho más 🔥
 
 ```
 https://pfg-survivor.netlify.app

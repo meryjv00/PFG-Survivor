@@ -27,6 +27,18 @@ El proyecto consta de tres repositorios:
 - [BACKEND SURVIVOR](https://github.com/meryjv00/PFG-Survivor-Back) - (NodeJS y Firebase)
 - [VIDEOGAME SURVIVOR](https://github.com/DiegoS3/Survivor) - (Unity)
 
+ ### Código fuente Videojuego 👨‍💻: 
+ [source] 
+ 
+ ### Videos 📹 
+ 
+ Vídeo explicativo: [video]
+ Trailer: [trailer]
+
+### Manuales Usuario 📕
+
+WEB: [ManualWeb]
+VIDEOJUEGO: [ManualVideo]
 
 ### Despliegue docker 🧱
 
@@ -42,3 +54,9 @@ https://trello.com/b/rb3vJOeO/proyecto-fin-de-grado-dam-daw
 ### Autores 🖋
 * **María Juan** - [meryjv00](https://github.com/meryjv00)
 * **Diego Sánchez** - [DiegoS3](https://github.com/DiegoS3)
+
+[source]: https://drive.google.com/file/d/1osHOYslKC93BuPduVjzo8Q13FT_9kyTs/view?usp=sharing
+[video]: https://youtu.be/i52JLuK1n9A
+[trailer]: https://youtu.be/eNcuMn3SGqU
+[ManualWeb]: https://meryjv00.github.io/PFG-Survivor/
+[ManualVideo]: https://diegos3.github.io/Survivor/

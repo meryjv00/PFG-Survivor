@@ -145,7 +145,7 @@
         <!--Mis items-->
         <div class="col-12 mx-auto mt-4 py-3 px-4 rounded">
             <h3 class="text-white text-center">Inventario</h3>
-            <p class="text-center">{{auth.user.coins}}  
+            <p *ngIf="auth.user" class="text-center">{{auth.user.coins}}  
                 <img src="../../../assets/imgs/coin.png" alt="" width="20px">
             </p>
             <div *ngIf="auth.itemsLogedUser.length > 0" class="row">

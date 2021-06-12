@@ -45,8 +45,8 @@ export class RegistroComponent implements OnInit {
     if (this.registro.invalid) {
       return;
     }
-    var btnregistro = document.getElementById("btnregistro") as HTMLInputElement;
-    btnregistro.disabled = true;
+    // var btnregistro = document.getElementById("btnregistro") as HTMLInputElement;
+    // btnregistro.disabled = true;
 
     this.auth.registro()
     .subscribe(
@@ -107,7 +107,7 @@ export class RegistroComponent implements OnInit {
    */
   openLogin() {
     this.activeModal.close();
-    this.ngmodal.open(LoginComponent, { size: 'lg' });
+    this.ngmodal.open(LoginComponent, { size: 'md' });
   }
 
 

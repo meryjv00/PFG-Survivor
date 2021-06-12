@@ -45,8 +45,8 @@ export class LoginComponent implements OnInit {
     if (this.login.invalid) {
       return;
     }
-    var btnlog = document.getElementById("btnlogin") as HTMLInputElement;
-    btnlog.disabled = true;
+    // var btnlog = document.getElementById("btnlogin") as HTMLInputElement;
+    // btnlog.disabled = true;
 
     this.auth.login()
       .subscribe(
@@ -109,7 +109,7 @@ export class LoginComponent implements OnInit {
    */
   openRegistro() {
     this.activeModal.close();
-    this.ngmodal.open(RegistroComponent, { size: 'lg' });
+    this.ngmodal.open(RegistroComponent, { size: 'md' });
   }
 
   /**

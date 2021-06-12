@@ -32,13 +32,13 @@ El proyecto consta de tres repositorios:
  
  ### Videos 📹 
  
- Vídeo explicativo: [video]  
- Trailer: [trailer]
+ - Vídeo explicativo: [video]  
+ - Trailer: [trailer]
 
 ### Manuales Usuario 📕
 
-WEB: [ManualWeb]  
-VIDEOJUEGO: [ManualVideo]  
+- WEB: [ManualWeb]  
+- VIDEOJUEGO: [ManualVideo]  
 
 ### Despliegue docker 🧱
 

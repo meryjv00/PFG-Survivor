@@ -13,7 +13,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 export class HomeComponent implements OnInit {
   userAuth: any | null;
   cargar: boolean = false;
-  pathDownload: string = '../../../assets/videogame/Survivor.apk';
+  pathDownload: string = '../../../assets/videogame/Survivor1.0.0.apk';
   
   constructor(public auth: AuthService,
     public friendService: FriendsService,

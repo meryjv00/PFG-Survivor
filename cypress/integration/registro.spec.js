@@ -1,7 +1,7 @@
 //Registro - María
 var emailRegistrado = 'pepe@gmail.com';
 var nombre = 'Maria';
-var email = 'cypress_user@gmail.com';
+var email = 'cypress_user2@gmail.com';
 var pass = 'Chubaca2020';
 
 describe('Registro', () => {
